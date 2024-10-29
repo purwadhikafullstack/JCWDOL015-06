@@ -8,7 +8,7 @@ export class SampleController {
 
     return res.status(200).send(sampleData);
   }
-
+ 
   async getSampleDataById(req: Request, res: Response) {
     const { id } = req.params;
 

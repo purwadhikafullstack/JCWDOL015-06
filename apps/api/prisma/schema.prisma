@@ -19,3 +19,17 @@ model Sample {
 
   @@map("samples") // if you want to use snake_case format
 }
+
+enum Role {
+  reguler
+  admin
+  super
+}
+
+model User {
+  idUser Int @id @default(autoincrement())
+  firstName String
+  lastName String
+  email String @unique
+  password String
+}

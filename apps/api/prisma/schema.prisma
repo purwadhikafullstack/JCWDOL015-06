@@ -20,16 +20,38 @@ model Sample {
   @@map("samples") // if you want to use snake_case format
 }
 
-enum Role {
-  reguler
-  admin
-  super
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  firstName String
+  lastName  String
+  password  String
+  avatar    String?
+  role      Role @default(REGULER)
+  storeId   Int?
+  isVerify  Int @default(0)
+  mobileNum Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model User {
-  idUser Int @id @default(autoincrement())
-  firstName String
-  lastName String
-  email String @unique
-  password String
+model Product {
+  id      Int @id @default(autoincrement())
+  storeId Int
+  productName String
+  desc    String
+  price   Int
+  weight  Int
+  height  Int
+  categoryId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+enum Role {
+  REGULER
+  ADMIN
+  SUPER_ADMIN
+  
 }

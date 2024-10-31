@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AccountController } from '@/controllers/account.controller';
+import { verifyToken } from '@/middlewares/token';
 
 export class AccountRouter {
   private router: Router;
@@ -12,10 +13,10 @@ export class AccountRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', this.accountController.getSampleData);
-    // this.router.get('/:id', this.accountController.getSampleDataById);
-    this.router.post('/', this.accountController.createAccountData);
-    this.router.get('/emailer-test', this.accountController.testingEmailer);
+    this.router.get('/', verifyToken, this.accountController.getUsersData);
+    this.router.post('/register', this.accountController.createAccountData);
+    this.router.post('/login', this.accountController.loginAccount);
+    this.router.post('/emailer-test', this.accountController.testingEmailer);
   }
 
   getRouter(): Router {

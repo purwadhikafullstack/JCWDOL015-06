@@ -16,6 +16,7 @@ export class AccountRouter {
     this.router.get('/', verifyToken, this.accountController.getUsersData);
     this.router.post('/register', this.accountController.createAccountData);
     this.router.post('/login', this.accountController.loginAccount);
+    this.router.get('/google', this.accountController.loginGoogle);
     this.router.post('/emailer-test', this.accountController.testingEmailer);
   }
 

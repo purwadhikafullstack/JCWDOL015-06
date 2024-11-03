@@ -11,7 +11,6 @@ export class AccountController {
   // fetching user's data
   async getUsersData(req: Request, res: Response) {
     try {
-
       const accounts = await prisma.user.findMany();
 
       res.status(200).send({
@@ -172,11 +171,12 @@ export class AccountController {
       });
 
       if (!existingUser) throw 'Account not found!';
+
       if (!existingUser.isVerify) throw 'Account not verify !';
 
-      const isValidPass = await compare(password, existingUser.password);
+      const isPasswordValid = await compare(password, existingUser.password);
 
-      if (!isValidPass) throw 'incorrect password!';
+      if (!isPasswordValid) throw 'incorrect password!';
 
       const payload = {
         id: existingUser.id,
@@ -190,6 +190,121 @@ export class AccountController {
         token,
         user: existingUser,
       });
+    } catch (err) {
+      res.status(401).send({
+        status: 'error login',
+        msg: err,
+      });
+    }
+  }
+
+  async loginGoogle(req: Request, res: Response) {
+    try {
+      // additionals for fetching user's access token
+      const googleSecret = process.env.CLIENT_SECRET;
+      const googleId = process.env.CLIENT_ID;
+      const googleAcccesTokenUrl = process.env.GOOGLE_ACCESS_TOKEN_URL;
+
+      // fetch authorization code after login consent page
+      console.log(req.query);
+      const { code } = req.query;
+
+      const data = {
+        code,
+        client_id: googleId,
+        client_secret: googleSecret,
+        redirect_uri: `http://localhost:${process.env.PORT}/api/account/google`,
+        grant_type: 'authorization_code',
+      };
+
+      console.log(data);
+
+      // exchange authorization code for access token & id_token
+      const response = await fetch(`${googleAcccesTokenUrl}`, {
+        method: 'POST',
+
+        body: JSON.stringify(data),
+      });
+
+      const access_token_data = await response.json();
+      console.log(access_token_data);
+
+      if (!access_token_data.access_token) throw `${access_token_data.error} ${access_token_data.error_description}`;
+
+      const { id_token } = access_token_data;
+      console.log(id_token);
+
+      // verify and extract google profile's information by the id token
+      const token_info_response = await fetch(
+        `${process.env.GOOGLE_TOKEN_INFO_URL}?id_token=${id_token}`,
+      );
+
+      // User's google profile 
+      const tokenInfoRes = await token_info_response.json();
+
+      // res.status(token_info_response.status).send({
+      //   status: 'ok',
+      //   msg: tokenInfoRes,
+      // });
+
+      const { email, email_verified, given_name, family_name, picture } =
+        tokenInfoRes;
+
+      if (!email_verified) throw 'Google Account Not Verified!';
+
+      const existingUser = await prisma.user.findUnique({
+        where: { email: email },
+      });
+
+      // Check if email logged by google already exist
+      if (existingUser) {
+        // Setting token
+        const payload = {
+          id: existingUser.id,
+          role: existingUser.role,
+        };
+
+        const token = sign(payload, process.env.SECRET_JWT!, {
+          expiresIn: '1d',
+        });
+
+        res.status(200).send({
+          status: 'ok',
+          msg: 'login success!',
+          token,
+          user: existingUser,
+        });
+        
+      } else {
+        // Upload user registration to database
+        const account = await prisma.user.create({
+          data: {
+            firstName: given_name,
+            lastName: family_name,
+            email,
+            password: 'not-provided',
+            mobileNum: 0,
+            avatar: picture,
+          },
+        });
+
+        // Setting token
+        const payload = {
+          id: account.id,
+          role: 'REGULER',
+        };
+
+        const token = sign(payload, process.env.SECRET_JWT!, {
+          expiresIn: '1d',
+        });
+
+        res.status(201).send({
+          status: 'ok',
+          msg: 'login success!',
+          token,
+          user: account,
+        });
+      }
     } catch (err) {
       res.status(401).send({
         status: 'error login',

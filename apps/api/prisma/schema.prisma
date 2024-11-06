@@ -27,31 +27,116 @@ model User {
   lastName  String
   password  String
   avatar    String?
-  role      Role @default(REGULER)
-  storeId   Int?
-  isVerify  Int @default(0)
+  role      Role
+  storeId   Int
+  store Store @relation(fields: [storeId], references: [id])
+  isVerify  Int
   mobileNum Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
 
-model Product {
-  id      Int @id @default(autoincrement())
-  storeId Int
-  productName String
-  desc    String
-  price   Int
-  weight  Int
-  height  Int
-  categoryId Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  Cart Cart[]
 }
 
 enum Role {
-  REGULER
-  ADMIN
   SUPER_ADMIN
-  
+  STORE_ADMIN
+  USER
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Product Product[]
+}
+
+model Product {
+  id    Int    @id @default(autoincrement())
+  price Int
+  description String?
+  image_url String?
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [id])
+  productDiscountId Int?
+  productDiscount Discount? @relation(fields: [productDiscountId], references: [id])
+  productName String
+  desc    String
+  weight  Int
+  Stock Stock[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Discount {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  discountType DiscountType
+  discountAmount Int?
+  discountPercentage Int?
+  appliedDiscountType AppliedDiscountType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Product Product[]
+
+  Cart Cart[]
+}
+
+enum AppliedDiscountType {
+  ON_PRODUCT
+  MINIMUM_PURCHASE
+  BUY_ONE_GET_ONE
+}
+
+enum DiscountType {
+  PERCENTAGE
+  AMOUNT
+}
+
+model Store {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  address String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User User[]
+
+  Stock Stock[]
+}
+
+model Stock {
+  id    Int    @id @default(autoincrement())
+  storeId  Int
+  store Store @relation(fields: [storeId], references: [id])
+  productId Int
+  product Product @relation(fields: [productId], references: [id])
+  stock Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cart {
+  id    Int    @id @default(autoincrement())
+  userId  Int
+  user User @relation(fields: [userId], references: [id])
+  cartProducts CartProduct[]
+  discountCartId Int?
+  discountCart Discount? @relation(fields: [discountCartId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartProduct {
+  id    Int    @id @default(autoincrement())
+  cartId  Int
+  productId Int
+  quantity Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Cart Cart[]
 }

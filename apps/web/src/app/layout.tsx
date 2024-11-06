@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { MainProviders } from '../providers/main-providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -12,17 +13,22 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
-}: {
+  children
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Header />
-        {children}
-        <Footer />
+    <html suppressHydrationWarning lang="en">
+      <head />
+      <body>
+        <MainProviders>
+          <Header />
+            {children}
+          <Footer />
+        </MainProviders>
+
       </body>
     </html>
   );
 }
+

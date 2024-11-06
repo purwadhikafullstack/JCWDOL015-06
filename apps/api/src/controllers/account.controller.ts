@@ -120,7 +120,7 @@ export class AccountController {
 
       // Upload user registration to database
       const account = await prisma.user.create({
-        data: { firstName, lastName, email, password: hashPassword, mobileNum },
+        data: { firstName, lastName, email, password: hashPassword, mobileNum, role: 'USER', isVerify:1, storeId:1  },
       });
 
       // Setting login token

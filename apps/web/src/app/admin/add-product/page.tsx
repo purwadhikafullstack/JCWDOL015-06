@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Select, Textarea, Button, SelectItem } from '@nextui-org/react';
 import Image from 'next/image';
-import '@nextui-org/react/style.css';
 
 const AddProduct = () => {
   const [name, setName] = useState('');
@@ -16,7 +15,6 @@ const AddProduct = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const router = useRouter();
 
-  // Handle file input and preview image
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file) {
@@ -32,10 +30,8 @@ const AddProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Example of form submission logic
     console.log({ name, store, image, discount, description, weight });
-    
-    // Redirect to products list after submitting the form
+
     router.push('/admin/products');
   };
 
@@ -43,94 +39,101 @@ const AddProduct = () => {
     <div style={{ padding: '20px' }}>
       <h2>Add Product</h2>
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <Input
-            isClearable
-            label="Product Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            fullWidth
-          />
-        </div>
+        <div className="grid grid-cols-12 md:gap-2 sm:gap-0">
+          <div className="md:col-span-6 sm:col-span-12 mb-3">
+            <Input
+              isClearable
+              label="Product Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              fullWidth
+            />
+          </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <Select
-            label="Store"
-            value={store}
-            onChange={(value) => 
-              { 
-                // console.log(value)
-                // setStore(value)
+          <div className="md:col-span-6 sm:col-span-12 mb-3">
+            <Select
+              label="Store"
+              value={store}
+              onChange={(event) => {
+                setStore(event.target.value);
               }}
-            required
-            fullWidth
-          >
-            <SelectItem value="1" key={'1'}>Warehouse Jakarta</SelectItem>
-          </Select>
-        </div>
+              required
+              fullWidth
+            >
+              <SelectItem value="1" key={'1'}>
+                Warehouse Jakarta
+              </SelectItem>
+            </Select>
+          </div>
 
-        <div style={{ marginBottom: '15px' }}>
-        <Input
-            type="file"
-            label="Product Image"
-            onChange={handleImageChange}
-            accept="image/*"
-            aria-label="Product Image Upload"
-            fullWidth
-          />
-          {imagePreview && (
-            <div style={{ marginTop: '10px' }}>
-              <span className='text-lg'>Image Preview:</span>
-              <Image
-                src={imagePreview}
-                alt="Product Preview"
-                style={{ maxWidth: '200px', maxHeight: '200px', objectFit: 'contain' }}
-              />
-            </div>
-          )}
-        </div>
+          <div className="md:col-span-6 sm:col-span-12 mb-3">
+            <Input
+              type="file"
+              label="Product Image"
+              onChange={handleImageChange}
+              accept="image/*"
+              aria-label="Product Image Upload"
+              fullWidth
+            />
+            {imagePreview && (
+              <div style={{ marginTop: '10px' }}>
+                <span className="text-lg">Image Preview:</span>
+                <Image
+                  src={imagePreview}
+                  alt="Product Preview"
+                  width={500}
+                  height={300}
+                  style={{ maxWidth: '200px', maxHeight: '200px', objectFit: 'contain' }}
+                />
+              </div>
+            )}
+          </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <Select
-            label="Discount"
-            value={discount}
-            onChange={(value) => 
-              { 
-                // console.log(value)
-                // setDiscount(value)
+          <div className="md:col-span-6 sm:col-span-12 mb-3">
+            <Select
+              label="Discount"
+              value={discount}
+              onChange={(event) => {
+                setDiscount(event.target.value);
               }}
-            required
-            fullWidth
-          >
-            <SelectItem value="1" key={''}>10% on product</SelectItem>
-          </Select>
+              required
+              fullWidth
+            >
+              <SelectItem value="1" key={''}>
+                10% on product
+              </SelectItem>
+            </Select>
+          </div>
+
+          <div className="md:col-span-6 sm:col-span-12 mb-3">
+            <Textarea
+              label="Product Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+              fullWidth
+              rows={4}
+            />
+          </div>
+
+          <div className="md:col-span-6 sm:col-span-12 mb-3">
+            <Input
+              type="number"
+              label="Product Weight"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              required
+              fullWidth
+            />
+          </div>
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <Textarea
-            label="Product Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            fullWidth
-            rows={4}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <Input
-            type="number"
-            label="Product Weight"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            required
-            fullWidth
-          />
-        </div>
-
-        <div>
-          <Button type="submit" color="primary" size="lg" fullWidth>
+        <div className="flex flex-row gap-2 justify-end my-4">
+          <Button className="bg-gray-400 text-black" size="md">
+            Cancel
+          </Button>
+          <Button type="submit" color="primary" size="md">
             Add Product
           </Button>
         </div>

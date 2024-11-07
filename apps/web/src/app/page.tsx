@@ -1,15 +1,11 @@
-import { Input } from "@nextui-org/react";
+
+import { Input, Button } from "@nextui-org/react";
 
 export default function Home() {
   return (
-    <div className='w-full bg-red-400'>
-      Test
-      <Input
-            isClearable
-            label="Product Name"
-            required
-            fullWidth
-          />
+    <div className="p-4">
+      <Button>Test Button</Button>
+      <Input isClearable label="Product Name" fullWidth />
     </div>
-  )
+  );
 }

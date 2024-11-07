@@ -14,10 +14,18 @@ export class AccountRouter {
 
   private initializeRoutes(): void {
     this.router.get('/', verifyToken, this.accountController.getUsersData);
+    this.router.get(
+      '/profile-detail',
+      verifyToken,
+      this.accountController.profileDetail,
+    );
     this.router.post('/register', this.accountController.createAccountData);
     this.router.post('/login', this.accountController.loginAccount);
+    this.router.get('/oauth-creds', this.accountController.oauthCreds);
     this.router.get('/google', this.accountController.loginGoogle);
     this.router.post('/emailer-test', this.accountController.testingEmailer);
+    this.router.patch('/account-verify', verifyToken, this.accountController.verifyAccount,
+    );
   }
 
   getRouter(): Router {

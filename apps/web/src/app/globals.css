@@ -6,34 +6,19 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  overflow: auto !important;
   @apply text-sm;
   @apply tracking-wide;
   @apply antialiased;
-  @apply overflow-hidden;
 }
 
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-
-    --primary: 231, 38%, 27%;
-    --primary-foreground: 0 0% 98%;
-    --success: 100, 60%, 31%;
-    --success-foreground: 0 0% 98%;
-    --info: 210, 100%, 90%;
-    --info-foreground: 0 0% 98%;
-
-    --badge-success-background: 60, 40%, 87%, 60%;
-    --badge-success-foreground: 103, 53%, 42%;
-    --badge-danger-background: 0, 73%, 87%, 60%;
-    --badge-danger-foreground: 14, 88%, 54%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
-    --radius: 0.5rem;
-  }
-
+main {
+  flex-grow: 1;
 }

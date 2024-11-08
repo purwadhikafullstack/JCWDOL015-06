@@ -1,7 +1,9 @@
 'use client';
 
+import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
 import { NextUIProvider } from '@nextui-org/system';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { ReactNode } from 'react';
 
 export interface IMainProvidersProps {
@@ -10,10 +12,14 @@ export interface IMainProvidersProps {
 
 export function MainProviders({ children }: IMainProvidersProps) {
   const router = useRouter();
+  const pathName = usePathname();
+  const hideHeaderFooter = pathName == '/no-permission';
 
   return (
     <NextUIProvider navigate={router.push}>
-      {children}
+      {!hideHeaderFooter && <Header />}
+      <main className="flex-grow">{children}</main>
+      {!hideHeaderFooter && <Footer />}
     </NextUIProvider>
   );
 }

@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { MainProviders } from '../providers/main-providers';
 import './globals.css';
 
@@ -18,14 +16,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html suppressHydrationWarning lang="en" className="h-full">
       <head />
-      <body>
-        <MainProviders>
-          <Header />
-          {children}
-          <Footer />
-        </MainProviders>
+      <body className="flex flex-col">
+        <MainProviders>{children}</MainProviders>
       </body>
     </html>
   );

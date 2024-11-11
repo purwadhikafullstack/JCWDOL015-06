@@ -4,6 +4,8 @@ import './globals.css';
 import Header from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import ReduxProvider from '@/redux/redux-provider';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,6 +25,12 @@ export default function RootLayout({
         <ReduxProvider>
           <Header />
           {children}
+          <ToastContainer
+            position="bottom-right"
+            autoClose={3000}
+            closeOnClick
+            draggable
+          />
           <Footer />
         </ReduxProvider>
       </body>

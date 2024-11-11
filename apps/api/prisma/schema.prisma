@@ -27,31 +27,84 @@ model User {
   lastName  String
   password  String
   avatar    String?
-  role      Role @default(REGULER)
+  role      Role     @default(REGULER)
   storeId   Int?
-  isVerify  Int @default(0)
+  isVerify  Int      @default(0)
   mobileNum Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Product {
-  id      Int @id @default(autoincrement())
-  storeId Int
+  id          Int      @id @default(autoincrement())
+  storeId     Int
   productName String
-  desc    String
-  price   Int
-  weight  Int
-  height  Int
-  categoryId Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  desc        String
+  price       Int
+  weight      Int
+  height      Int
+  categoryId  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
+model Store {
+  id        Int      @id @default(autoincrement())
+  ownerId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now()) 
+}
+
+model Address {
+  id         Int      @id @default(autoincrement())
+  type       Type
+  typeId     Int
+  desc       String
+  provinceId Int
+  cityId     Int
+  coor_lat   String
+  coor_lng   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt @default(now()) 
+}
+
+model Storage {
+  id        Int      @id @default(autoincrement())
+  storeId   Int
+  productId Int
+  stock     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now()) 
+}
+
+model Storage_Flow {
+  id        Int       @id @default(autoincrement())
+  storageId Int 
+  flowType  Flow_Type
+  amount    Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt @default(now()) 
+}
+
+model Product_Category {
+  id Int @id @default(autoincrement())
+  categoryName String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt @default(now()) 
 }
 
 enum Role {
   REGULER
   ADMIN
   SUPER_ADMIN
-  
+}
+
+enum Type {
+  USER
+  STORE
+}
+
+enum Flow_Type {
+  INCOMING
+  OUTGOING
 }

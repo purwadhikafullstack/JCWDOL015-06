@@ -14,29 +14,7 @@ import {
 } from '@nextui-org/react';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-
-const dummyCategories = [
-  { id: 1, name: 'Fruits' },
-  { id: 2, name: 'Vegetables' },
-  { id: 3, name: 'Dairy' },
-  { id: 4, name: 'Meat' },
-  { id: 5, name: 'Bakery' },
-  { id: 6, name: 'Beverages' },
-  { id: 7, name: 'Snacks' },
-  { id: 8, name: 'Frozen Foods' },
-  { id: 9, name: 'Canned Goods' },
-  { id: 10, name: 'Condiments' },
-  { id: 11, name: 'Spices' },
-  { id: 12, name: 'Grains' },
-  { id: 13, name: 'Pasta' },
-  { id: 14, name: 'Seafood' },
-  { id: 15, name: 'Sweets' },
-  { id: 16, name: 'Personal Care' },
-  { id: 17, name: 'Household Items' },
-  { id: 18, name: 'Pet Supplies' },
-  { id: 19, name: 'Baby Products' },
-  { id: 20, name: 'Health Products' }
-];
+import { dummyCategories } from '@/data/dummyData';
 
 const CategoriesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);

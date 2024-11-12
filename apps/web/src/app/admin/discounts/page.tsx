@@ -14,107 +14,15 @@ import {
 } from '@nextui-org/react';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { Discount, dummyDiscounts } from '@/data/dummyData';
+import AddEditDiscount from '@/components/admin/AddEditDiscount';
 
-enum AppliedDiscountType {
-  ON_PRODUCT = 'ON_PRODUCT',
-  MINIMUM_PURCHASE = 'MINIMUM_PURCHASE',
-  BUY_ONE_GET_ONE = 'BUY_ONE_GET_ONE'
-}
-
-enum DiscountType {
-  PERCENTAGE = 'PERCENTAGE',
-  AMOUNT = 'AMOUNT'
-}
-
-const dummyDiscounts = [
-  {
-    id: 1,
-    name: 'Summer Sale',
-    discountType: DiscountType.PERCENTAGE,
-    discountAmount: null,
-    discountPercentage: 20,
-    appliedDiscountType: AppliedDiscountType.ON_PRODUCT
-  },
-  {
-    id: 2,
-    name: 'Winter Sale',
-    discountType: DiscountType.AMOUNT,
-    discountAmount: 50,
-    discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.MINIMUM_PURCHASE
-  },
-  {
-    id: 3,
-    name: 'Black Friday',
-    discountType: DiscountType.PERCENTAGE,
-    discountAmount: null,
-    discountPercentage: 30,
-    appliedDiscountType: AppliedDiscountType.BUY_ONE_GET_ONE
-  },
-  {
-    id: 4,
-    name: 'Cyber Monday',
-    discountType: DiscountType.AMOUNT,
-    discountAmount: 100,
-    discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.ON_PRODUCT
-  },
-  {
-    id: 5,
-    name: 'New Year Sale',
-    discountType: DiscountType.PERCENTAGE,
-    discountAmount: null,
-    discountPercentage: 25,
-    appliedDiscountType: AppliedDiscountType.MINIMUM_PURCHASE
-  },
-  {
-    id: 6,
-    name: "Valentine's Day",
-    discountType: DiscountType.AMOUNT,
-    discountAmount: 75,
-    discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.BUY_ONE_GET_ONE
-  },
-  {
-    id: 7,
-    name: 'Easter Sale',
-    discountType: DiscountType.PERCENTAGE,
-    discountAmount: null,
-    discountPercentage: 15,
-    appliedDiscountType: AppliedDiscountType.ON_PRODUCT
-  },
-  {
-    id: 8,
-    name: 'Halloween Sale',
-    discountType: DiscountType.AMOUNT,
-    discountAmount: 60,
-    discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.MINIMUM_PURCHASE
-  },
-  {
-    id: 9,
-    name: 'Thanksgiving Sale',
-    discountType: DiscountType.PERCENTAGE,
-    discountAmount: null,
-    discountPercentage: 10,
-    appliedDiscountType: AppliedDiscountType.BUY_ONE_GET_ONE
-  },
-  {
-    id: 10,
-    name: 'Christmas Sale',
-    discountType: DiscountType.AMOUNT,
-    discountAmount: 150,
-    discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.ON_PRODUCT
-  }
-];
-
-const DiscountsPage = () => {
+export default function DiscountsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedDiscount, setSelectedDiscount] = useState<any | null>(null);
-  const [editedDiscountName, setEditedDiscountName] = useState('');
+  const [editedDiscount, setEditedDiscount] = useState<Discount>();
 
   const discountsPerPage = 10;
 
@@ -126,7 +34,7 @@ const DiscountsPage = () => {
 
   const handleEditClick = (discount: any) => {
     setSelectedDiscount(discount);
-    setEditedDiscountName(discount.name);
+    setEditedDiscount(discount);
     setIsEditModalOpen(true);
   };
 
@@ -161,10 +69,23 @@ const DiscountsPage = () => {
           {currentDiscounts.map((discount) => (
             <TableRow key={discount.id}>
               <TableCell>{discount.name}</TableCell>
-              <TableCell>{discount.discountType}</TableCell>
-              <TableCell>{discount.discountAmount ?? '-'}</TableCell>
-              <TableCell>{discount.discountPercentage ?? '-'}</TableCell>
-              <TableCell>{discount.appliedDiscountType}</TableCell>
+              <TableCell>
+                <span
+                  className={`text-white p-2 rounded-md font-semibold text-xs ${discount.discountType == 'PERCENTAGE' ? 'bg-blue-500' : 'bg-yellow-500'}`}
+                >
+                  {discount.discountType.charAt(0) + discount.discountType.slice(1).toLowerCase()}
+                </span>
+              </TableCell>
+              <TableCell>
+                {discount.discountAmount ? `Rp. ${discount.discountAmount.toLocaleString('id-ID')}` : '-'}
+              </TableCell>
+              <TableCell>{discount.discountPercentage ? `${discount.discountPercentage} %` : '-'}</TableCell>
+              <TableCell>
+                <span className={`text-gray-700 p-2 rounded-md font-semibold text-xs bg-gray-200`}>
+                  {discount.appliedDiscountType.replace(/_/g, ' ').charAt(0) +
+                    discount.appliedDiscountType.replace(/_/g, ' ').slice(1).toLowerCase()}
+                </span>
+              </TableCell>
               <TableCell>
                 <div>
                   <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleEditClick(discount)}>
@@ -191,21 +112,13 @@ const DiscountsPage = () => {
         onChange={(page) => paginate(page)}
       />
 
-      <Modal size="xl" isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} closeButton>
-        <ModalHeader>Edit Discount</ModalHeader>
-        <ModalBody>
-          <Input
-            fullWidth
-            label="Discount Name"
-            value={editedDiscountName}
-            onChange={(e) => setEditedDiscountName(e.target.value)}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveEdit}>Save</Button>
-        </ModalFooter>
-      </Modal>
+      <AddEditDiscount
+        mode="edit"
+        editedData={editedDiscount}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSaveEdit={handleSaveEdit}
+      />
 
       <Modal size="xl" isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} closeButton>
         <ModalHeader>Confirm Delete</ModalHeader>
@@ -217,6 +130,4 @@ const DiscountsPage = () => {
       </Modal>
     </div>
   );
-};
-
-export default DiscountsPage;
+}

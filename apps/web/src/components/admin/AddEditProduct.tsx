@@ -6,7 +6,7 @@ import { Input, Select, Textarea, Button, SelectItem } from '@nextui-org/react';
 import Image from 'next/image';
 
 interface AddEditProductFormProps {
-  mode: 'create' | 'edit';
+  mode: 'add' | 'edit';
   data?: {
     name: string;
     store: string;
@@ -220,7 +220,7 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
             Cancel
           </Button>
           <Button type="submit" color="primary" size="md">
-            {mode === 'create' ? 'Add Product' : 'Update Product'}
+            {mode === 'add' ? 'Add Product' : 'Update Product'}
           </Button>
         </div>
       </form>

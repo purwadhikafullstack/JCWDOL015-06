@@ -1,6 +1,5 @@
 'use client';
 
-// import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/store';
 import { setLogoutState } from '@/redux/slice/accountSlice';
 import Login from './authentication/Login';
@@ -9,9 +8,10 @@ import { Wrapper } from './Wrapper';
 import { IoSearch, IoCartOutline } from 'react-icons/io5';
 import { useEffect } from 'react';
 import { deleteToken, getToken } from '@/lib/cookie';
+import { Input, Button } from '@nextui-org/react';
+import { FaShoppingCart } from 'react-icons/fa';
 
-const Header: React.FC = () => {
-  // const [isOpen, setIsOpen] = useState(false)
+export const Header: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const accountState = useAppSelector((state) => state.account.accountState);
@@ -38,47 +38,56 @@ const Header: React.FC = () => {
 
     dispatch(setLogoutState());
   };
-
+  
   return (
-    <div className="flex flex-wrap mx-auto w-full h-full m-0 flex-col">
-      {/*  block lg:hidden */}
-      <div className="border-2 flex flex-col gap-2 border-black h-fit">
-        <h1>Location</h1>
-        {accountState ? <h1>Youre Logged IN</h1> : <h1>Youre Log OUT</h1>}
+    <header className="bg-white shadow-md p-4">
+      <div className="max-w-screen-xl mx-auto flex justify-between items-center">
+        {/* Logo */}
+        <div className="text-3xl font-bold text-primary">
+          <a href="/">GroceryStore</a>
+        </div>
 
-        <button onClick={logoutAction}>Log out</button>
-        {/* {accountState && <button onClick={logoutAction}>Log out</button>} */}
-        {accountState && <h1>{emailState} - sss</h1>}
-      </div>
-      {/* Mobile-Tablet Nav */}
-      <div className="flex flex-wrap flex-col lg:hidden">
-        <div className="h-14 p-1 flex flex-wrap justify-between">
-          <div className="flex justify-between items-center text-center w-36 border-2">
-            <button>sidebar</button>
-            {/* <button onClick={() => {setIsOpen(true)}}>Login</button> */}
-            <h1>Icon</h1>
+        {/* Navigation */}
+        <nav className="space-x-6 text-gray-700">
+          <a href="/" className="hover:text-primary">
+            Home
+          </a>
+          <a href="/products" className="hover:text-primary">
+            Products
+          </a>
+          <a href="/about" className="hover:text-primary">
+            About
+          </a>
+          <a href="/contact" className="hover:text-primary">
+            Contact
+          </a>
+        </nav>
+
+        {/* Search Bar */}
+        <div className="flex items-center space-x-4">
+          <Input aria-label="Search products" placeholder="Search..." isClearable className="w-72" />
+          <Button className="relative">
+            <FaShoppingCart />
+            <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
+              3
+            </span>
+          </Button>
+        </div>
+
+        {accountState ? (
+          <div className='p-3'>
+            <button onClick={logoutAction}>Log out</button>
           </div>
-          <div className="flex gap-2 justify-between items-center w-36 border-2">
-            <IoSearch />
+        ) : (
+          <div className='p-3 flex gap-2'>
             <Login />
             <Register />
-            <IoCartOutline />
           </div>
-        </div>
-        <div className="p-2 sm:h-10 lg:h-12">Categories</div>
+        )}
+
+        
       </div>
-      {/* Dekstop Nav */}
-      <div className="hidden lg:flex flex-wrap flex-col ">
-        <div className="h-14 p-2">
-          Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-        </div>
-        <div className="flex border-2 p-2 gap-4 border-black sm:h-10 lg:h-12">
-          Cate
-          <Login />
-          <Register />
-        </div>
-      </div>
-    </div>
+    </header>
   );
 };
 

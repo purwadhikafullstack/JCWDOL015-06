@@ -2,6 +2,7 @@
 
 import Carousel from '@/components/LandingPage/CarouselHero';
 import Categories from '@/components/LandingPage/Categories';
+import NearestStoreWDiscounted from '@/components/LandingPage/NearestStoreWDiscounted';
 import NearestStoreWTopProduct from '@/components/LandingPage/NearestStoreWTopProduct';
 import { Wrapper } from '@/components/Wrapper';
 import { getProductList } from '@/lib/product';
@@ -36,9 +37,18 @@ export default function Home() {
   }, []);
 
   return (
-    <Wrapper additional="gap-5">
+    <Wrapper additional="gap-5 bg-slate-200 py-5 lg:px-5">
       <Carousel />
       <Categories categories={categories} />
+      {/* <div className="w-full h-[15rem] p-4 relative">
+        <Image
+          alt="carousel-image"
+          src="https://images.unsplash.com/photo-1549989476-69a92fa57c36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+          sizes="100vw"
+          fill
+        />
+      </div> */}
+      <NearestStoreWDiscounted />
       <NearestStoreWTopProduct />
       <div className="flex flex-col w-full h-fit p-4 border-2 border-blue-700">
         {!products ? (

@@ -5,30 +5,75 @@ import fs from 'fs';
 export class ProductController {
   async getProductList(req: Request, res: Response) {
     try {
-      const categoryFetch = await prisma.product_Category.findMany({
-        select: {
-          id: true,
-          categoryName: true,
-        },
+      // const categoryFetch = await prisma.category.findMany({
+      //   select: {
+      //     id: true,
+      //     name: true,
+      //   },
+      // });
+
+      // const productFetch = await prisma.product.findMany();
+
+      // if (!productFetch) throw 'Product List Unable be Fetched!';
+
+      // if (!categoryFetch) {
+      //   res.status(200).send({
+      //     status: 'ok',
+      //     products: productFetch,
+      //     categories: 'Null',
+      //   });
+      // } else {
+      //   res.status(200).send({
+      //     status: 'ok',
+      //     products: productFetch,
+      //     categories: categoryFetch,
+      //   });
+      // }
+
+      const productFetch = await prisma.product.findMany({
+        include: {
+          category: true,
+          productDiscount: true
+        }
       });
 
-      const productFetch = await prisma.product.findMany();
+      if (!productFetch) throw 'Product List Unable to be Fetched!';
 
-      if (!productFetch) throw 'Product List Unable be Fetched!';
+      res.status(200).send({
+        status: 'ok',
+        products: productFetch,
+      });
 
-      if (!categoryFetch) {
+    } catch (error) {
+      res.status(400).send({
+        status: 'error fething users data',
+        msg: error,
+      });
+    }
+  }
+
+  async getStoreList(req: Request, res: Response) {
+    try {
+      const storeFetch = await prisma.store.findMany();
+
+      if (!storeFetch) throw 'store List Unable be Fetched!';
+
+      const address = await prisma.address.findMany()
+
+       if (!address) {
         res.status(200).send({
           status: 'ok',
-          products: productFetch,
-          categories: 'Null',
+          stores: storeFetch,
+          address: 'Null',
         });
       } else {
         res.status(200).send({
           status: 'ok',
-          products: productFetch,
-          categories: categoryFetch,
+          stores: storeFetch,
+          categories: address,
         });
       }
+
     } catch (error) {
       res.status(400).send({
         status: 'error fething users data',

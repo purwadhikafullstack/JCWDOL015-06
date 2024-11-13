@@ -27,32 +27,136 @@ model User {
   lastName  String
   password  String
   avatar    String?
-  role      Role     @default(REGULER)
+  role      Role
   storeId   Int?
+  store     Store?    @relation(fields: [storeId], references: [id])
   isVerify  Int      @default(0)
   mobileNum Int
+  // address   Address?  @relation(fields: [id], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Cart Cart[]
+}
+
+enum Role {
+  SUPER_ADMIN
+  STORE_ADMIN
+  USER
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Product Product[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  storeId     Int
-  productName String
-  desc        String
-  price       Int
-  weight      Int
-  height      Int
-  categoryId  Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                Int       @id @default(autoincrement())
+  price             Int
+  image_url         String?
+  categoryId        Int
+  category          Category  @relation(fields: [categoryId], references: [id])
+  productDiscountId Int?
+  productDiscount   Discount? @relation(fields: [productDiscountId], references: [id])
+  productName       String
+  desc              String
+  weight            Int
+  Stock             Stock[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Discount {
+  id                  Int                 @id @default(autoincrement())
+  name                String              @unique
+  discountType        DiscountType
+  discountAmount      Int?
+  discountPercentage  Int?
+  appliedDiscountType AppliedDiscountType
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  Product Product[]
+
+  Cart Cart[]
+}
+
+enum AppliedDiscountType {
+  ON_PRODUCT
+  MINIMUM_PURCHASE
+  BUY_ONE_GET_ONE
+}
+
+enum DiscountType {
+  PERCENTAGE
+  AMOUNT
 }
 
 model Store {
   id        Int      @id @default(autoincrement())
-  ownerId   Int
+  name      String   @unique
+  // address   Address  @relation(fields: [id], references: [typeId])
+  address Int @default(0)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @default(now()) 
+  updatedAt DateTime @updatedAt
+
+  User User[]
+
+  Stock Stock[]
+}
+
+model Stock {
+  id        Int      @id @default(autoincrement())
+  storeId   Int
+  store     Store    @relation(fields: [storeId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  stock     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Stock_Flow Stock_Flow[]
+}
+
+model Cart {
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  user           User          @relation(fields: [userId], references: [id])
+  cartProducts   CartProduct[]
+  discountCartId Int?
+  discountCart   Discount?     @relation(fields: [discountCartId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model CartProduct {
+  id        Int      @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Cart Cart[]
+}
+
+model Stock_Flow {
+  id        Int       @id @default(autoincrement())
+  stockId   Int
+  stock     Stock     @relation(fields: [stockId], references: [id])
+  flowType  Flow_Type
+  amount    Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+}
+
+enum Flow_Type {
+  INCOMING
+  OUTGOING
 }
 
 model Address {
@@ -65,46 +169,14 @@ model Address {
   coor_lat   String
   coor_lng   String
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt @default(now()) 
-}
+  updatedAt  DateTime @default(now()) @updatedAt
 
-model Storage {
-  id        Int      @id @default(autoincrement())
-  storeId   Int
-  productId Int
-  stock     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @default(now()) 
-}
+  // User User[]
 
-model Storage_Flow {
-  id        Int       @id @default(autoincrement())
-  storageId Int 
-  flowType  Flow_Type
-  amount    Int
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt @default(now()) 
-}
-
-model Product_Category {
-  id Int @id @default(autoincrement())
-  categoryName String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt @default(now()) 
-}
-
-enum Role {
-  REGULER
-  ADMIN
-  SUPER_ADMIN
+  // Store Store[]
 }
 
 enum Type {
   USER
   STORE
-}
-
-enum Flow_Type {
-  INCOMING
-  OUTGOING
 }

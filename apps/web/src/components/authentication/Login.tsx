@@ -14,6 +14,7 @@ import Swal from 'sweetalert2';
 import { createToken } from '@/lib/cookie';
 import { setLoginState } from '@/redux/slice/accountSlice';
 import { jwtDecode } from 'jwt-decode';
+import { Button } from '@nextui-org/react';
 
 const LoginSchema = yup.object().shape({
   email: yup
@@ -160,9 +161,12 @@ const Login: React.FC = () => {
 
   return (
     <>
-      <button className="btn btn-ghost" onClick={openModal}>
+      {/* <button className="btn btn-ghost" onClick={openModal}>
         Login
-      </button>
+      </button> */}
+      <Button color="default" variant="light"  onClick={openModal}>
+      Login
+      </Button>  
       {/* isOpen &&  */}
       {isOpen && (
         <>

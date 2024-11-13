@@ -11,7 +11,18 @@ export class AccountController {
   // fetching user's data
   async getUsersData(req: Request, res: Response) {
     try {
-      const accounts = await prisma.user.findMany();
+      // const accounts = await prisma.user.findMany({
+      //   include: {
+      //     address: true,
+      //     store: true
+      //   }
+      // });
+
+      const accounts = await prisma.user.findMany({
+        include: {
+          store: true
+        }
+      });
 
       res.status(200).send({
         status: 'ok',
@@ -100,7 +111,7 @@ export class AccountController {
 
       // Upload user registration to database
       const account = await prisma.user.create({
-        data: { firstName, lastName, email, password: hashPassword, mobileNum },
+        data: { firstName, lastName, email, password: hashPassword, mobileNum, role: 'USER', isVerify:0  },
       });
 
       // Setting login token
@@ -296,6 +307,12 @@ export class AccountController {
           `${process.env.NEXT_URL}/authGoogle/callback?token=${token}`,
         );
       } else {
+        /*
+        const account = await prisma.user.create({
+        data: { firstName, lastName, email, password: hashPassword, mobileNum, role: 'USER', isVerify:0, storeId:1  },
+      });
+         */
+
         // Upload user registration to database
         const account = await prisma.user.create({
           data: {
@@ -305,6 +322,7 @@ export class AccountController {
             password: 'not-provided',
             mobileNum: 0,
             avatar: picture,
+            role: "USER"
           },
         });
 
@@ -345,6 +363,8 @@ export class AccountController {
 
   async oauthCreds(req: Request, res: Response) {
     try {
+      console.log('\n\n OAUTH CONSENT API \n\n\n');
+      
       const GOOGLE_CALLBACK_URL = `http%3A//localhost:${process.env.PORT}/api/account/google`;
 
       const GOOGLE_OAUTH_SCOPES = [

@@ -12,7 +12,7 @@ import {
   TableRow,
   Input
 } from '@nextui-org/react';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@nextui-org/modal';
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Discount, dummyDiscounts } from '@/data/dummyData';
 import AddEditDiscount from '@/components/admin/AddEditDiscount';
@@ -121,12 +121,18 @@ export default function DiscountsPage() {
       />
 
       <Modal size="xl" isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} closeButton>
-        <ModalHeader>Confirm Delete</ModalHeader>
-        <ModalBody>Are you sure you want to delete {selectedDiscount?.name}?</ModalBody>
-        <ModalFooter>
-          <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
-          <Button onClick={handleConfirmDelete}>Yes</Button>
-        </ModalFooter>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Confirm Delete</ModalHeader>
+              <ModalBody>Are you sure you want to delete {selectedDiscount?.name}?</ModalBody>
+              <ModalFooter>
+                <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
+                <Button onClick={handleConfirmDelete}>Yes</Button>
+              </ModalFooter>{' '}
+            </>
+          )}
+        </ModalContent>
       </Modal>
     </div>
   );

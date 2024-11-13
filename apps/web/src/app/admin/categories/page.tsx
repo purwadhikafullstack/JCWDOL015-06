@@ -12,7 +12,7 @@ import {
   TableRow,
   Input
 } from '@nextui-org/react';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@nextui-org/modal';
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { dummyCategories } from '@/data/dummyData';
 
@@ -93,28 +93,40 @@ const CategoriesPage = () => {
       />
 
       <Modal size="xl" isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} closeButton>
-        <ModalHeader>Edit Category</ModalHeader>
-        <ModalBody>
-          <Input
-            fullWidth
-            label="Category Name"
-            value={editedCategoryName}
-            onChange={(e) => setEditedCategoryName(e.target.value)}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveEdit}>Save</Button>
-        </ModalFooter>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Edit Category</ModalHeader>
+              <ModalBody>
+                <Input
+                  fullWidth
+                  label="Category Name"
+                  value={editedCategoryName}
+                  onChange={(e) => setEditedCategoryName(e.target.value)}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
+                <Button onClick={handleSaveEdit}>Save</Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
       </Modal>
 
       <Modal size="xl" isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} closeButton>
-        <ModalHeader>Confirm Delete</ModalHeader>
-        <ModalBody>Are you sure you want to delete {selectedCategory?.name}?</ModalBody>
-        <ModalFooter>
-          <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
-          <Button onClick={handleConfirmDelete}>Yes</Button>
-        </ModalFooter>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Confirm Delete</ModalHeader>
+              <ModalBody>Are you sure you want to delete {selectedCategory?.name}?</ModalBody>
+              <ModalFooter>
+                <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
+                <Button onClick={handleConfirmDelete}>Yes</Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
       </Modal>
     </div>
   );

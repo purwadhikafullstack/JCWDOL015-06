@@ -12,7 +12,7 @@ import {
   TableRow,
   Input
 } from '@nextui-org/react';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@nextui-org/modal';
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { dummyProducts, dummyCategories } from '@/data/dummyData';
 
@@ -105,35 +105,47 @@ const ProductsPage = () => {
       />
 
       <Modal size="xl" isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} closeButton>
-        <ModalHeader>Edit Product</ModalHeader>
-        <ModalBody>
-          <Input
-            fullWidth
-            label="Product Name"
-            value={editedProductName}
-            onChange={(e) => setEditedProductName(e.target.value)}
-          />
-          <Input
-            fullWidth
-            label="Product Price"
-            type="number"
-            value={String(editedProductPrice)}
-            onChange={(e) => setEditedProductPrice(Number(e.target.value))}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveEdit}>Save</Button>
-        </ModalFooter>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Edit Product</ModalHeader>
+              <ModalBody>
+                <Input
+                  fullWidth
+                  label="Product Name"
+                  value={editedProductName}
+                  onChange={(e) => setEditedProductName(e.target.value)}
+                />
+                <Input
+                  fullWidth
+                  label="Product Price"
+                  type="number"
+                  value={String(editedProductPrice)}
+                  onChange={(e) => setEditedProductPrice(Number(e.target.value))}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
+                <Button onClick={handleSaveEdit}>Save</Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
       </Modal>
 
       <Modal size="xl" isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} closeButton>
-        <ModalHeader>Confirm Delete</ModalHeader>
-        <ModalBody>Are you sure you want to delete {selectedProduct?.productName}?</ModalBody>
-        <ModalFooter>
-          <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
-          <Button onClick={handleConfirmDelete}>Yes</Button>
-        </ModalFooter>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Confirm Delete</ModalHeader>
+              <ModalBody>Are you sure you want to delete {selectedProduct?.productName}?</ModalBody>
+              <ModalFooter>
+                <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
+                <Button onClick={handleConfirmDelete}>Yes</Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
       </Modal>
     </div>
   );

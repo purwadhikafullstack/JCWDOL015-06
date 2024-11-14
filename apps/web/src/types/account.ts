@@ -1,3 +1,5 @@
+import { PiPassword } from "react-icons/pi";
+
 export interface IRegLogin {
   email: string;
   password: string;
@@ -21,7 +23,17 @@ export interface DecodedToken {
 export interface IRegister {
   email: string;
   password: string;
+  confirmPassword: string;
   firstName: string;
   lastName: string;
   mobileNum: number;
+}
+
+export interface IChangePassword {
+  password: string;
+  confirmPassword: string;
+}
+
+export interface IForgot {
+  email: string;
 }

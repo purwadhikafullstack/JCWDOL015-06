@@ -24,7 +24,18 @@ export class AccountRouter {
     this.router.get('/oauth-creds', this.accountController.oauthCreds);
     this.router.get('/google', this.accountController.loginGoogle);
     this.router.post('/emailer-test', this.accountController.testingEmailer);
-    this.router.patch('/account-verify', verifyToken, this.accountController.verifyAccount,
+    this.router.patch(
+      '/account-verify',
+      verifyToken,
+      this.accountController.verifyAccount,
+    );
+    this.router.post(
+      '/forgot-password',
+      this.accountController.confirmPasswordChange,
+    );
+    this.router.patch(
+      '/change-password',
+      this.accountController.changePassword,
     );
   }
 

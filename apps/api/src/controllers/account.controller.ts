@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
 import { compare, genSalt, hash } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs';
 import handlebars from 'handlebars';
 import { transporter } from '@/helpers/nodemailer';
+import { IChangePassword } from '@/types/account';
 
 export class AccountController {
   // fetching user's data
@@ -20,8 +21,8 @@ export class AccountController {
 
       const accounts = await prisma.user.findMany({
         include: {
-          store: true
-        }
+          store: true,
+        },
       });
 
       res.status(200).send({
@@ -37,16 +38,16 @@ export class AccountController {
     }
   }
 
-  // For testing nodemailer and changing verified status after registration without using front end
+  // For testing nodemailer and changing verified status after registration without using ui
   async testingEmailer(req: Request, res: Response) {
     try {
       const { email } = req.body;
 
-      const findAcc = await prisma.user.findUnique({
+      const existingUser = await prisma.user.findUnique({
         where: { email: email },
       });
 
-      if (findAcc) {
+      if (existingUser) {
         const templatePath = path.join(
           __dirname,
           '../templates',
@@ -58,12 +59,12 @@ export class AccountController {
         const compiledTemplate = handlebars.compile(templateSource);
 
         const html = compiledTemplate({
-          name: `${findAcc.firstName} ${findAcc.lastName}`,
+          name: `${existingUser.firstName} ${existingUser.lastName}`,
         });
 
         await transporter.sendMail({
           from: process.env.MAIL_USER,
-          to: `${findAcc.email}`,
+          to: `${existingUser.email}`,
           subject: '(TESTING) Verify Account Grocery G6',
           html: html,
         });
@@ -99,11 +100,11 @@ export class AccountController {
       const { firstName, lastName, email, password, mobileNum } = req.body;
 
       // Checking if email has been used
-      const existingAuthor = await prisma.user.findUnique({
+      const existingUser = await prisma.user.findUnique({
         where: { email: email },
       });
 
-      if (existingAuthor) throw 'Email Has Been Used !';
+      if (existingUser) throw 'Email Has Been Used !';
 
       // hashing password
       const salt = await genSalt(10);
@@ -111,7 +112,15 @@ export class AccountController {
 
       // Upload user registration to database
       const account = await prisma.user.create({
-        data: { firstName, lastName, email, password: hashPassword, mobileNum, role: 'USER', isVerify:0  },
+        data: {
+          firstName,
+          lastName,
+          email,
+          password: hashPassword,
+          mobileNum,
+          role: 'USER',
+          isVerify: 0,
+        },
       });
 
       // Setting login token
@@ -130,7 +139,7 @@ export class AccountController {
       const compiledTemplate = handlebars.compile(templateSource);
       const html = compiledTemplate({
         name: `${account.firstName} ${account.lastName}`,
-        link: `${process.env.NEXT_URL}verification/${token}`,
+        link: `${process.env.NEXT_URL}customer/verification/${token}`,
       });
       // const html = compiledTemplate({
       //   name: `${account.firstName} ${account.lastName}`,
@@ -218,6 +227,7 @@ export class AccountController {
     }
   }
 
+  // Login With Google Process
   async loginGoogle(req: Request, res: Response) {
     try {
       // additionals for fetching user's access token
@@ -301,10 +311,10 @@ export class AccountController {
         //     token,
         //     user: existingUser,
         //   })
-        //   .redirect(`${process.env.NEXT_URL}/authGoogle/callback?token=${token}`);
+        //   .redirect(`${process.env.NEXT_URL}/auth-google/callback?token=${token}`);
 
         res.redirect(
-          `${process.env.NEXT_URL}/authGoogle/callback?token=${token}`,
+          `${process.env.NEXT_URL}customer/auth-google/callback?token=${token}`,
         );
       } else {
         /*
@@ -322,7 +332,8 @@ export class AccountController {
             password: 'not-provided',
             mobileNum: 0,
             avatar: picture,
-            role: "USER"
+            role: 'USER',
+            isVerify: 1
           },
         });
 
@@ -347,10 +358,10 @@ export class AccountController {
         //     token,
         //     user: account,
         //   })
-        //   .redirect(`${process.env.NEXT_URL}/authGoogle/callback?token=${token}`);
+        //   .redirect(`${process.env.NEXT_URL}/auth-google/callback?token=${token}`);
 
         res.redirect(
-          `${process.env.NEXT_URL}/authGoogle/callback?token=${token}`,
+          `${process.env.NEXT_URL}customer/auth-google/callback?token=${token}`,
         );
       }
     } catch (error) {
@@ -361,10 +372,11 @@ export class AccountController {
     }
   }
 
+  // Sending Google Login Consent Link
   async oauthCreds(req: Request, res: Response) {
     try {
       console.log('\n\n OAUTH CONSENT API \n\n\n');
-      
+
       const GOOGLE_CALLBACK_URL = `http%3A//localhost:${process.env.PORT}/api/account/google`;
 
       const GOOGLE_OAUTH_SCOPES = [
@@ -391,6 +403,7 @@ export class AccountController {
     }
   }
 
+  // User Account Profile Detail
   async profileDetail(req: Request, res: Response) {
     try {
       const userDetail = await prisma.user.findUnique({
@@ -414,9 +427,10 @@ export class AccountController {
     }
   }
 
+  // Account Verification After Registration
   async verifyAccount(req: Request, res: Response) {
     console.log('\n\n\n API VERIFICATION STARTS');
-    
+
     try {
       const userDetail = await prisma.user.findUnique({
         where: {
@@ -440,6 +454,95 @@ export class AccountController {
     } catch (error) {
       res.status(400).send({
         status: 'error account verification',
+        msg: error,
+      });
+    }
+  }
+
+  // First Step To User's account Password Reset
+  async confirmPasswordChange(req: Request, res: Response) {
+    try {
+      const {email} = req.body;
+
+      console.log('\n\n\n API CHANGE PASSWORD \n');
+
+      console.log(email);      
+
+      const existingUser = await prisma.user.findUnique({
+        where: {email: email}
+      })
+
+      if (!existingUser) throw 'Account Email Not Found';
+
+      const payload = {email: email, isPasswordChange: true}
+      const token = sign(payload, process.env.SECRET_JWT!, {
+        expiresIn: '10m',
+      });
+
+      const templatePath = path.join(
+        __dirname,
+        '../templates',
+        'forgotPassword.hbs',
+      );
+
+      const templateSource = fs.readFileSync(templatePath, 'utf-8');
+      const compiledTemplate = handlebars.compile(templateSource);
+      const html = compiledTemplate({
+        name: `${existingUser.firstName} ${existingUser.lastName}`,
+        link: `${process.env.NEXT_URL}customer/change-password/${token}`,
+      });
+
+      await transporter.sendMail({
+        from: process.env.MAIL_USER,
+        to: existingUser.email,
+        subject: 'Password Change Grocery G6',
+        html: html,
+      });
+
+      res.status(200).send({
+        status: 'ok',
+        msg: 'Email Confirmed, Please Check Your Email!',
+      });
+
+    } catch (error) {
+      res.status(400).send({
+        status: 'error confirm password change',
+        msg: error,
+      });
+    }
+  }
+
+  async changePassword(req: Request, res: Response) {
+    try {
+      const {password, token} = req.body;
+
+      const verifyToken = verify(token, process.env.SECRET_JWT!);
+
+      if (!verifyToken) throw "Time Limit Exceeded. Please Send New Password Change Request!";
+
+      const payload = verifyToken as IChangePassword;
+
+      if (payload.isPasswordChange == undefined || payload.isPasswordChange == false) throw "Unknown Request, Please Send New Password Change Request!"
+
+      const salt = await genSalt(10);
+      const hashPassword = await hash(password, salt);
+
+      await prisma.user.update({
+        where: {
+          email: payload.email
+        }, data: {
+          password: hashPassword
+        }
+      })
+      
+      res.status(201).send({
+        status: 'ok',
+        msg: 'Password Successfully Changed!',
+      });
+      
+    } catch (error) {
+      res.status(400).send({
+        status: 'error change password',
         msg: error,
       });
     }

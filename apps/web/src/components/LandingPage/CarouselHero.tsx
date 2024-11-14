@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
@@ -24,7 +26,7 @@ const CarouselHero: React.FC = () => {
   };
 
   return (
-    <Carousel responsive={responsive} slidesToSlide={1} swipeable={true} infinite={true} centerMode={false} focusOnSelect={false} showDots={true}  className='border-4 border-orange-600 w-screen'>
+    <Carousel responsive={responsive} slidesToSlide={1} swipeable={true} infinite={true} centerMode={false} focusOnSelect={false} showDots={true}  className='w-screen'>
       <div className="w-full h-[30rem] flex gap-5">
         <Image
           alt="carousel-image"

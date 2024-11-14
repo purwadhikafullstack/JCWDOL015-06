@@ -12,6 +12,7 @@ import { PORT } from './config';
 import { SampleRouter } from './routers/sample.router';
 import { AccountRouter } from './routers/account.router';
 import { ProductRouter } from './routers/product.router';
+import { CategoryRouter } from './routers/category.router';
 
 export default class App {
   private app: Express;
@@ -30,7 +31,7 @@ export default class App {
   }
 
   private handleError(): void {
-    // not found
+    // not found path
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       if (req.path.includes('/api/')) {
         res.status(404).send('Not found !');
@@ -39,7 +40,7 @@ export default class App {
       }
     });
 
-    // error
+    // error path
     this.app.use(
       (err: Error, req: Request, res: Response, next: NextFunction) => {
         if (req.path.includes('/api/')) {
@@ -56,14 +57,18 @@ export default class App {
     const sampleRouter = new SampleRouter();
     const accountRouter = new AccountRouter();
     const productRouter = new ProductRouter();
+    const categoryRouter = new CategoryRouter();
 
+    // default path
     this.app.get('/api', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student API!`);
     });
 
+    // main path
     this.app.use('/api/samples', sampleRouter.getRouter());
     this.app.use('/api/account', accountRouter.getRouter());
     this.app.use('/api/product', productRouter.getRouter());
+    this.app.use('/api/category', categoryRouter.getRouter());
   }
 
   public start(): void {

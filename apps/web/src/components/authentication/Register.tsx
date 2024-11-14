@@ -2,6 +2,7 @@
 
 import { registerAccount } from '@/lib/account';
 import { IRegister, IRegLogin } from '@/types/account';
+import { Button } from '@nextui-org/react';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
@@ -12,19 +13,23 @@ const RegiserSchema = yup.object().shape({
     .string()
     .matches(
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      'Invalid email format or contains forbidden characters',
+      'Invalid email format or contains forbidden characters'
     )
     .required('Email Is Required!'),
   password: yup
     .string()
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
-      'Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, and one number. Special characters like quotation marks are not allowed.',
+      'Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, and one number. Special characters like quotation marks are not allowed.'
     )
     .required('Password Is Required!'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Password Must Match!')
+    .required('Re-Confirm Password Is Required!'),
   firstName: yup.string().required('First Name Is Required'),
   lastName: yup.string().required('Last Name Is Required'),
-  mobileNum: yup.number().required('Mobile Number Is Required'),
+  mobileNum: yup.number().required('Mobile Number Is Required')
 });
 
 const Register: React.FC = () => {
@@ -33,12 +38,9 @@ const Register: React.FC = () => {
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
-  const handleSubmit = async (
-    data: IRegister,
-    action: FormikHelpers<IRegister>,
-  ) => {
+  const handleSubmit = async (data: IRegister, action: FormikHelpers<IRegister>) => {
     console.log('\n\n REGISTER HANDLE SUBMIT \n\n');
-    
+
     try {
       const { result } = await registerAccount(data);
 
@@ -50,7 +52,7 @@ const Register: React.FC = () => {
           text: 'Please Proceed To Verify Your Account By Checking Your Email Inbox For Our Verification Message',
           icon: 'success',
           confirmButtonText: 'Cool',
-          timer: 7000,
+          timer: 7000
         });
 
         action.resetForm();
@@ -63,17 +65,16 @@ const Register: React.FC = () => {
         text: `${error}`,
         icon: 'error',
         confirmButtonText: 'Ok',
-        timer: 4000,
+        timer: 4000
       });
-
     }
   };
 
   return (
     <>
-      <button className="btn btn-ghost btn-circle" onClick={openModal}>
-        register
-      </button>
+      <Button color="success" variant="light" onClick={openModal}>
+        Register
+      </Button>
       {/* isOpen &&  */}
       {isOpen && (
         <>
@@ -92,16 +93,17 @@ const Register: React.FC = () => {
               </div>
 
               {/* Bottom/Main Side */}
-              <div className="basis-8/12 flex flex-col flex-wrap gap-3 h-full p-3 rounded-t-2xl bg-slate-100 relative bottom-4">
-                <h1 className="text-xl ml-2">Register Account</h1>
+              <div className="basis-8/12 flex flex-col gap-3 h-full p-3 rounded-t-2xl bg-slate-100 relative bottom-4 overflow-y-auto">
+                <h1 className="text-xl ml-2 mb-4">Register Account</h1>
 
                 <Formik
                   initialValues={{
                     email: '',
                     password: '',
+                    confirmPassword: '',
                     firstName: '',
                     lastName: '',
-                    mobileNum: 0,
+                    mobileNum: 0
                   }}
                   validationSchema={RegiserSchema}
                   onSubmit={handleSubmit}
@@ -118,13 +120,9 @@ const Register: React.FC = () => {
                             type="text"
                             name="email"
                             placeholder="Type email address"
-                            className="input input-bordered w-full max-w-md"
+                            className="input input-bordered w-full max-w-md p-3 rounded-lg"
                           />
-                          <ErrorMessage
-                            name="email"
-                            component="div"
-                            className="text-red-500"
-                          />
+                          <ErrorMessage name="email" component="div" className="text-red-500" />
                         </label>
                         {/* Input Password */}
                         <label className="form-control w-full max-w-md">
@@ -135,13 +133,22 @@ const Register: React.FC = () => {
                             type="password"
                             name="password"
                             placeholder="Type password here"
-                            className="input input-bordered w-full max-w-md"
+                            className="input input-bordered w-full max-w-md p-3 rounded-lg"
                           />
-                          <ErrorMessage
-                            name="password"
-                            component="div"
-                            className="text-red-500"
+                          <ErrorMessage name="password" component="div" className="text-red-500" />
+                        </label>
+                        {/* Input Confirm Password */}
+                        <label className="form-control w-full max-w-md">
+                          <div className="label">
+                            <span className="label-text">Confirm Password</span>
+                          </div>
+                          <Field
+                            type="password"
+                            name="confirmPassword"
+                            placeholder="Type password here"
+                            className="input input-bordered w-full max-w-md p-3 rounded-lg"
                           />
+                          <ErrorMessage name="confirmPassword" component="div" className="text-red-500" />
                         </label>
                         {/* Input First Name */}
                         <label className="form-control w-full max-w-lg">
@@ -152,13 +159,9 @@ const Register: React.FC = () => {
                             type="text"
                             name="firstName"
                             placeholder="Type First - Middle Name"
-                            className="input input-bordered w-full max-w-md"
+                            className="input input-bordered w-full max-w-md p-3 rounded-lg"
                           />
-                          <ErrorMessage
-                            name="firstName"
-                            component="div"
-                            className="text-red-500"
-                          />
+                          <ErrorMessage name="firstName" component="div" className="text-red-500" />
                         </label>
                         {/* Input Last Name */}
                         <label className="form-control w-full max-w-lg">
@@ -169,13 +172,9 @@ const Register: React.FC = () => {
                             type="text"
                             name="lastName"
                             placeholder="Type Last Name"
-                            className="input input-bordered w-full max-w-md"
+                            className="input input-bordered w-full max-w-md p-3 rounded-lg"
                           />
-                          <ErrorMessage
-                            name="lastName"
-                            component="div"
-                            className="text-red-500"
-                          />
+                          <ErrorMessage name="lastName" component="div" className="text-red-500" />
                         </label>
                         {/* Input Mobile Number */}
                         <label className="form-control w-full max-w-lg">
@@ -186,20 +185,13 @@ const Register: React.FC = () => {
                             type="number"
                             name="mobileNum"
                             placeholder="Type Mobile Phone Number"
-                            className="input input-bordered w-full max-w-md"
+                            className="input input-bordered w-full max-w-md p-3 rounded-lg"
                           />
-                          <ErrorMessage
-                            name="mobileNum"
-                            component="div"
-                            className="text-red-500"
-                          />
+                          <ErrorMessage name="mobileNum" component="div" className="text-red-500" />
                         </label>
-                        <button
-                          type="submit"
-                          className="btn btn-outline btn-accent w-fit px-9 mx-auto"
-                        >
+                        <Button color="success" variant="ghost" type="submit" className="w-3/6 mx-auto ">
                           Continue
-                        </button>
+                        </Button>
                       </Form>
                     );
                   }}

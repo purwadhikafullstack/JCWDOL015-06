@@ -33,20 +33,34 @@ export class ProductController {
       const productFetch = await prisma.product.findMany({
         include: {
           category: true,
-          productDiscount: true
-        }
+          productDiscount: true,
+          Stock: {
+            select: {
+              store: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
+            }
+          }
+        },
       });
 
       if (!productFetch) throw 'Product List Unable to be Fetched!';
+
+      console.log('\n\n\n\n');
+      console.log(productFetch);
+
+      if(productFetch.length < 1) throw 'No Product Detected!'
 
       res.status(200).send({
         status: 'ok',
         products: productFetch,
       });
-
     } catch (error) {
       res.status(400).send({
-        status: 'error fething users data',
+        status: 'error fething products',
         msg: error,
       });
     }
@@ -58,9 +72,9 @@ export class ProductController {
 
       if (!storeFetch) throw 'store List Unable be Fetched!';
 
-      const address = await prisma.address.findMany()
+      const address = await prisma.address.findMany();
 
-       if (!address) {
+      if (!address) {
         res.status(200).send({
           status: 'ok',
           stores: storeFetch,
@@ -73,7 +87,6 @@ export class ProductController {
           categories: address,
         });
       }
-
     } catch (error) {
       res.status(400).send({
         status: 'error fething users data',

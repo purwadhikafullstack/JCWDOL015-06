@@ -7,32 +7,10 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 import { useRouter } from 'next/navigation';
 import { FaBox, FaClipboardList, FaShoppingCart, FaChartBar, FaUser } from 'react-icons/fa';
 import { Select, SelectItem } from '@nextui-org/react';
+import { RiDiscountPercentLine } from 'react-icons/ri';
+import { dummyData } from '@/data/dummyData';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-interface DummyData {
-  stores: { id: number; name: string }[];
-  sales: { [key: string]: number[] };
-  stock: { [key: string]: number[] };
-}
-
-const dummyData: DummyData = {
-  stores: [
-    { id: 0, name: 'All' },
-    { id: 1, name: 'Store Jakarta' },
-    { id: 2, name: 'Store Bandung' }
-  ],
-  sales: {
-    All: [14, 22, 23, 10, 3, 7],
-    'Store Jakarta': [12, 19, 3, 5, 2, 3],
-    'Store Bandung': [2, 3, 20, 5, 1, 4]
-  },
-  stock: {
-    All: [190, 380, 280, 150, 130, 170],
-    'Store Jakarta': [100, 200, 150, 80, 70, 90],
-    'Store Bandung': [90, 180, 130, 70, 60, 80]
-  }
-};
 
 const AdminDashboardPage = () => {
   const [selectedStoreId, setSelectedStoreId] = useState(dummyData.stores[0].id);
@@ -109,7 +87,7 @@ const AdminDashboardPage = () => {
       title: 'Manage Discounts',
       path: '/admin/discounts',
       description: 'Add, edit, delete, and see the list of discounts to be applied into product or order',
-      icon: FaClipboardList
+      icon: RiDiscountPercentLine
     },
     {
       title: 'See Reports',
@@ -138,9 +116,11 @@ const AdminDashboardPage = () => {
         onClick={() => {
           router.push(menu.path);
         }}
-        className="text-primary flex flex-row gap-5 border p-4 w-[300px] h-[100px] rounded-md hover:bg-[#22c55e1a] hover:cursor-pointer"
+        className="text-primary flex flex-row gap-5 border p-4 w-[300px] h-[125px] rounded-md hover:bg-[#22c55e1a] hover:cursor-pointer"
       >
-        <Icon size={40} />
+        <div className="max-h-[50px] max-w-[50px]">
+          <Icon className="w-[50px] h-[50px]" />
+        </div>
         <div className="flex flex-col gap-2">
           <div className="textlg font-semibold">{menu.title}</div>
           <div>{menu.description}</div>

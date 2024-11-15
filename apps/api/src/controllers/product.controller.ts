@@ -1,36 +1,10 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
-import path from 'path';
-import fs from 'fs';
+
 export class ProductController {
-  async getProductList(req: Request, res: Response) {
+  async getProducts(req: Request, res: Response) {
     try {
-      // const categoryFetch = await prisma.category.findMany({
-      //   select: {
-      //     id: true,
-      //     name: true,
-      //   },
-      // });
-
-      // const productFetch = await prisma.product.findMany();
-
-      // if (!productFetch) throw 'Product List Unable be Fetched!';
-
-      // if (!categoryFetch) {
-      //   res.status(200).send({
-      //     status: 'ok',
-      //     products: productFetch,
-      //     categories: 'Null',
-      //   });
-      // } else {
-      //   res.status(200).send({
-      //     status: 'ok',
-      //     products: productFetch,
-      //     categories: categoryFetch,
-      //   });
-      // }
-
-      const productFetch = await prisma.product.findMany({
+      const products = await prisma.product.findMany({
         include: {
           category: true,
           productDiscount: true,
@@ -47,50 +21,138 @@ export class ProductController {
         },
       });
 
-      if (!productFetch) throw 'Product List Unable to be Fetched!';
-
-      console.log('\n\n\n\n');
-      console.log(productFetch);
-
-      if(productFetch.length < 1) throw 'No Product Detected!'
-
       res.status(200).send({
         status: 'ok',
-        products: productFetch,
+        products,
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error fething products',
-        msg: error,
+    } catch (err) {
+      res.status(500).send({
+        status: 'error fething products data',
+        msg: err,
       });
     }
   }
 
-  async getStoreList(req: Request, res: Response) {
+  async getProductById(req: Request, res: Response) {
     try {
-      const storeFetch = await prisma.store.findMany();
+      const { id } = req.body;
 
-      if (!storeFetch) throw 'store List Unable be Fetched!';
+      const product = await prisma.product.findUnique({
+        where: { id: id },
+      });
 
-      const address = await prisma.address.findMany();
+      res.status(200).send({
+        status: 'ok',
+        msg: 'Product Detail Fetched!',
+        product,
+      });
+    } catch (err) {
+      res.status(500).send({
+        status: 'error fetching product detail',
+        msg: err,
+      });
+    }
+  }
 
-      if (!address) {
-        res.status(200).send({
-          status: 'ok',
-          stores: storeFetch,
-          address: 'Null',
-        });
-      } else {
-        res.status(200).send({
-          status: 'ok',
-          stores: storeFetch,
-          categories: address,
-        });
-      }
-    } catch (error) {
-      res.status(400).send({
-        status: 'error fething users data',
-        msg: error,
+  // Create product
+  async createProduct(req: Request, res: Response) {
+    try {
+      const {
+        price,
+        image_url,
+        categoryId,
+        productDiscountId,
+        productName,
+        desc,
+        weight,
+        Stock,
+      } = req.body;
+
+      const product = await prisma.product.create({
+        data: {
+          price,
+          image_url,
+          categoryId,
+          productDiscountId,
+          productName,
+          desc,
+          weight,
+          Stock,
+        },
+      });
+
+      res.status(201).send({
+        status: 'ok',
+        msg: 'Product Created!',
+        product,
+      });
+    } catch (err) {
+      res.status(500).send({
+        status: 'Failed to Create Product!',
+        msg: err,
+      });
+    }
+  }
+
+  // Update product
+  async updateProduct(req: Request, res: Response) {
+    try {
+      const {
+        id,
+        price,
+        image_url,
+        categoryId,
+        productDiscountId,
+        productName,
+        desc,
+        weight,
+        Stock,
+      } = req.body;
+
+      const product = await prisma.product.update({
+        where: { id: id },
+        data: {
+          price,
+          image_url,
+          categoryId,
+          productDiscountId,
+          productName,
+          desc,
+          weight,
+          Stock,
+        },
+      });
+
+      res.status(200).send({
+        status: 'ok',
+        msg: 'Product Updated!',
+        product,
+      });
+    } catch (err) {
+      res.status(500).send({
+        status: 'Failed to Update Product!',
+        msg: err,
+      });
+    }
+  }
+
+  async deleteProduct(req: Request, res: Response) {
+    try {
+      const { id } = req.body;
+
+      const product = await prisma.product.delete({
+        where: { id: id },
+      });
+
+      res.status(200).send({
+        status: 'ok',
+        msg: 'Product Deleted!',
+        product,
+      });
+    } catch (err) {
+      res.status(500).send({
+        status: 'error deleting product',
+        msg: err,
       });
     }
   }

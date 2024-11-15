@@ -10,6 +10,15 @@ body {
   @apply text-sm;
   @apply tracking-wide;
   @apply antialiased;
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: auto !important;
+  @apply text-sm;
+  @apply tracking-wide;
+  @apply antialiased;
 }
 
 html,

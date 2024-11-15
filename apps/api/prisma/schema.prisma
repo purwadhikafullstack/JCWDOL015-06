@@ -29,10 +29,9 @@ model User {
   avatar    String?
   role      Role
   storeId   Int?
-  store     Store?    @relation(fields: [storeId], references: [id])
+  store     Store?   @relation(fields: [storeId], references: [id])
   isVerify  Int      @default(0)
   mobileNum Int
-  // address   Address?  @relation(fields: [id], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -99,8 +98,7 @@ enum DiscountType {
 model Store {
   id        Int      @id @default(autoincrement())
   name      String   @unique
-  // address   Address  @relation(fields: [id], references: [typeId])
-  address Int @default(0)
+  address   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -170,10 +168,6 @@ model Address {
   coor_lng   String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
-
-  // User User[]
-
-  // Store Store[]
 }
 
 enum Type {

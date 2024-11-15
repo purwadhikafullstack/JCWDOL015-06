@@ -13,14 +13,13 @@ import {
   ModalContent
 } from '@nextui-org/react';
 import { Discount, dummyProducts, Product } from '@/data/dummyData';
-import { set } from 'cypress/types/lodash';
 
 interface AddEditDiscountProps {
   mode: 'add' | 'edit';
   editedData?: Discount;
   isOpen: boolean;
   onClose: () => void;
-  onSaveEdit: () => void;
+  onSaveEdit: (discount: Discount) => void;
 }
 
 const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSaveEdit, mode, editedData }) => {
@@ -28,7 +27,8 @@ const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSa
   const [editedDiscountName, setEditedDiscountName] = useState('');
   const [discountType, setDiscountType] = useState('PERCENTAGE');
   const [appliedDiscountType, setAppliedDiscountType] = useState('MINIMUM_PURCHASE');
-  const [discountValue, setDiscountValue] = useState<number | string>('');
+  const [discountAmount, setDiscountAmount] = useState<number>(0);
+  const [discountPercentage, setDiscountPercentage] = useState<number>(0);
   const [minimumPurchaseAmount, setMinimumPurchaseAmount] = useState<number | string>('');
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -37,48 +37,55 @@ const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSa
     if (isOpen) {
       if (mode == 'edit') {
         setId(editedData?.id);
-        setEditedDiscountName(editedData?.name || '');
-        setDiscountType(editedData?.discountType || 'PERCENTAGE');
-        setAppliedDiscountType(editedData?.appliedDiscountType || 'MINIMUM_PURCHASE');
-        setDiscountValue(
-          appliedDiscountType == 'PERCENTAGE'
-            ? editedData?.discountPercentage || 0
-            : editedData?.discountPercentage || 0
-        );
-        setMinimumPurchaseAmount(editedData?.minimumPurchaseAmount || 0);
+        setEditedDiscountName(editedData?.name ?? '');
+        setDiscountType(editedData?.discountType ?? 'PERCENTAGE');
+        setAppliedDiscountType(editedData?.appliedDiscountType ?? 'MINIMUM_PURCHASE');
+        setDiscountAmount(editedData?.discountAmount ?? 0);
+        setDiscountPercentage(editedData?.discountPercentage ?? 0);
+        setMinimumPurchaseAmount(editedData?.minimumPurchaseAmount ?? 0);
         setSelectedProductIds(
           editedData?.products?.map((val) => {
             return String(val.id);
-          }) || []
+          }) ?? []
         );
-        setSelectedProducts(editedData?.products || []);
+        setSelectedProducts(editedData?.products ?? []);
       } else {
         setEditedDiscountName('');
         setDiscountType('PERCENTAGE');
         setAppliedDiscountType('MINIMUM_PURCHASE');
-        setDiscountValue('');
+        setDiscountAmount(0);
+        setDiscountPercentage(0);
         setMinimumPurchaseAmount('');
         setSelectedProductIds([]);
         setSelectedProducts([]);
       }
     }
-  }, [
-    appliedDiscountType,
-    editedData?.appliedDiscountType,
-    editedData?.discountPercentage,
-    editedData?.discountType,
-    editedData?.id,
-    editedData?.minimumPurchaseAmount,
-    editedData?.name,
-    editedData?.products,
-    isOpen,
-    mode
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleSaveEdit = () => {
-    onSaveEdit();
+    onSaveEdit({
+      id,
+      name: editedDiscountName,
+      discountType,
+      appliedDiscountType,
+      discountAmount,
+      discountPercentage,
+      minimumPurchaseAmount,
+      selectedProductIds,
+      selectedProducts
+    } as Discount);
     onClose();
   };
+
+  useEffect(() => {
+    if (appliedDiscountType === 'MINIMUM_PURCHASE') {
+      setMinimumPurchaseAmount('');
+    } else {
+      setSelectedProductIds([]);
+      setSelectedProducts([]);
+    }
+  }, [appliedDiscountType]);
 
   return (
     <Modal className="overflow-auto" size="xl" isOpen={isOpen} onClose={onClose} closeButton>
@@ -103,8 +110,8 @@ const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSa
                   label="Discount Percentage"
                   type="number"
                   endContent="%"
-                  value={String(discountValue)}
-                  onChange={(e) => setDiscountValue(e.target.value)}
+                  value={String(discountPercentage)}
+                  onChange={(e) => setDiscountPercentage(Number(e.target.value))}
                 />
               ) : (
                 <Input
@@ -112,14 +119,18 @@ const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSa
                   label="Discount Amount"
                   type="number"
                   startContent="Rp."
-                  value={String(discountValue)}
-                  onChange={(e) => setDiscountValue(new Intl.NumberFormat('id-ID').format(Number(e.target.value)))}
+                  value={String(discountAmount)}
+                  onChange={(e) => setDiscountAmount(Number(e.target.value))}
                 />
               )}
+              {/* {appliedDiscountType} */}
               <Select
                 label="Applied Discount Type"
                 value={appliedDiscountType}
-                onChange={(e) => setAppliedDiscountType(e.target.value)}
+                defaultSelectedKeys={[appliedDiscountType]}
+                onChange={(e) => {
+                  setAppliedDiscountType(String(e.target.value));
+                }}
               >
                 <SelectItem key="MINIMUM_PURCHASE" value="MINIMUM_PURCHASE">
                   Minimum Purchase
@@ -138,16 +149,14 @@ const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSa
                   type="number"
                   startContent="Rp."
                   value={String(minimumPurchaseAmount)}
-                  onChange={(e) =>
-                    setMinimumPurchaseAmount(new Intl.NumberFormat('id-ID').format(Number(e.target.value)))
-                  }
+                  onChange={(e) => setMinimumPurchaseAmount(Number(e.target.value))}
                 />
               )}
               {(appliedDiscountType === 'ON_PRODUCT' || appliedDiscountType === 'BUY_ONE_GET_ONE') && (
                 <>
                   <Select
                     label="Can be applied to product:"
-                    multiple
+                    selectionMode="multiple"
                     value={selectedProductIds}
                     onSelectionChange={(selected) => {
                       const selectedIds = Array.from(selected as Set<string>);

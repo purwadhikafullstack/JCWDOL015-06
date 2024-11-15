@@ -1,17 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Table,
-  Pagination,
-  Button,
-  TableHeader,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableRow,
-  Input
-} from '@nextui-org/react';
+import { Table, Pagination, Button, TableHeader, TableBody, TableCell, TableColumn, TableRow } from '@nextui-org/react';
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Discount, dummyDiscounts } from '@/data/dummyData';
@@ -21,35 +11,42 @@ export default function DiscountsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedDiscount, setSelectedDiscount] = useState<any | null>(null);
+  const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(null);
   const [editedDiscount, setEditedDiscount] = useState<Discount>();
+  const [discounts, setDiscounts] = useState<Discount[]>(dummyDiscounts);
 
   const discountsPerPage = 10;
 
   const indexOfLastDiscount = currentPage * discountsPerPage;
   const indexOfFirstDiscount = indexOfLastDiscount - discountsPerPage;
-  const currentDiscounts = dummyDiscounts.slice(indexOfFirstDiscount, indexOfLastDiscount);
+  const currentDiscounts = discounts.slice(indexOfFirstDiscount, indexOfLastDiscount);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  const handleEditClick = (discount: any) => {
+  const handleEditClick = (discount: Discount) => {
     setSelectedDiscount(discount);
     setEditedDiscount(discount);
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteClick = (discount: any) => {
+  const handleDeleteClick = (discount: Discount) => {
     setSelectedDiscount(discount);
     setIsDeleteModalOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    // Save the edited discount name logic here
+  const handleSaveEdit = (discount: Discount) => {
+    const index = discounts.findIndex((discount) => discount.id === selectedDiscount?.id);
+    const updatedDiscounts = [...discounts];
+    updatedDiscounts[index] = discount;
+    setDiscounts(updatedDiscounts);
     setIsEditModalOpen(false);
   };
 
   const handleConfirmDelete = () => {
-    // Delete the discount logic here
+    const index = discounts.findIndex((discount) => discount.id === selectedDiscount?.id);
+    let updatedDiscounts = [...discounts];
+    updatedDiscounts.splice(index, 1);
+    setDiscounts(updatedDiscounts);
     setIsDeleteModalOpen(false);
   };
 
@@ -107,7 +104,7 @@ export default function DiscountsPage() {
       <Pagination
         showControls
         className="my-2 shadow-sm"
-        total={Math.ceil(dummyDiscounts.length / discountsPerPage)}
+        total={Math.ceil(discounts.length / discountsPerPage)}
         initialPage={1}
         onChange={(page) => paginate(page)}
       />

@@ -1,67 +1,52 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input, Select, Textarea, Button, SelectItem } from '@nextui-org/react';
-import Image from 'next/image';
+import { Input, Textarea, Button } from '@nextui-org/react';
+// import Image from 'next/image';
+import { Product } from '@/data/dummyData';
 
 interface AddEditProductFormProps {
   mode: 'add' | 'edit';
-  data?: {
-    name: string;
-    store: string;
-    images: File[];
-    discount: string;
-    description: string;
-    weight: string;
-  };
-  onSubmit: (product: {
-    name: string;
-    store: string;
-    images: File[];
-    discount: string;
-    description: string;
-    weight: string;
-  }) => void;
+  data?: Product;
+  onSubmit: (product: Product) => void;
 }
 
 const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onSubmit }) => {
   const [name, setName] = useState('');
-  const [store, setStore] = useState('');
   const [images, setImages] = useState<File[]>([]);
-  const [discount, setDiscount] = useState('');
   const [description, setDescription] = useState('');
-  const [weight, setWeight] = useState('');
+  const [weight, setWeight] = useState(0);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     if (mode === 'edit' && data) {
-      setName(data.name);
-      setStore(data.store);
-      setImages(data.images);
-      setDiscount(data.discount);
-      setDescription(data.description);
-      setWeight(data.weight);
-      if (data.images) {
-        const previews = data.images.map((image) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(image);
-          return new Promise<string>((resolve) => {
-            reader.onloadend = () => {
-              resolve(reader.result as string);
-            };
-          });
-        });
-        Promise.all(previews).then(setImagePreviews);
+      setName(data.productName ?? '');
+      // setImages(data.image_urls ?? []);
+      setDescription(data.desc ?? '');
+      setWeight(data.weight ?? 0);
+      if (data.image_urls) {
+        setImagePreviews(data.image_urls);
+        // const previews = data.images.map((image) => {
+        //   const reader = new FileReader();
+        //   reader.readAsDataURL(image);
+        //   return new Promise<string>((resolve) => {
+        //     reader.onloadend = () => {
+        //       resolve(reader.result as string);
+        //     };
+        //   });
+        // });
+        // Promise.all(previews).then(setImagePreviews);
       }
     }
   }, [mode, data]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
-    setImages(files);
+    setImages((prevImages) => [...prevImages, ...files]);
     const previews = files.map((file) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -71,13 +56,19 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
         };
       });
     });
-    Promise.all(previews).then(setImagePreviews);
+    Promise.all(previews).then((newPreviews) => {
+      setImagePreviews((prevPreviews) => {
+        const uniquePreviews = newPreviews.filter((preview) => !prevPreviews.includes(preview));
+        return [...prevPreviews, ...uniquePreviews];
+      });
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const product = { name, store, images, discount, description, weight };
+    const product = { name, images, description, weight };
+    product.weight = product.weight;
     onSubmit(product);
 
     router.push('/admin/products');
@@ -121,24 +112,6 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
           </div>
 
           <div className="md:col-span-6 sm:col-span-12 mb-3">
-            <Select
-              label="Store"
-              labelPlacement="outside"
-              value={store}
-              onChange={(event) => {
-                setStore(event.target.value);
-              }}
-              required
-              fullWidth
-              placeholder="Select store"
-            >
-              <SelectItem value="1" key={'1'}>
-                Store Jakarta
-              </SelectItem>
-            </Select>
-          </div>
-
-          <div className="md:col-span-6 sm:col-span-12 mb-3">
             <Input
               type="file"
               label="Product Images"
@@ -150,12 +123,13 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
               multiple
               placeholder="Upload product images"
             />
+
             {imagePreviews.length > 0 && (
               <div style={{ marginTop: '10px' }}>
                 <span className="text-lg">Image Previews:</span>
                 <div className="flex flex-wrap gap-2">
                   {imagePreviews.map((preview, index) => (
-                    <Image
+                    <img
                       key={index}
                       src={preview}
                       alt={`Product Preview ${index + 1}`}
@@ -168,24 +142,6 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
                 </div>
               </div>
             )}
-          </div>
-
-          <div className="md:col-span-6 sm:col-span-12 mb-3">
-            <Select
-              label="Discount"
-              labelPlacement="outside"
-              value={discount}
-              onChange={(event) => {
-                setDiscount(event.target.value);
-              }}
-              required
-              fullWidth
-              placeholder="Select discount"
-            >
-              <SelectItem value="1" key={''}>
-                10% on product
-              </SelectItem>
-            </Select>
           </div>
 
           <div className="md:col-span-6 sm:col-span-12 mb-3">
@@ -206,8 +162,8 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
               type="number"
               label="Product Weight"
               labelPlacement="outside"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
+              value={String(weight)}
+              onChange={(e) => setWeight(Number(e.target.value))}
               required
               fullWidth
               placeholder="Enter product weight"
@@ -233,7 +189,7 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
           <button onClick={handlePrevImage} className="absolute left-4 text-white text-2xl">
             &lt;
           </button>
-          <Image
+          <img
             src={imagePreviews[currentImageIndex]}
             alt={`Product Preview ${currentImageIndex + 1}`}
             width={800}

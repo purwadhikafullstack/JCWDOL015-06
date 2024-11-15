@@ -21,12 +21,6 @@ export const Footer = () => {
           <a href="/contact" className="hover:underline">
             Contact Us
           </a>
-          <a href="/privacy-policy" className="hover:underline">
-            Privacy Policy
-          </a>
-          <a href="/terms" className="hover:underline">
-            Terms & Conditions
-          </a>
         </div>
 
         {/* Social Media */}

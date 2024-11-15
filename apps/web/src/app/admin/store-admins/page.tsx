@@ -14,71 +14,77 @@ import {
 } from '@nextui-org/react';
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Category, dummyCategories } from '@/data/dummyData';
+import { User, dummyStoreAdmins } from '@/data/dummyData';
 
-const CategoriesPage = () => {
+const StoreAdminsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [editedCategoryName, setEditedCategoryName] = useState<string | undefined>('');
-  const [categories, setCategories] = useState<Category[]>(dummyCategories);
+  const [selectedAdmin, setSelectedAdmin] = useState<User | null>(null);
+  const [editedAdminName, setEditedAdminName] = useState<string | undefined>('');
+  const [admins, setAdmins] = useState<User[]>(dummyStoreAdmins);
 
-  const categoriesPerPage = 10;
+  const adminsPerPage = 10;
 
-  const indexOfLastCategory = currentPage * categoriesPerPage;
-  const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
-  const currentCategories = categories.slice(indexOfFirstCategory, indexOfLastCategory);
+  const indexOfLastAdmin = currentPage * adminsPerPage;
+  const indexOfFirstAdmin = indexOfLastAdmin - adminsPerPage;
+  const currentAdmins = admins.slice(indexOfFirstAdmin, indexOfLastAdmin);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  const handleEditClick = (category: Category) => {
-    setSelectedCategory(category);
-    setEditedCategoryName(category.name);
+  const handleEditClick = (admin: User) => {
+    setSelectedAdmin(admin);
+    setEditedAdminName(`${admin.firstName} ${admin.lastName}`);
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteClick = (category: Category) => {
-    setSelectedCategory(category);
+  const handleDeleteClick = (admin: User) => {
+    setSelectedAdmin(admin);
     setIsDeleteModalOpen(true);
   };
 
   const handleSaveEdit = () => {
-    const index = categories.findIndex((category) => category.id === selectedCategory?.id);
-    const updatedCategories = [...categories];
-    updatedCategories[index].name = editedCategoryName;
-    setCategories(updatedCategories);
+    const index = admins.findIndex((admin) => admin.id === selectedAdmin?.id);
+    const updatedAdmins = [...admins];
+    const [firstName, lastName] = editedAdminName?.split(' ') || ['', ''];
+    updatedAdmins[index].firstName = firstName;
+    updatedAdmins[index].lastName = lastName;
+    setAdmins(updatedAdmins);
     setIsEditModalOpen(false);
   };
 
   const handleConfirmDelete = () => {
-    const index = categories.findIndex((product) => product.id === selectedCategory?.id);
-    const updatedCategories = [...categories];
-    updatedCategories.splice(index, 1);
-    setCategories(updatedCategories);
+    const index = admins.findIndex((admin) => admin.id === selectedAdmin?.id);
+    const updatedAdmins = [...admins];
+    updatedAdmins.splice(index, 1);
+    setAdmins(updatedAdmins);
     setIsDeleteModalOpen(false);
   };
 
   return (
     <div className="p-4">
-      <div className="my-2 text-lg font-semibold">Categories</div>
-      <Table aria-label="Categories Table">
+      <div className="my-2 text-lg font-semibold">Store Admins</div>
+      <Table aria-label="Store Admins Table">
         <TableHeader>
           <TableColumn className="text-md text-gray-700">Name</TableColumn>
+          <TableColumn className="text-md text-gray-700">Email</TableColumn>
+          <TableColumn className="text-md text-gray-700">Store</TableColumn>
           <TableColumn className="text-md text-gray-700">Action</TableColumn>
         </TableHeader>
         <TableBody>
-          {currentCategories.map((category) => (
-            <TableRow key={category.id}>
-              <TableCell>{category.name}</TableCell>
+          {currentAdmins.map((admin) => (
+            <TableRow key={admin.id}>
+              <TableCell>{`${admin.firstName} ${admin.lastName}`}</TableCell>
+              <TableCell>{admin.email}</TableCell>
+              <TableCell>{admin.store?.name}</TableCell>
               <TableCell>
                 <div>
-                  <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleEditClick(category)}>
+                  <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleEditClick(admin)}>
                     <div className="flex items-center gap-1 border rounded-md border-primary p-1">
                       <FaPencilAlt size={14} className="text-primary bg-white text-lg" />
                     </div>
                   </Button>
-                  <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleDeleteClick(category)}>
+                  <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleDeleteClick(admin)}>
                     <div className="flex items-center gap-1 border rounded-md border-danger p-1">
                       <FaTrash size={14} className="text-danger bg-white text-lg" />
                     </div>
@@ -92,7 +98,7 @@ const CategoriesPage = () => {
       <Pagination
         showControls
         className="my-2 shadow-sm"
-        total={Math.ceil(dummyCategories.length / categoriesPerPage)}
+        total={Math.ceil(dummyStoreAdmins.length / adminsPerPage)}
         initialPage={1}
         onChange={(page) => paginate(page)}
       />
@@ -101,13 +107,13 @@ const CategoriesPage = () => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Edit Category</ModalHeader>
+              <ModalHeader>Edit Admin</ModalHeader>
               <ModalBody>
                 <Input
                   fullWidth
-                  label="Category Name"
-                  value={editedCategoryName}
-                  onChange={(e) => setEditedCategoryName(e.target.value)}
+                  label="Admin Name"
+                  value={editedAdminName}
+                  onChange={(e) => setEditedAdminName(e.target.value)}
                 />
               </ModalBody>
               <ModalFooter>
@@ -124,7 +130,9 @@ const CategoriesPage = () => {
           {(onClose) => (
             <>
               <ModalHeader>Confirm Delete</ModalHeader>
-              <ModalBody>Are you sure you want to delete {selectedCategory?.name}?</ModalBody>
+              <ModalBody>
+                Are you sure you want to delete {selectedAdmin?.firstName} {selectedAdmin?.lastName}?
+              </ModalBody>
               <ModalFooter>
                 <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
                 <Button onClick={handleConfirmDelete}>Yes</Button>
@@ -137,4 +145,4 @@ const CategoriesPage = () => {
   );
 };
 
-export default CategoriesPage;
+export default StoreAdminsPage;

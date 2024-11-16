@@ -1,7 +1,7 @@
 'use client';
 
 import AddEditProductForm from '@/components/admin/AddEditProduct';
-import { Product, dummyProducts } from '@/data/dummyData';
+import { Product, dummyProducts } from '@/types/types';
 import { Spinner } from '@nextui-org/react';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';

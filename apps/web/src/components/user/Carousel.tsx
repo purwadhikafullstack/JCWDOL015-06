@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { dummyProducts } from '@/data/dummyData';
+import { dummyProducts } from '@/types/types';
 import { useRouter } from 'next/navigation';
 import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from 'react-icons/md';
 

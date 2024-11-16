@@ -84,11 +84,8 @@ model Discount {
   ProductDiscount ProductDiscount[]
 
   Cart Cart[]
-
   CartItem CartItem[]
-
   Order Order[]
-
   OrderItem OrderItem[]
 }
 

@@ -12,7 +12,7 @@ import {
   SelectItem,
   ModalContent
 } from '@nextui-org/react';
-import { Discount, dummyProducts, Product } from '@/data/dummyData';
+import { Discount, dummyProducts, Product } from '@/types/types';
 
 interface AddEditDiscountProps {
   mode: 'add' | 'edit';
@@ -168,7 +168,7 @@ const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSa
                     }}
                   >
                     {dummyProducts.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
+                      <SelectItem key={Number(product.id)} value={product.id}>
                         {product.productName}
                       </SelectItem>
                     ))}
@@ -183,7 +183,9 @@ const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSa
             </ModalBody>
             <ModalFooter>
               <Button onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSaveEdit}>Save</Button>
+              <Button onClick={handleSaveEdit} color="primary">
+                Save
+              </Button>
             </ModalFooter>
           </>
         )}

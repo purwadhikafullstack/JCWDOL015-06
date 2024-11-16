@@ -17,7 +17,7 @@ export const Header = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="space-x-6 text-gray-700">
+        <nav className="space-x-6 text-gray-700 invisible sm:visible">
           <a
             href={role == 'USER' ? '/user' : '/admin'}
             className={`hover:text-black ${currentRoute === (role == 'USER' ? '/user' : '/admin') ? 'text-primary' : ''}`}

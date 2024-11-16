@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Table,
   Pagination,
@@ -12,70 +12,178 @@ import {
   TableRow,
   Input
 } from '@nextui-org/react';
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { User, dummyStoreAdmins } from '@/data/dummyData';
+import { FaPencilAlt, FaSearch, FaTrash } from 'react-icons/fa';
+import { StoreAdmin } from '@/types/types';
+import {
+  fetchStoreAdmins,
+  getStoreAdminById,
+  createStoreAdmin,
+  updateStoreAdmin,
+  deleteStoreAdmin
+} from '@/api/storeAdmin.api';
+import { toastFailed, toastSuccess } from '@/utils/toastHelper';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
+import AddEditStoreAdmin from '@/components/admin/AddEditStoreAdmin';
 
 const StoreAdminsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [storeAdmin, setStoreAdmins] = useState<StoreAdmin[]>([]);
+  const [addEditMode, setAddEditMode] = useState<'add' | 'edit'>('add');
+  const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedAdmin, setSelectedAdmin] = useState<User | null>(null);
-  const [editedAdminName, setEditedAdminName] = useState<string | undefined>('');
-  const [admins, setAdmins] = useState<User[]>(dummyStoreAdmins);
+  const [selectedStoreAdmin, setSelectedStoreAdmin] = useState<StoreAdmin>();
+  const [totalStoreAdmins, setTotalStoreAdmins] = useState<number>();
+  const [nameFilter, setNameFilter] = useState<string | undefined>();
 
-  const adminsPerPage = 10;
+  const pageSize = 10;
 
-  const indexOfLastAdmin = currentPage * adminsPerPage;
-  const indexOfFirstAdmin = indexOfLastAdmin - adminsPerPage;
-  const currentAdmins = admins.slice(indexOfFirstAdmin, indexOfLastAdmin);
+  const loadStoreAdmins = useCallback(async () => {
+    try {
+      const queryParams = { page: currentPage, pageSize } as { [key: string]: any };
+      if (nameFilter) {
+        queryParams.name = nameFilter;
+      }
+      const response = await fetchStoreAdmins(queryParams);
+      setStoreAdmins(response.storeAdmins);
+      setTotalStoreAdmins(response.total);
+    } catch (err) {
+      toastFailed('Failed to fetch store admin');
+      setStoreAdmins([]);
+      setTotalStoreAdmins(0);
+    }
+  }, [currentPage, nameFilter]);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [nameFilter]);
 
-  const handleEditClick = (admin: User) => {
-    setSelectedAdmin(admin);
-    setEditedAdminName(`${admin.firstName} ${admin.lastName}`);
-    setIsEditModalOpen(true);
+  useEffect(() => {
+    loadStoreAdmins();
+  }, [loadStoreAdmins]);
+
+  const handleAddClick = () => {
+    setAddEditMode('add');
+    setSelectedStoreAdmin(undefined);
+    setIsAddEditModalOpen(true);
   };
 
-  const handleDeleteClick = (admin: User) => {
-    setSelectedAdmin(admin);
+  const handleEditClick = async (storeAdmin: StoreAdmin) => {
+    if (storeAdmin.id) {
+      try {
+        const response = await getStoreAdminById(storeAdmin.id);
+        setSelectedStoreAdmin(response);
+        setAddEditMode('edit');
+        setIsAddEditModalOpen(true);
+      } catch (err) {
+        toastFailed('Failed to fetch store admin');
+      }
+    }
+  };
+
+  const handleDeleteClick = (storeAdmin: StoreAdmin) => {
+    setSelectedStoreAdmin(storeAdmin);
     setIsDeleteModalOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    const index = admins.findIndex((admin) => admin.id === selectedAdmin?.id);
-    const updatedAdmins = [...admins];
-    const [firstName, lastName] = editedAdminName?.split(' ') || ['', ''];
-    updatedAdmins[index].firstName = firstName;
-    updatedAdmins[index].lastName = lastName;
-    setAdmins(updatedAdmins);
-    setIsEditModalOpen(false);
+  const handleSave = async (storeAdmin: StoreAdmin) => {
+    if (selectedStoreAdmin?.id) {
+      const updateStoreAdminData = {
+        ...storeAdmin
+      } as { firstName: string; lastName: string; storeId?: number };
+
+      try {
+        await updateStoreAdmin(selectedStoreAdmin?.id, updateStoreAdminData);
+        toastSuccess('Updated store admin successfully');
+        setIsAddEditModalOpen(false);
+        loadStoreAdmins();
+      } catch (err) {
+        toastFailed('Failed to update store admin');
+      }
+    } else {
+      const createStoreAdminData = {
+        ...storeAdmin
+      } as {
+        username: string;
+        email: string;
+        password: string;
+        firstName: string;
+        lastName: string;
+        storeId: number;
+        mobileNum: string;
+      };
+      try {
+        await createStoreAdmin(createStoreAdminData);
+        toastSuccess('Created store admin successfully');
+        setIsAddEditModalOpen(false);
+        loadStoreAdmins();
+      } catch (err) {
+        toastFailed('Failed to create store admin');
+      }
+    }
   };
 
-  const handleConfirmDelete = () => {
-    const index = admins.findIndex((admin) => admin.id === selectedAdmin?.id);
-    const updatedAdmins = [...admins];
-    updatedAdmins.splice(index, 1);
-    setAdmins(updatedAdmins);
-    setIsDeleteModalOpen(false);
+  const handleConfirmDelete = async () => {
+    if (selectedStoreAdmin?.id) {
+      try {
+        await deleteStoreAdmin(selectedStoreAdmin?.id);
+        toastSuccess('Deleted store admin successfully');
+        setIsDeleteModalOpen(false);
+        loadStoreAdmins();
+      } catch (err) {
+        toastFailed('Failed to delete store admin');
+      }
+    }
+  };
+
+  const onSortChange = (e: any) => {
+    console.log(e);
   };
 
   return (
     <div className="p-4">
       <div className="my-2 text-lg font-semibold">Store Admins</div>
-      <Table aria-label="Store Admins Table">
+      <div className="my-2 gap-2 p-4 border border-gray-200 shadow-md bg-white rounded-md flex items-center">
+        <Button size="md" color="primary" className="p-2 mr-4" onClick={handleAddClick}>
+          Add New
+        </Button>
+        <Input
+          size="sm"
+          label="Search by username, first name, or last name"
+          value={nameFilter}
+          onChange={(e) => setNameFilter(e.target.value)}
+        />
+        <FaSearch className="ml-2 text-gray-500" />
+      </div>
+
+      <Table
+        onSortChange={(e) => {
+          onSortChange(e);
+        }}
+        aria-label="Store Admins Table"
+      >
         <TableHeader>
-          <TableColumn className="text-md text-gray-700">Name</TableColumn>
-          <TableColumn className="text-md text-gray-700">Email</TableColumn>
-          <TableColumn className="text-md text-gray-700">Store</TableColumn>
-          <TableColumn className="text-md text-gray-700">Action</TableColumn>
+          <TableColumn allowsSorting className="text-md text-gray-700">
+            Name
+          </TableColumn>
+          <TableColumn allowsSorting className="text-md text-gray-700">
+            Email
+          </TableColumn>
+          <TableColumn allowsSorting className="text-md text-gray-700">
+            Username
+          </TableColumn>
+          <TableColumn allowsSorting className="text-md text-gray-700">
+            Store
+          </TableColumn>
+          <TableColumn allowsSorting className="text-md text-gray-700">
+            Action
+          </TableColumn>
         </TableHeader>
         <TableBody>
-          {currentAdmins.map((admin) => (
+          {storeAdmin?.map((admin) => (
             <TableRow key={admin.id}>
               <TableCell>{`${admin.firstName} ${admin.lastName}`}</TableCell>
               <TableCell>{admin.email}</TableCell>
+              <TableCell>{admin.username}</TableCell>
               <TableCell>{admin.store?.name}</TableCell>
               <TableCell>
                 <div>
@@ -95,52 +203,30 @@ const StoreAdminsPage = () => {
           ))}
         </TableBody>
       </Table>
+
       <Pagination
+        className="flex flex-col gap-5 my-2"
         showControls
-        className="my-2 shadow-sm"
-        total={Math.ceil(dummyStoreAdmins.length / adminsPerPage)}
-        initialPage={1}
-        onChange={(page) => paginate(page)}
+        total={Math.ceil(totalStoreAdmins ? totalStoreAdmins / pageSize : 1)}
+        color="primary"
+        page={currentPage}
+        onChange={setCurrentPage}
       />
 
-      <Modal size="xl" isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} closeButton>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Edit Admin</ModalHeader>
-              <ModalBody>
-                <Input
-                  fullWidth
-                  label="Admin Name"
-                  value={editedAdminName}
-                  onChange={(e) => setEditedAdminName(e.target.value)}
-                />
-              </ModalBody>
-              <ModalFooter>
-                <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-                <Button onClick={handleSaveEdit}>Save</Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <AddEditStoreAdmin
+        isOpen={isAddEditModalOpen}
+        onClose={() => setIsAddEditModalOpen(false)}
+        addEditMode={addEditMode}
+        storeAdmin={selectedStoreAdmin}
+        handleSave={handleSave}
+      />
 
-      <Modal size="xl" isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} closeButton>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Confirm Delete</ModalHeader>
-              <ModalBody>
-                Are you sure you want to delete {selectedAdmin?.firstName} {selectedAdmin?.lastName}?
-              </ModalBody>
-              <ModalFooter>
-                <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
-                <Button onClick={handleConfirmDelete}>Yes</Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <DeleteConfirmationModal
+        selected={selectedStoreAdmin}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        handleConfirmDelete={handleConfirmDelete}
+      />
     </div>
   );
 };

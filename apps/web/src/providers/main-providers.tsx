@@ -31,7 +31,12 @@ export function MainProviders({ children }: IMainProvidersProps) {
       router.push('/no-permission');
       return;
     }
-    if (role !== 'SUPER_ADMIN' && pathName == '/admin/store-admins') {
+    if (
+      role !== 'SUPER_ADMIN' &&
+      (pathName == '/admin/store-admins' ||
+        pathName == '/admin/producs/add-product' ||
+        pathName.includes('/admin/producs/edit-product'))
+    ) {
       router.push('/no-permission');
       return;
     }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { dummyProducts, Product } from '@/data/dummyData';
+import { dummyProducts, Product } from '@/types/types';
 // import ProductsTable from '@/components/common/ProductTable';
 import ProductGrid from '@/components/common/ProductGrid';
 

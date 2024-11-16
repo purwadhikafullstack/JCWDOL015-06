@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { useRouter } from 'next/navigation';
 import { FaBox, FaClipboardList, FaShoppingCart, FaChartBar, FaUser } from 'react-icons/fa';
 import { Select, SelectItem } from '@nextui-org/react';
 import { RiDiscountPercentLine } from 'react-icons/ri';
-import { dummyData, dummyProducts, dummyStocks, dummyStores } from '@/data/dummyData';
+import { dummyData, dummyProducts, dummyStocks, dummyStores, Role } from '@/types/types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -36,9 +35,10 @@ const AdminDashboardPage = () => {
       if (stock.storeId == storeId || !storeId) {
         const findIndex = productQuantities.findIndex((val) => val.productId == stock.productId);
         if (findIndex < 0) {
-          productQuantities.push({ productId: stock.productId, totalQuantity: stock.quantity });
+          productQuantities.push({ productId: Number(stock.productId), totalQuantity: Number(stock.quantity) });
         } else {
-          productQuantities[findIndex].totalQuantity = productQuantities[findIndex].totalQuantity + stock.quantity;
+          productQuantities[findIndex].totalQuantity =
+            productQuantities[findIndex].totalQuantity + Number(stock.quantity);
         }
       }
     });
@@ -54,7 +54,6 @@ const AdminDashboardPage = () => {
     setSelectedStoreId(event.target.value);
     const selectedValue = dummyStores.find((val) => val.id == event.target.value);
 
-    console.log(event.target.value);
     setStockForChart(sortProductsByTotalQuantity(event.target.value));
 
     if (selectedValue) {
@@ -104,46 +103,49 @@ const AdminDashboardPage = () => {
     icon: any;
   }
 
+  const userRole = localStorage.getItem('userRole') as Role;
+
   const adminMenus: AdminMenu[] = [
     {
-      title: 'Manage Products',
+      title: 'Products',
       path: '/admin/products',
-      description: 'Add, edit, delete, and see the list of your products',
+      description:
+        userRole == 'SUPER_ADMIN' ? 'Add, edit, delete, and see the list of your products' : 'See the list of products',
       icon: FaShoppingCart
     },
     {
-      title: 'Manage Stocks',
+      title: 'Stocks',
       path: '/admin/stocks',
-      description: 'Add and edit stocks in stores',
+      description: userRole == 'SUPER_ADMIN' ? 'Add and edit stocks in stores' : 'Add and edit stocks in your store',
       icon: FaBox
     },
     {
-      title: 'Manage Categories',
+      title: 'Categories',
       path: '/admin/categories',
       description: 'Add, edit, delete, and see the list of product categories',
       icon: FaClipboardList
     },
     {
-      title: 'Manage Discounts',
+      title: 'Discounts',
       path: '/admin/discounts',
       description: 'Add, edit, delete, and see the list of discounts to be applied into product or order',
       icon: RiDiscountPercentLine
     },
     {
-      title: 'See Reports',
+      title: 'Reports',
       path: '/admin/reports',
       description: 'See daily, weekly, and monthly report on reports',
       subTitles: [
-        { subTitle: 'See reports on order', subTitlePath: '/admin/reports/sellings' },
-        { subTitle: 'See reports on stock', subTitlePath: '/admin/reports/stocks' }
+        { subTitle: 'See reports on order', subTitlePath: '/admin/reports/order' },
+        { subTitle: 'See reports on stock', subTitlePath: '/admin/reports/stock' }
       ],
       icon: FaChartBar
     }
   ];
 
-  if (localStorage.getItem('userRole') === 'SUPER_ADMIN') {
+  if (userRole == 'SUPER_ADMIN') {
     adminMenus.push({
-      title: 'Manage Store Admins',
+      title: 'Store Admins',
       description: 'Add, edit, delete, and see the list of store admins',
       path: '/admin/store-admins',
       icon: FaUser
@@ -172,7 +174,8 @@ const AdminDashboardPage = () => {
               return (
                 <div
                   key={subTitle.subTitle}
-                  onClick={() => {
+                  onClick={(event) => {
+                    event.stopPropagation();
                     router.push(subTitle.subTitlePath);
                   }}
                   className="text-primary hover:underline"

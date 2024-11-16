@@ -20,6 +20,7 @@ import { ProductRouter } from './routers/product.router';
 import { StockRouter } from './routers/stock.router';
 import { StockHistoryRouter } from './routers/stockHistory.router';
 import { StoreRouter } from './routers/store.router';
+import { StoreAdminRouter } from './routers/storeAdmin.router';
 
 export default class App {
   private readonly app: Express;
@@ -70,6 +71,7 @@ export default class App {
     const stockRouter = new StockRouter();
     const stockHistoryRouter = new StockHistoryRouter();
     const storeRouter = new StoreRouter();
+    const storeAdminRouter = new StoreAdminRouter();
 
     this.app.get('/api', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student API!`);
@@ -85,6 +87,7 @@ export default class App {
     this.app.use('/api/stockHistory', stockHistoryRouter.getRouter());
     this.app.use('/api/store', storeRouter.getRouter());
     this.app.use('/uploads', express.static('uploads'));
+    this.app.use('/api/storeAdmin', storeAdminRouter.getRouter());
   }
 
   public start(): void {

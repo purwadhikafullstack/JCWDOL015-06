@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Textarea, Button } from '@nextui-org/react';
 // import Image from 'next/image';
-import { Product } from '@/data/dummyData';
+import { Product } from '@/types/types';
 
 interface AddEditProductFormProps {
   mode: 'add' | 'edit';
@@ -29,7 +29,7 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
       setDescription(data.desc ?? '');
       setWeight(data.weight ?? 0);
       if (data.imageUrls) {
-        setImagePreviews(data.imageUrls);
+        setImagePreviews(data.imageUrls.split(','));
         // const previews = data.images.map((image) => {
         //   const reader = new FileReader();
         //   reader.readAsDataURL(image);

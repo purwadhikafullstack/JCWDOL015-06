@@ -24,31 +24,41 @@ export class ProductController {
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const products = await prisma.product.findMany({
-        where: {
-          AND: [
-            { productName: { contains: name as string } },
-            { category: { name: { contains: category as string } } },
-          ],
-        },
-        include: {
-          category: true,
-          productDiscounts: {
-            include: {
-              discount: true,
+      const [products, total] = await prisma.$transaction([
+        prisma.product.findMany({
+          where: {
+            AND: [
+              { productName: { contains: name as string } },
+              { category: { name: { contains: category as string } } },
+            ],
+          },
+          include: {
+            category: true,
+            productDiscounts: {
+              include: {
+                discount: true,
+              },
+            },
+            Stock: {
+              include: {
+                store: true,
+              },
             },
           },
-          Stock: {
-            include: {
-              store: true,
-            },
+          skip,
+          take,
+        }),
+        prisma.product.count({
+          where: {
+            AND: [
+              { productName: { contains: name as string } },
+              { category: { name: { contains: category as string } } },
+            ],
           },
-        },
-        skip,
-        take,
-      });
+        }),
+      ]);
 
-      res.status(200).json(products);
+      res.status(200).json({ products, total });
     } catch (err) {
       res.status(400).send({
         status: 'error',

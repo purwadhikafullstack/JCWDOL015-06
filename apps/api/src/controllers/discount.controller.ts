@@ -48,26 +48,41 @@ export class DiscountController {
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const discounts = await prisma.discount.findMany({
-        where: {
-          AND: [
-            { appliedDiscountType: appliedDiscountType as AppliedDiscountType },
-            { discountType: discountType as DiscountType },
-            { name: { contains: name as string } },
-          ],
-        },
-        include: {
-          ProductDiscount: {
-            include: {
-              product: true,
+      const [discounts, total] = await prisma.$transaction([
+        prisma.discount.findMany({
+          where: {
+            AND: [
+              {
+                appliedDiscountType: appliedDiscountType as AppliedDiscountType,
+              },
+              { discountType: discountType as DiscountType },
+              { name: { contains: name as string } },
+            ],
+          },
+          include: {
+            ProductDiscount: {
+              include: {
+                product: true,
+              },
             },
           },
-        },
-        skip,
-        take,
-      });
+          skip,
+          take,
+        }),
+        prisma.discount.count({
+          where: {
+            AND: [
+              {
+                appliedDiscountType: appliedDiscountType as AppliedDiscountType,
+              },
+              { discountType: discountType as DiscountType },
+              { name: { contains: name as string } },
+            ],
+          },
+        }),
+      ]);
 
-      res.status(200).json(discounts);
+      res.status(200).json({ discounts, total });
     } catch (err) {
       res.status(400).send({
         status: 'error',

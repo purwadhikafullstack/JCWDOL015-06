@@ -1,7 +1,7 @@
 'use client';
 
 import AddEditProductForm from '@/components/admin/AddEditProduct';
-import { Product } from '@/data/dummyData';
+import { Product } from '@/types/types';
 
 const AddProduct = () => {
   const handleSubmit = async (product: Product) => {

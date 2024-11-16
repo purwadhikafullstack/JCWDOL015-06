@@ -6,9 +6,6 @@ const useRoleBasedRedirect = () => {
   const router = useRouter();
   const { isAuthenticated, userRole } = useSelector((state: RootState) => state.auth);
 
-  console.log(isAuthenticated);
-  console.log(userRole);
-
   if (!isAuthenticated) {
     router.push('/login');
     return;

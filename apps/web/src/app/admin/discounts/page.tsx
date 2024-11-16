@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Table, Pagination, Button, TableHeader, TableBody, TableCell, TableColumn, TableRow } from '@nextui-org/react';
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Discount, dummyDiscounts } from '@/data/dummyData';
+import { Discount, dummyDiscounts } from '@/types/types';
 import AddEditDiscount from '@/components/admin/AddEditDiscount';
 
 export default function DiscountsPage() {

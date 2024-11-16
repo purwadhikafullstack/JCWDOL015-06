@@ -19,26 +19,72 @@ export class StockController {
 
   async getStocks(req: Request, res: Response) {
     try {
-      const { productName, storeName, page = 1, pageSize = 10 } = req.query;
+      const {
+        productName,
+        storeName,
+        productId,
+        storeId,
+        page = 1,
+        pageSize = 10,
+      } = req.query;
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const stocks = await prisma.stock.findMany({
-        where: {
-          AND: [
-            { product: { productName: { contains: productName as string } } },
-            { store: { name: { contains: storeName as string } } },
-          ],
-        },
-        include: {
-          product: true,
-          store: true,
-        },
-        skip,
-        take,
-      });
+      let whereFilter = {
+        OR: [
+          {
+            AND: [
+              {
+                product: {
+                  productName: { contains: productName as string },
+                },
+              },
+              { store: { name: { contains: storeName as string } } },
+            ],
+          },
+        ],
+      } as any;
 
-      res.status(200).json(stocks);
+      if (productId && storeId) {
+        whereFilter.OR.push({
+          AND: [
+            {
+              productId: { equals: Number(productId) },
+            },
+            {
+              storeId: { equals: Number(storeId) },
+            },
+          ],
+        });
+      }
+
+      if (storeId && !productId) {
+        whereFilter = {
+          AND: [
+            whereFilter,
+            {
+              storeId: { equals: Number(storeId) },
+            },
+          ],
+        };
+      }
+
+      const [stocks, total] = await prisma.$transaction([
+        prisma.stock.findMany({
+          where: whereFilter,
+          include: {
+            product: true,
+            store: true,
+          },
+          skip,
+          take,
+        }),
+        prisma.stock.count({
+          where: whereFilter,
+        }),
+      ]);
+
+      res.status(200).json({ stocks, total });
     } catch (err) {
       res.status(400).send({
         status: 'error',

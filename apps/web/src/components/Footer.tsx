@@ -3,7 +3,7 @@ import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from 'react-icons/f
 export const Footer = () => {
   return (
     <footer className="bg-primary text-white py-6 px-4 w-full">
-      <div className="max-w-screen-xl mx-auto flex justify-between items-start">
+      <div className="max-w-screen-xl mx-auto flex flex-col sm:flex-row justify-between items-start">
         {/* Contact Info */}
         <div className="space-y-2">
           <h3 className="text-lg font-bold">Contact Us</h3>

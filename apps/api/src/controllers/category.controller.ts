@@ -23,13 +23,18 @@ export class CategoryController {
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const categories = await prisma.category.findMany({
-        where: { name: { contains: name as string } },
-        skip,
-        take,
-      });
+      const [categories, total] = await prisma.$transaction([
+        prisma.category.findMany({
+          where: { name: { contains: name as string } },
+          skip,
+          take,
+        }),
+        prisma.category.count({
+          where: { name: { contains: name as string } },
+        }),
+      ]);
 
-      res.status(200).json(categories);
+      res.status(200).json({ categories, total });
     } catch (err) {
       res.status(400).send({
         status: 'error',

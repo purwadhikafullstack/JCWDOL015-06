@@ -36,43 +36,100 @@ export class OrderController {
   async getOrders(req: Request, res: Response) {
     try {
       const {
+        start_date,
+        end_date,
+        productName,
+        storeName,
         userName,
-        userId,
-        createdAt,
+        storeId,
         page = 1,
         pageSize = 10,
       } = req.query;
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const orders = await prisma.order.findMany({
-        where: {
-          AND: [
-            { createdAt: { gte: new Date(createdAt as string) } },
-            {
-              OR: [
-                { user: { username: { contains: userName as string } } },
-                { userId: Number(userId) },
-              ],
-            },
-          ],
-        },
-        include: {
-          orderItems: {
-            include: {
-              product: true,
-              discount: true,
+      const whereFilter = {
+        AND: [
+          {
+            orderItems: {
+              product: { productName: { contains: productName as string } },
             },
           },
-          discount: true,
-          store: true,
-          user: true,
-        },
-        skip,
-        take,
-      });
+          { store: { name: { contains: storeName as string } } },
+          {
+            OR: [
+              { user: { username: { contains: userName as string } } },
+              { user: { firstName: { contains: userName as string } } },
+              { user: { lastName: { contains: userName as string } } },
+            ],
+          },
+        ],
+      } as any;
+      if (
+        start_date &&
+        typeof start_date === 'string' &&
+        (!end_date || typeof end_date !== 'string')
+      ) {
+        whereFilter.AND.push({
+          createdAt: {
+            gte: new Date(start_date),
+            // lt: new Date(end_date),
+          },
+        });
+      }
+      if (
+        end_date &&
+        typeof end_date === 'string' &&
+        (!start_date || typeof start_date !== 'string')
+      ) {
+        whereFilter.AND.push({
+          createdAt: {
+            // gte: new Date(start_date),
+            lt: new Date(end_date),
+          },
+        });
+      }
+      if (
+        start_date &&
+        typeof start_date === 'string' &&
+        end_date &&
+        typeof end_date === 'string'
+      ) {
+        whereFilter.AND.push({
+          createdAt: {
+            gt: new Date(start_date),
+            lt: new Date(end_date),
+          },
+        });
+      }
+      if (storeId) {
+        whereFilter.AND.push({
+          storeId: { equals: Number(storeId) },
+        });
+      }
 
-      res.status(200).json(orders);
+      const [orders, total] = await prisma.$transaction([
+        prisma.order.findMany({
+          // where: whereFilter,
+          include: {
+            orderItems: {
+              include: {
+                product: true,
+                discount: true,
+              },
+            },
+            store: true,
+          },
+          skip,
+          take,
+          orderBy: { createdAt: 'desc' },
+        }),
+        prisma.order.count({
+          // where: whereFilter,
+        }),
+      ]);
+
+      res.status(200).json({ orders, total });
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -95,7 +152,6 @@ export class OrderController {
           },
           discount: true,
           store: true,
-          user: true,
         },
       });
 

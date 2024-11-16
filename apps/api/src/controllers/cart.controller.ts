@@ -41,29 +41,39 @@ export class CartController {
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const carts = await prisma.cart.findMany({
-        where: {
-          OR: [
-            { user: { username: { contains: userName as string } } },
-            { userId: Number(userId) },
-          ],
-        },
-        include: {
-          cartItems: {
-            include: {
-              product: true,
-              discount: true,
-            },
+      const [carts, total] = await prisma.$transaction([
+        prisma.cart.findMany({
+          where: {
+            OR: [
+              { user: { username: { contains: userName as string } } },
+              { userId: Number(userId) },
+            ],
           },
-          discount: true,
-          store: true,
-          user: true,
-        },
-        skip,
-        take,
-      });
+          include: {
+            cartItems: {
+              include: {
+                product: true,
+                discount: true,
+              },
+            },
+            discount: true,
+            store: true,
+            user: true,
+          },
+          skip,
+          take,
+        }),
+        prisma.cart.count({
+          where: {
+            OR: [
+              { user: { username: { contains: userName as string } } },
+              { userId: Number(userId) },
+            ],
+          },
+        }),
+      ]);
 
-      res.status(200).json(carts);
+      res.status(200).json({ carts, total });
     } catch (err) {
       res.status(400).send({
         status: 'error',

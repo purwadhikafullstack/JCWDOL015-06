@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { CategoryController } from '@/controllers/category.controller';
 export class CategoryRouter {
-  private router: Router;
-  private categoryController: CategoryController;
+  private readonly router: Router;
+  private readonly categoryController: CategoryController;
 
   constructor() {
     this.categoryController = new CategoryController();

@@ -23,13 +23,18 @@ export class StoreController {
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const stores = await prisma.store.findMany({
-        where: { name: { contains: name as string } },
-        skip,
-        take,
-      });
+      const [stores, total] = await prisma.$transaction([
+        prisma.store.findMany({
+          where: { name: { contains: name as string } },
+          skip,
+          take,
+        }),
+        prisma.store.count({
+          where: { name: { contains: name as string } },
+        }),
+      ]);
 
-      res.status(200).json(stores);
+      res.status(200).json({ stores, total });
     } catch (err) {
       res.status(400).send({
         status: 'error',

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Pagination } from '@nextui-org/react';
-import { Product } from '@/data/dummyData';
+import { Product } from '@/types/types';
 
 interface PaginationProps {
   totalPage: number;

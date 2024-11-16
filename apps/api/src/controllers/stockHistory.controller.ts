@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import e, { Request, Response } from 'express';
 import prisma from '@/prisma';
 
 export class StockHistoryController {
@@ -27,9 +27,12 @@ export class StockHistoryController {
   async getStockHistories(req: Request, res: Response) {
     try {
       const {
-        date,
+        start_date,
+        end_date,
         productName,
         storeName,
+        userName,
+        storeId,
         page = 1,
         pageSize = 10,
       } = req.query;
@@ -40,28 +43,72 @@ export class StockHistoryController {
         AND: [
           { product: { productName: { contains: productName as string } } },
           { store: { name: { contains: storeName as string } } },
+          {
+            OR: [{ user: { username: { contains: userName as string } } }],
+          },
         ],
       } as any;
-      if (date && typeof date === 'string') {
+      if (
+        start_date &&
+        typeof start_date === 'string' &&
+        (!end_date || typeof end_date !== 'string')
+      ) {
         whereFilter.AND.push({
           createdAt: {
-            gte: new Date(date as string),
-            lt: new Date(date as string),
+            gte: new Date(start_date),
+            // lt: new Date(end_date),
           },
         });
       }
+      if (
+        end_date &&
+        typeof end_date === 'string' &&
+        (!start_date || typeof start_date !== 'string')
+      ) {
+        whereFilter.AND.push({
+          createdAt: {
+            // gte: new Date(start_date),
+            lt: new Date(end_date),
+          },
+        });
+      }
+      if (
+        start_date &&
+        typeof start_date === 'string' &&
+        end_date &&
+        typeof end_date === 'string'
+      ) {
+        whereFilter.AND.push({
+          createdAt: {
+            gt: new Date(start_date),
+            lt: new Date(end_date),
+          },
+        });
+      }
+      if (storeId) {
+        whereFilter.AND.push({
+          storeId: { equals: Number(storeId) },
+        });
+      }
 
-      const stockHistories = await prisma.stockHistory.findMany({
-        where: whereFilter,
-        include: {
-          product: true,
-          store: true,
-        },
-        skip,
-        take,
-      });
+      const [stockHistories, total] = await prisma.$transaction([
+        prisma.stockHistory.findMany({
+          where: whereFilter,
+          include: {
+            product: true,
+            store: true,
+            user: true,
+          },
+          skip,
+          take,
+          orderBy: { createdAt: 'desc' },
+        }),
+        prisma.stockHistory.count({
+          where: whereFilter,
+        }),
+      ]);
 
-      res.status(200).json(stockHistories);
+      res.status(200).json({ stockHistories, total });
     } catch (err) {
       res.status(400).send({
         status: 'error',

@@ -4,9 +4,10 @@ import prisma from '@/prisma';
 export class ProductController {
   async createProduct(req: Request, res: Response) {
     try {
-      const { price, productName, desc, imageUrls, categoryId } = req.body;
+      const { price, productName, desc, imageUrls, categoryId, weight } =
+        req.body;
       const product = await prisma.product.create({
-        data: { price, productName, desc, imageUrls, categoryId },
+        data: { price, productName, desc, imageUrls, categoryId, weight },
       });
       res.status(201).json(product);
     } catch (err) {
@@ -25,13 +26,23 @@ export class ProductController {
 
       const products = await prisma.product.findMany({
         where: {
-          OR: [
+          AND: [
             { productName: { contains: name as string } },
             { category: { name: { contains: category as string } } },
           ],
         },
         include: {
           category: true,
+          productDiscounts: {
+            include: {
+              discount: true,
+            },
+          },
+          Stock: {
+            include: {
+              store: true,
+            },
+          },
         },
         skip,
         take,
@@ -51,7 +62,19 @@ export class ProductController {
       const { id } = req.params;
       const product = await prisma.product.findUnique({
         where: { id: Number(id) },
-        include: { category: true },
+        include: {
+          category: true,
+          productDiscounts: {
+            include: {
+              discount: true,
+            },
+          },
+          Stock: {
+            include: {
+              store: true,
+            },
+          },
+        },
       });
 
       if (!product) {

@@ -15,9 +15,7 @@ model Store {
   StockHistory StockHistory[]
   User User[]
   Stock Stock[]
-
   Cart Cart[]
-
   Order Order[]
 }
 
@@ -33,7 +31,7 @@ model User {
   password  String
   avatar    String?
   isVerify  Int
-  mobileNum Int
+  mobileNum String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -57,10 +55,21 @@ model Product {
   imageUrls  String
   categoryId Int
   category   Category  @relation(fields: [categoryId], references: [id])
+  weight Int
+  productDiscounts    ProductDiscount[]
 
   StockHistory StockHistory[]
+  CartItem CartItem[]
+  OrderItem OrderItem[]
   Stock Stock[]
-  Discount Discount[]
+}
+
+model ProductDiscount {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  discountId Int
+  product    Product  @relation(fields: [productId], references: [id])
+  discount   Discount @relation(fields: [discountId], references: [id])
 }
 
 model Discount {
@@ -70,7 +79,17 @@ model Discount {
   appliedDiscountType   AppliedDiscountType
   discountPercentage    Int?
   discountAmount        Int?
-  appliedOnProducts     Product[]
+  minimumPurchaseAmount Int?
+
+  ProductDiscount ProductDiscount[]
+
+  Cart Cart[]
+
+  CartItem CartItem[]
+
+  Order Order[]
+
+  OrderItem OrderItem[]
 }
 
 model Stock {
@@ -98,30 +117,34 @@ model StockHistory {
 model Cart {
   id             Int      @id @default(autoincrement())
   discountId     Int?
+  discount       Discount?    @relation(fields: [discountId], references: [id])
   totalPrice     Float
   totalDiscount  Float
   createdAt      DateTime @default(now())
-  storeId         Int
-  store           Store   @relation(fields: [storeId], references: [id])
+  storeId        Int
+  store          Store    @relation(fields: [storeId], references: [id])
   userId         Int
-  user           User    @relation(fields: [userId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
   cartItems      CartItem[]
 }
 
 model CartItem {
   id             Int      @id @default(autoincrement())
   cartId         Int
-  cart           Cart     @relation(fields: [cartId], references: [id])
   productId      Int
   quantity       Int
   totalPrice     Float
   totalDiscount  Float
   discountId     Int?
+  discount       Discount?    @relation(fields: [discountId], references: [id])
+  cart           Cart     @relation(fields: [cartId], references: [id])
+  product        Product  @relation(fields: [productId], references: [id])
 }
 
 model Order {
   id             Int      @id @default(autoincrement())
   discountId     Int?
+  discount       Discount?    @relation(fields: [discountId], references: [id])
   totalPrice     Float
   totalDiscount  Float
   createdAt      DateTime @default(now())
@@ -134,14 +157,15 @@ model Order {
 
 model OrderItem {
   id             Int      @id @default(autoincrement())
-  orderId        Int
+  orderId         Int
   productId      Int
   quantity       Int
   totalPrice     Float
   totalDiscount  Float
   discountId     Int?
-
-  Order Order[]
+  discount       Discount?    @relation(fields: [discountId], references: [id])
+  order           Order     @relation(fields: [orderId], references: [id])
+  product        Product  @relation(fields: [productId], references: [id])
 }
 
 enum Role {
@@ -153,6 +177,7 @@ enum Role {
 enum DiscountType {
   PERCENTAGE
   AMOUNT
+  BUY_ONE_GET_ONE
 }
 
 enum AppliedDiscountType {

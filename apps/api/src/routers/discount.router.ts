@@ -1,13 +1,24 @@
 import { Router } from 'express';
 import { DiscountController } from '@/controllers/discount.controller';
+export class DiscountRouter {
+  private router: Router;
+  private discountController: DiscountController;
 
-const router = Router();
-const discountController = new DiscountController();
+  constructor() {
+    this.discountController = new DiscountController();
+    this.router = Router();
+    this.initializeRoutes();
+  }
 
-router.post('/discounts', discountController.createDiscount);
-router.get('/discounts', discountController.getDiscounts);
-router.get('/discounts/:id', discountController.getDiscountById);
-router.put('/discounts/:id', discountController.updateDiscount);
-router.delete('/discounts/:id', discountController.deleteDiscount);
+  private initializeRoutes(): void {
+    this.router.post('/', this.discountController.createDiscount);
+    this.router.get('/', this.discountController.getDiscounts);
+    this.router.get('/:id', this.discountController.getDiscountById);
+    this.router.put('/:id', this.discountController.updateDiscount);
+    this.router.delete('/:id', this.discountController.deleteDiscount);
+  }
 
-export default router;
+  getRouter(): Router {
+    return this.router;
+  }
+}

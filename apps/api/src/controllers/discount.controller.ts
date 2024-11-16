@@ -20,8 +20,10 @@ export class DiscountController {
           appliedDiscountType,
           discountPercentage,
           discountAmount,
-          appliedOnProducts: {
-            connect: appliedOnProductIds.map((id: number) => ({ id })),
+          ProductDiscount: {
+            create: appliedOnProductIds.map((productId: number) => ({
+              productId,
+            })),
           },
         },
       });
@@ -48,14 +50,18 @@ export class DiscountController {
 
       const discounts = await prisma.discount.findMany({
         where: {
-          OR: [
+          AND: [
             { appliedDiscountType: appliedDiscountType as AppliedDiscountType },
             { discountType: discountType as DiscountType },
             { name: { contains: name as string } },
           ],
         },
         include: {
-          appliedOnProducts: true,
+          ProductDiscount: {
+            include: {
+              product: true,
+            },
+          },
         },
         skip,
         take,
@@ -75,7 +81,13 @@ export class DiscountController {
       const { id } = req.params;
       const discount = await prisma.discount.findUnique({
         where: { id: Number(id) },
-        include: { appliedOnProducts: true },
+        include: {
+          ProductDiscount: {
+            include: {
+              product: true,
+            },
+          },
+        },
       });
 
       if (!discount) {
@@ -111,10 +123,19 @@ export class DiscountController {
           appliedDiscountType,
           discountPercentage,
           discountAmount,
-          appliedOnProducts: {
-            connect: appliedOnProductIds.map((id: number) => ({ id })),
-          },
         },
+      });
+
+      // Update ProductDiscounts
+      await prisma.productDiscount.deleteMany({
+        where: { discountId: Number(id) },
+      });
+
+      await prisma.productDiscount.createMany({
+        data: appliedOnProductIds.map((productId: number) => ({
+          discountId: Number(id),
+          productId,
+        })),
       });
 
       res.status(200).json(discount);

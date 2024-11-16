@@ -25,7 +25,7 @@ export class StockController {
 
       const stocks = await prisma.stock.findMany({
         where: {
-          OR: [
+          AND: [
             { product: { productName: { contains: productName as string } } },
             { store: { name: { contains: storeName as string } } },
           ],

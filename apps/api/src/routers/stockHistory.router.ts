@@ -1,13 +1,24 @@
 import { Router } from 'express';
 import { StockHistoryController } from '@/controllers/stockHistory.controller';
+export class StockHistoryRouter {
+  private router: Router;
+  private stockHistoryController: StockHistoryController;
 
-const router = Router();
-const stockHistoryController = new StockHistoryController();
+  constructor() {
+    this.stockHistoryController = new StockHistoryController();
+    this.router = Router();
+    this.initializeRoutes();
+  }
 
-router.post('/stockHistories', stockHistoryController.createStockHistory);
-router.get('/stockHistories', stockHistoryController.getStockHistories);
-router.get('/stockHistories/:id', stockHistoryController.getStockHistoryById);
-router.put('/stockHistories/:id', stockHistoryController.updateStockHistory);
-router.delete('/stockHistories/:id', stockHistoryController.deleteStockHistory);
+  private initializeRoutes(): void {
+    this.router.post('/', this.stockHistoryController.createStockHistory);
+    this.router.get('/', this.stockHistoryController.getStockHistories);
+    this.router.get('/:id', this.stockHistoryController.getStockHistoryById);
+    this.router.put('/:id', this.stockHistoryController.updateStockHistory);
+    this.router.delete('/:id', this.stockHistoryController.deleteStockHistory);
+  }
 
-export default router;
+  getRouter(): Router {
+    return this.router;
+  }
+}

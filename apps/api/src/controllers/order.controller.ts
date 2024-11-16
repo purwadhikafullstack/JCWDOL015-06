@@ -47,14 +47,26 @@ export class OrderController {
 
       const orders = await prisma.order.findMany({
         where: {
-          OR: [
-            { user: { username: { contains: userName as string } } },
-            { userId: Number(userId) },
+          AND: [
             { createdAt: { gte: new Date(createdAt as string) } },
+            {
+              OR: [
+                { user: { username: { contains: userName as string } } },
+                { userId: Number(userId) },
+              ],
+            },
           ],
         },
         include: {
-          orderItems: true,
+          orderItems: {
+            include: {
+              product: true,
+              discount: true,
+            },
+          },
+          discount: true,
+          store: true,
+          user: true,
         },
         skip,
         take,
@@ -74,7 +86,17 @@ export class OrderController {
       const { id } = req.params;
       const order = await prisma.order.findUnique({
         where: { id: Number(id) },
-        include: { orderItems: true },
+        include: {
+          orderItems: {
+            include: {
+              product: true,
+              discount: true,
+            },
+          },
+          discount: true,
+          store: true,
+          user: true,
+        },
       });
 
       if (!order) {
@@ -104,7 +126,7 @@ export class OrderController {
           totalDiscount,
           storeId,
           orderItems: {
-            connect: orderItemIds.map((id: number) => ({ id })),
+            set: orderItemIds.map((id: number) => ({ id })),
           },
         },
       });

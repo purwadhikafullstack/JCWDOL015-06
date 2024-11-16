@@ -1,13 +1,24 @@
 import { Router } from 'express';
 import { CartController } from '@/controllers/cart.controller';
+export class CartRouter {
+  private router: Router;
+  private cartController: CartController;
 
-const router = Router();
-const cartController = new CartController();
+  constructor() {
+    this.cartController = new CartController();
+    this.router = Router();
+    this.initializeRoutes();
+  }
 
-router.post('/carts', cartController.createCart);
-router.get('/carts', cartController.getCarts);
-router.get('/carts/:id', cartController.getCartById);
-router.put('/carts/:id', cartController.updateCart);
-router.delete('/carts/:id', cartController.deleteCart);
+  private initializeRoutes(): void {
+    this.router.post('/', this.cartController.createCart);
+    this.router.get('/', this.cartController.getCarts);
+    this.router.get('/:id', this.cartController.getCartById);
+    this.router.put('/:id', this.cartController.updateCart);
+    this.router.delete('/:id', this.cartController.deleteCart);
+  }
 
-export default router;
+  getRouter(): Router {
+    return this.router;
+  }
+}

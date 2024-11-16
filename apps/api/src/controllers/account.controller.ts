@@ -9,9 +9,8 @@ import { transporter } from '@/helpers/nodemailer';
 
 export class AccountController {
   // fetching user's data
-  async getUsersData(req: Request, res: Response) {
+  async getUsersData(_req: Request, res: Response) {
     try {
-
       const accounts = await prisma.user.findMany();
 
       res.status(200).send({
@@ -54,7 +53,7 @@ export class AccountController {
       const { email } = req.body;
 
       const findAcc = await prisma.user.findUnique({
-        where: { email: email },
+        where: { email: email as string, username: email as string },
       });
 
       if (findAcc) {
@@ -80,7 +79,7 @@ export class AccountController {
         });
 
         await prisma.user.update({
-          where: { email: email },
+          where: { email: email, username: email },
           data: {
             isVerify: 1,
           },
@@ -109,7 +108,7 @@ export class AccountController {
 
       // Checking if email has been used
       const existingAuthor = await prisma.user.findUnique({
-        where: { email: email },
+        where: { email: email, username: email },
       });
 
       if (existingAuthor) throw 'email has been used !';
@@ -120,7 +119,17 @@ export class AccountController {
 
       // Upload user registration to database
       const account = await prisma.user.create({
-        data: { firstName, lastName, email, password: hashPassword, mobileNum, role: 'USER', isVerify:1, storeId:1  },
+        data: {
+          firstName,
+          lastName,
+          email,
+          username: email,
+          password: hashPassword,
+          mobileNum,
+          role: 'USER',
+          isVerify: 1,
+          storeId: 1,
+        },
       });
 
       // Setting login token
@@ -165,10 +174,10 @@ export class AccountController {
   // Reguler login process
   async loginAccount(req: Request, res: Response) {
     try {
-      const { email, password } = req.body;
+      const { email, password, username } = req.body;
 
       const existingUser = await prisma.user.findUnique({
-        where: { email: email },
+        where: { email: email, username: username },
       });
 
       if (!existingUser) throw 'Account not found!';

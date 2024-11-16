@@ -49,7 +49,15 @@ export class CartController {
           ],
         },
         include: {
-          cartItems: true,
+          cartItems: {
+            include: {
+              product: true,
+              discount: true,
+            },
+          },
+          discount: true,
+          store: true,
+          user: true,
         },
         skip,
         take,
@@ -69,7 +77,17 @@ export class CartController {
       const { id } = req.params;
       const cart = await prisma.cart.findUnique({
         where: { id: Number(id) },
-        include: { cartItems: true },
+        include: {
+          cartItems: {
+            include: {
+              product: true,
+              discount: true,
+            },
+          },
+          discount: true,
+          store: true,
+          user: true,
+        },
       });
 
       if (!cart) {
@@ -99,8 +117,19 @@ export class CartController {
           totalDiscount,
           storeId,
           cartItems: {
-            connect: cartItemIds.map((id: number) => ({ id })),
+            set: cartItemIds.map((id: number) => ({ id })),
           },
+        },
+        include: {
+          cartItems: {
+            include: {
+              product: true,
+              discount: true,
+            },
+          },
+          discount: true,
+          store: true,
+          user: true,
         },
       });
 

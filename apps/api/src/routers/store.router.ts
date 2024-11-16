@@ -1,13 +1,24 @@
 import { Router } from 'express';
 import { StoreController } from '@/controllers/store.controller';
+export class StoreRouter {
+  private router: Router;
+  private storeController: StoreController;
 
-const router = Router();
-const storeController = new StoreController();
+  constructor() {
+    this.storeController = new StoreController();
+    this.router = Router();
+    this.initializeRoutes();
+  }
 
-router.post('/stores', storeController.createStore);
-router.get('/stores', storeController.getStores);
-router.get('/stores/:id', storeController.getStoreById);
-router.put('/stores/:id', storeController.updateStore);
-router.delete('/stores/:id', storeController.deleteStore);
+  private initializeRoutes(): void {
+    this.router.post('/', this.storeController.createStore);
+    this.router.get('/', this.storeController.getStores);
+    this.router.get('/:id', this.storeController.getStoreById);
+    this.router.put('/:id', this.storeController.updateStore);
+    this.router.delete('/:id', this.storeController.deleteStore);
+  }
 
-export default router;
+  getRouter(): Router {
+    return this.router;
+  }
+}

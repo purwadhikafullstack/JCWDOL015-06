@@ -1,3 +1,320 @@
+export enum AppliedDiscountType {
+  ON_PRODUCT = 'ON_PRODUCT',
+  MINIMUM_PURCHASE = 'MINIMUM_PURCHASE',
+  BUY_ONE_GET_ONE = 'BUY_ONE_GET_ONE'
+}
+
+export enum DiscountType {
+  PERCENTAGE = 'PERCENTAGE',
+  AMOUNT = 'AMOUNT'
+}
+
+export enum Role {
+  SUPER_ADMIN,
+  STORE_ADMIN,
+  USER
+}
+
+export interface Category {
+  id: number;
+  name?: string;
+}
+
+export interface Store {
+  id: number;
+  name: string;
+  address: string;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  password?: string;
+  avatar?: string;
+  isVerify?: number;
+  mobileNum?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: Role;
+  storeId?: number;
+  store?: Store;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Product {
+  id?: number;
+  price?: number;
+  imageUrls?: string;
+  categoryId?: number;
+  productName?: string;
+  desc?: string;
+  weight?: number;
+  category?: Category;
+}
+
+export interface Discount {
+  id: number;
+  name: string;
+  discountType: DiscountType;
+  discountAmount?: number | null;
+  discountPercentage?: number | null;
+  appliedDiscountType: AppliedDiscountType;
+  minimumPurchaseAmount?: number;
+  products?: Product[];
+}
+
+export interface Stock {
+  id: number;
+  productId: number;
+  storeId: number;
+  store: Store;
+  product: Product;
+  quantity: number;
+}
+
+export interface StockHistory {
+  id: number;
+  userId: number;
+  user: User;
+  product: Product;
+  productId: number;
+  quantity: number;
+  totalQuantity: number;
+  storeId: number;
+  store: Store;
+  createdAt: Date;
+}
+
+export const dummyProducts = [
+  {
+    id: 1,
+    productName: 'Daging Sapi Rendang',
+    price: 65000,
+    categoryId: 4,
+    imageUrls: '',
+    desc: 'Description for product 1Description for product 1Description for product 1Description for product 1Description for product 1Description for product 1',
+    weight: 199
+  },
+  {
+    id: 2,
+    productName: 'Kentang frozen',
+    price: 99000,
+    categoryId: 2,
+    imageUrls: '',
+    desc: 'Description for product 2Description for product 2Description for product 2Description for product 2Description for product 2Description for product 2',
+    weight: 235
+  },
+  {
+    id: 3,
+    productName: 'Kecap Manis Bango',
+    price: 19000,
+    categoryId: 10,
+    imageUrls: '',
+    desc: 'Description for product 3Description for product 3Description for product 3Description for product 3Description for product 3Description for product 3',
+    weight: 339
+  },
+  {
+    id: 4,
+    productName: 'Product 4',
+    price: 42000,
+    categoryId: 20,
+    imageUrls: '',
+    desc: 'Description for product 4Description for product 4Description for product 4Description for product 4Description for product 4Description for product 4',
+    weight: 178
+  },
+  {
+    id: 5,
+    productName: 'Product 5',
+    price: 33000,
+    categoryId: 19,
+    imageUrls: '',
+    desc: 'Description for product 5Description for product 5Description for product 5Description for product 5Description for product 5Description for product 5',
+    weight: 403
+  },
+  {
+    id: 6,
+    productName: 'Product 6',
+    price: 30000,
+    categoryId: 17,
+    imageUrls: '',
+    desc: 'Description for product 6Description for product 6Description for product 6Description for product 6Description for product 6Description for product 6',
+    weight: 301
+  },
+  {
+    id: 7,
+    productName: 'Product 7',
+    price: 77000,
+    categoryId: 20,
+    imageUrls: '',
+    desc: 'Description for product 7Description for product 7Description for product 7Description for product 7Description for product 7Description for product 7',
+    weight: 531
+  },
+  {
+    id: 8,
+    productName: 'Product 8',
+    price: 7000,
+    categoryId: 6,
+    imageUrls: '',
+    desc: 'Description for product 8Description for product 8Description for product 8Description for product 8Description for product 8Description for product 8',
+    weight: 179
+  },
+  {
+    id: 9,
+    productName: 'Product 9',
+    price: 77000,
+    categoryId: 12,
+    imageUrls: '',
+    desc: 'Description for product 9Description for product 9Description for product 9Description for product 9Description for product 9Description for product 9',
+    weight: 331
+  },
+  {
+    id: 10,
+    productName: 'Product 10',
+    price: 53000,
+    categoryId: 12,
+    imageUrls: '',
+    desc: 'Description for product 10Description for product 10Description for product 10Description for product 10Description for product 10Description for prod',
+    weight: 524
+  },
+  {
+    id: 11,
+    productName: 'Product 11',
+    price: 66000,
+    categoryId: 18,
+    imageUrls: '',
+    desc: 'Description for product 11Description for product 11Description for product 11Description for product 11Description for product 11Description for prod',
+    weight: 522
+  },
+  {
+    id: 12,
+    productName: 'Telur',
+    price: 17000,
+    categoryId: 10,
+    imageUrls: '',
+    desc: 'Description for product 12Description for product 12Description for product 12Description for product 12Description for product 12Description for prod',
+    weight: 223
+  },
+  {
+    id: 13,
+    productName: 'Product 13',
+    price: 73000,
+    categoryId: 5,
+    imageUrls: '',
+    desc: 'Description for product 13Description for product 13Description for product 13Description for product 13Description for product 13Description for prod',
+    weight: 241
+  },
+  {
+    id: 14,
+    productName: 'Product 14',
+    price: 53000,
+    categoryId: 16,
+    imageUrls: '',
+    desc: 'Description for product 14Description for product 14Description for product 14Description for product 14Description for product 14Description for prod',
+    weight: 479
+  },
+  {
+    id: 15,
+    productName: 'Product 15',
+    price: 50000,
+    categoryId: 7,
+    imageUrls: '',
+    desc: 'Description for product 15Description for product 15Description for product 15Description for product 15Description for product 15Description for prod',
+    weight: 172
+  },
+  {
+    id: 16,
+    productName: 'Product 16',
+    price: 63000,
+    categoryId: 11,
+    imageUrls: '',
+    desc: 'Description for product 16Description for product 16Description for product 16Description for product 16Description for product 16Description for prod',
+    weight: 382
+  },
+  {
+    id: 17,
+    productName: 'Product 17',
+    price: 96000,
+    categoryId: 17,
+    imageUrls: '',
+    desc: 'Description for product 17Description for product 17Description for product 17Description for product 17Description for product 17Description for prod',
+    weight: 206
+  },
+  {
+    id: 18,
+    productName: 'Product 18',
+    price: 81000,
+    categoryId: 20,
+    imageUrls: '',
+    desc: 'Description for product 18Description for product 18Description for product 18Description for product 18Description for product 18Description for prod',
+    weight: 268
+  },
+  {
+    id: 19,
+    productName: 'Product 19',
+    price: 97000,
+    categoryId: 19,
+    imageUrls: '',
+    desc: 'Description for product 19Description for product 19Description for product 19Description for product 19Description for product 19Description for prod',
+    weight: 125
+  },
+  {
+    id: 20,
+    productName: 'Product 20',
+    price: 51000,
+    categoryId: 13,
+    imageUrls: '',
+    desc: 'Description for product 20Description for product 20Description for product 20Description for product 20Description for product 20Description for prod',
+    weight: 479
+  },
+  {
+    id: 21,
+    productName: 'Product 21',
+    price: 27000,
+    categoryId: 4,
+    imageUrls: '',
+    desc: 'Description for product 21Description for product 21Description for product 21Description for product 21Description for product 21Description for prod',
+    weight: 201
+  },
+  {
+    id: 22,
+    productName: 'Product 22',
+    price: 81000,
+    categoryId: 9,
+    imageUrls: '',
+    desc: 'Description for product 22Description for product 22Description for product 22Description for product 22Description for product 22Description for prod',
+    weight: 532
+  },
+  {
+    id: 23,
+    productName: 'Product 23',
+    price: 49000,
+    categoryId: 9,
+    imageUrls: '',
+    desc: 'Description for product 23Description for product 23Description for product 23Description for product 23Description for product 23Description for prod',
+    weight: 560
+  },
+  {
+    id: 24,
+    productName: 'Product 24',
+    price: 34000,
+    categoryId: 14,
+    imageUrls: '',
+    desc: 'Description for product 24Description for product 24Description for product 24Description for product 24Description for product 24Description for prod',
+    weight: 106
+  },
+  {
+    id: 25,
+    productName: 'Product 25',
+    price: 29000,
+    categoryId: 7,
+    imageUrls: '',
+    desc: 'Description for product 25Description for product 25Description for product 25Description for product 25Description for product 25Description for prod',
+    weight: 436
+  }
+] as Product[];
+
 export const dummyCategories = [
   { id: 1, name: 'Fruits' },
   { id: 2, name: 'Vegetables' },
@@ -21,781 +338,103 @@ export const dummyCategories = [
   { id: 20, name: 'Health Products' }
 ] as Category[];
 
-export interface Category {
-  id: number;
-  name?: string;
-}
-
-export const dummyProducts = [
-  {
-    id: 1,
-    productName: 'Daging Sapi Rendang',
-    price: 65000,
-    category: {
-      id: 20
-    },
-    imageUrls: [
-      'https://i2.wp.com/juragansapi.com/wp-content/uploads/2020/05/promo-daging-sapisegar-lebaran-2020.jpg?fit=800%2C500&ssl=1'
-    ],
-    desc: 'Description for product 1Description for product 1Description for product 1Description for product 1Description for product 1Description for product 1',
-    weight: 199,
-    stock: 42
-  },
-  {
-    id: 2,
-    productName: 'Kentang frozen',
-    price: 99000,
-    category: {
-      id: 16
-    },
-    imageUrls: [
-      'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//catalog-image/116/MTA-96749279/br-m036969-08463_-promo-kentang-goreng-fiesta-french-fries-shoestring-1-kg-500-gr_full01.jpg'
-    ],
-    desc: 'Description for product 2Description for product 2Description for product 2Description for product 2Description for product 2Description for product 2',
-    weight: 235,
-    stock: 8
-  },
-  {
-    id: 3,
-    productName: 'Kecap Manis Bango',
-    price: 19000,
-    category: {
-      id: 19
-    },
-    imageUrls: ['https://assets.klikindomaret.com/share/HERO_BNR_BANGO-17-MEI.jpg'],
-    desc: 'Description for product 3Description for product 3Description for product 3Description for product 3Description for product 3Description for product 3',
-    weight: 339,
-    stock: 39
-  },
-  {
-    id: 4,
-    productName: 'Product 4',
-    price: 42000,
-    category: {
-      id: 20
-    },
-    imageUrls: [''],
-    desc: 'Description for product 4Description for product 4Description for product 4Description for product 4Description for product 4Description for product 4',
-    weight: 178,
-    stock: 38
-  },
-  {
-    id: 5,
-    productName: 'Product 5',
-    price: 33000,
-    category: {
-      id: 19
-    },
-    imageUrls: [''],
-    desc: 'Description for product 5Description for product 5Description for product 5Description for product 5Description for product 5Description for product 5',
-    weight: 403,
-    stock: 10
-  },
-  {
-    id: 6,
-    productName: 'Product 6',
-    price: 30000,
-    category: {
-      id: 17
-    },
-    imageUrls: [''],
-    desc: 'Description for product 6Description for product 6Description for product 6Description for product 6Description for product 6Description for product 6',
-    weight: 301,
-    stock: 94
-  },
-  {
-    id: 7,
-    productName: 'Product 7',
-    price: 77000,
-    category: {
-      id: 20
-    },
-    imageUrls: [''],
-    desc: 'Description for product 7Description for product 7Description for product 7Description for product 7Description for product 7Description for product 7',
-    weight: 531,
-    stock: 72
-  },
-  {
-    id: 8,
-    productName: 'Product 8',
-    price: 7000,
-    category: {
-      id: 6
-    },
-    imageUrls: [''],
-    desc: 'Description for product 8Description for product 8Description for product 8Description for product 8Description for product 8Description for product 8',
-    weight: 179,
-    stock: 72
-  },
-  {
-    id: 9,
-    productName: 'Product 9',
-    price: 77000,
-    category: {
-      id: 12
-    },
-    imageUrls: [''],
-    desc: 'Description for product 9Description for product 9Description for product 9Description for product 9Description for product 9Description for product 9',
-    weight: 331,
-    stock: 21
-  },
-  {
-    id: 10,
-    productName: 'Product 10',
-    price: 53000,
-    category: {
-      id: 12
-    },
-    imageUrls: [''],
-    desc: 'Description for product 10Description for product 10Description for product 10Description for product 10Description for product 10Description for prod',
-    weight: 524,
-    stock: 67
-  },
-  {
-    id: 11,
-    productName: 'Product 11',
-    price: 66000,
-    category: {
-      id: 18
-    },
-    imageUrls: [''],
-    desc: 'Description for product 11Description for product 11Description for product 11Description for product 11Description for product 11Description for prod',
-    weight: 522,
-    stock: 2
-  },
-  {
-    id: 12,
-    productName: 'Telur',
-    price: 17000,
-    category: {
-      id: 10
-    },
-    imageUrls: [''],
-    desc: 'Description for product 12Description for product 12Description for product 12Description for product 12Description for product 12Description for prod',
-    weight: 223,
-    stock: 31
-  },
-  {
-    id: 13,
-    productName: 'Product 13',
-    price: 73000,
-    category: {
-      id: 5
-    },
-    imageUrls: [''],
-    desc: 'Description for product 13Description for product 13Description for product 13Description for product 13Description for product 13Description for prod',
-    weight: 241,
-    stock: 45
-  },
-  {
-    id: 14,
-    productName: 'Product 14',
-    price: 53000,
-    category: {
-      id: 16
-    },
-    imageUrls: [''],
-    desc: 'Description for product 14Description for product 14Description for product 14Description for product 14Description for product 14Description for prod',
-    weight: 479,
-    stock: 100
-  },
-  {
-    id: 15,
-    productName: 'Product 15',
-    price: 50000,
-    category: {
-      id: 7
-    },
-    imageUrls: [''],
-    desc: 'Description for product 15Description for product 15Description for product 15Description for product 15Description for product 15Description for prod',
-    weight: 172,
-    stock: 88
-  },
-  {
-    id: 16,
-    productName: 'Product 16',
-    price: 63000,
-    category: {
-      id: 11
-    },
-    imageUrls: [''],
-    desc: 'Description for product 16Description for product 16Description for product 16Description for product 16Description for product 16Description for prod',
-    weight: 382,
-    stock: 31
-  },
-  {
-    id: 17,
-    productName: 'Product 17',
-    price: 96000,
-    category: {
-      id: 17
-    },
-    imageUrls: [''],
-    desc: 'Description for product 17Description for product 17Description for product 17Description for product 17Description for product 17Description for prod',
-    weight: 206,
-    stock: 24
-  },
-  {
-    id: 18,
-    productName: 'Product 18',
-    price: 81000,
-    category: {
-      id: 20
-    },
-    imageUrls: [''],
-    desc: 'Description for product 18Description for product 18Description for product 18Description for product 18Description for product 18Description for prod',
-    weight: 268,
-    stock: 12
-  },
-  {
-    id: 19,
-    productName: 'Product 19',
-    price: 97000,
-    category: {
-      id: 19
-    },
-    imageUrls: [''],
-    desc: 'Description for product 19Description for product 19Description for product 19Description for product 19Description for product 19Description for prod',
-    weight: 125,
-    stock: 19
-  },
-  {
-    id: 20,
-    productName: 'Product 20',
-    price: 51000,
-    category: {
-      id: 13
-    },
-    imageUrls: [''],
-    desc: 'Description for product 20Description for product 20Description for product 20Description for product 20Description for product 20Description for prod',
-    weight: 479,
-    stock: 40
-  },
-  {
-    id: 21,
-    productName: 'Product 21',
-    price: 27000,
-    category: {
-      id: 4
-    },
-    imageUrls: [''],
-    desc: 'Description for product 21Description for product 21Description for product 21Description for product 21Description for product 21Description for prod',
-    weight: 201,
-    stock: 10
-  },
-  {
-    id: 22,
-    productName: 'Product 22',
-    price: 81000,
-    category: {
-      id: 9
-    },
-    imageUrls: [''],
-    desc: 'Description for product 22Description for product 22Description for product 22Description for product 22Description for product 22Description for prod',
-    weight: 532,
-    stock: 26
-  },
-  {
-    id: 23,
-    productName: 'Product 23',
-    price: 49000,
-    category: {
-      id: 9
-    },
-    imageUrls: [''],
-    desc: 'Description for product 23Description for product 23Description for product 23Description for product 23Description for product 23Description for prod',
-    weight: 560,
-    stock: 19
-  },
-  {
-    id: 24,
-    productName: 'Product 24',
-    price: 34000,
-    category: {
-      id: 14
-    },
-    imageUrls: [''],
-    desc: 'Description for product 24Description for product 24Description for product 24Description for product 24Description for product 24Description for prod',
-    weight: 106,
-    stock: 22
-  },
-  {
-    id: 25,
-    productName: 'Product 25',
-    price: 29000,
-    category: {
-      id: 7
-    },
-    imageUrls: [''],
-    desc: 'Description for product 25Description for product 25Description for product 25Description for product 25Description for product 25Description for prod',
-    weight: 436,
-    stock: 71
-  },
-  {
-    id: 26,
-    productName: 'Product 26',
-    price: 51000,
-    category: {
-      id: 11
-    },
-    imageUrls: [''],
-    desc: 'Description for product 26Description for product 26Description for product 26Description for product 26Description for product 26Description for prod',
-    weight: 489,
-    stock: 49
-  },
-  {
-    id: 27,
-    productName: 'Product 27',
-    price: 76000,
-    category: {
-      id: 18
-    },
-    imageUrls: [''],
-    desc: 'Description for product 27Description for product 27Description for product 27Description for product 27Description for product 27Description for prod',
-    weight: 177,
-    stock: 58
-  },
-  {
-    id: 28,
-    productName: 'Product 28',
-    price: 35000,
-    category: {
-      id: 3
-    },
-    imageUrls: [''],
-    desc: 'Description for product 28Description for product 28Description for product 28Description for product 28Description for product 28Description for prod',
-    weight: 157,
-    stock: 78
-  },
-  {
-    id: 29,
-    productName: 'Product 29',
-    price: 26000,
-    category: {
-      id: 11
-    },
-    imageUrls: [''],
-    desc: 'Description for product 29Description for product 29Description for product 29Description for product 29Description for product 29Description for prod',
-    weight: 525,
-    stock: 90
-  },
-  {
-    id: 30,
-    productName: 'Product 30',
-    price: 38000,
-    category: {
-      id: 6
-    },
-    imageUrls: [''],
-    desc: 'Description for product 30Description for product 30Description for product 30Description for product 30Description for product 30Description for prod',
-    weight: 494,
-    stock: 61
-  },
-  {
-    id: 31,
-    productName: 'Product 31',
-    price: 36000,
-    category: {
-      id: 5
-    },
-    imageUrls: [''],
-    desc: 'Description for product 31Description for product 31Description for product 31Description for product 31Description for product 31Description for prod',
-    weight: 160,
-    stock: 11
-  },
-  {
-    id: 32,
-    productName: 'Product 32',
-    price: 92000,
-    category: {
-      id: 6
-    },
-    imageUrls: [''],
-    desc: 'Description for product 32Description for product 32Description for product 32Description for product 32Description for product 32Description for prod',
-    weight: 425,
-    stock: 87
-  },
-  {
-    id: 33,
-    productName: 'Product 33',
-    price: 6000,
-    category: {
-      id: 1
-    },
-    imageUrls: [''],
-    desc: 'Description for product 33Description for product 33Description for product 33Description for product 33Description for product 33Description for prod',
-    weight: 262,
-    stock: 57
-  },
-  {
-    id: 34,
-    productName: 'Product 34',
-    price: 87000,
-    category: {
-      id: 7
-    },
-    imageUrls: [''],
-    desc: 'Description for product 34Description for product 34Description for product 34Description for product 34Description for product 34Description for prod',
-    weight: 254,
-    stock: 2
-  },
-  {
-    id: 35,
-    productName: 'Product 35',
-    price: 54000,
-    category: {
-      id: 17
-    },
-    imageUrls: [''],
-    desc: 'Description for product 35Description for product 35Description for product 35Description for product 35Description for product 35Description for prod',
-    weight: 485,
-    stock: 36
-  },
-  {
-    id: 36,
-    productName: 'Product 36',
-    price: 74000,
-    category: {
-      id: 12
-    },
-    imageUrls: [''],
-    desc: 'Description for product 36Description for product 36Description for product 36Description for product 36Description for product 36Description for prod',
-    weight: 229,
-    stock: 93
-  },
-  {
-    id: 37,
-    productName: 'Product 37',
-    price: 92000,
-    category: {
-      id: 16
-    },
-    imageUrls: [''],
-    desc: 'Description for product 37Description for product 37Description for product 37Description for product 37Description for product 37Description for prod',
-    weight: 168,
-    stock: 2
-  },
-  {
-    id: 38,
-    productName: 'Product 38',
-    price: 35000,
-    category: {
-      id: 6
-    },
-    imageUrls: [''],
-    desc: 'Description for product 38Description for product 38Description for product 38Description for product 38Description for product 38Description for prod',
-    weight: 576,
-    stock: 78
-  },
-  {
-    id: 39,
-    productName: 'Product 39',
-    price: 28000,
-    category: {
-      id: 4
-    },
-    imageUrls: [''],
-    desc: 'Description for product 39Description for product 39Description for product 39Description for product 39Description for product 39Description for prod',
-    weight: 203,
-    stock: 22
-  },
-  {
-    id: 40,
-    productName: 'Product 40',
-    price: 31000,
-    category: {
-      id: 11
-    },
-    imageUrls: [''],
-    desc: 'Description for product 40Description for product 40Description for product 40Description for product 40Description for product 40Description for prod',
-    weight: 230,
-    stock: 97
-  },
-  {
-    id: 41,
-    productName: 'Product 41',
-    price: 26000,
-    category: {
-      id: 8
-    },
-    imageUrls: [''],
-    desc: 'Description for product 41Description for product 41Description for product 41Description for product 41Description for product 41Description for prod',
-    weight: 414,
-    stock: 91
-  },
-  {
-    id: 42,
-    productName: 'Product 42',
-    price: 68000,
-    category: {
-      id: 18
-    },
-    imageUrls: [''],
-    desc: 'Description for product 42Description for product 42Description for product 42Description for product 42Description for product 42Description for prod',
-    weight: 368,
-    stock: 22
-  },
-  {
-    id: 43,
-    productName: 'Product 43',
-    price: 70000,
-    category: {
-      id: 9
-    },
-    imageUrls: [''],
-    desc: 'Description for product 43Description for product 43Description for product 43Description for product 43Description for product 43Description for prod',
-    weight: 404,
-    stock: 30
-  },
-  {
-    id: 44,
-    productName: 'Product 44',
-    price: 48000,
-    category: {
-      id: 9
-    },
-    imageUrls: [''],
-    desc: 'Description for product 44Description for product 44Description for product 44Description for product 44Description for product 44Description for prod',
-    weight: 317,
-    stock: 5
-  },
-  {
-    id: 45,
-    productName: 'Product 45',
-    price: 44000,
-    category: {
-      id: 14
-    },
-    imageUrls: [''],
-    desc: 'Description for product 45Description for product 45Description for product 45Description for product 45Description for product 45Description for prod',
-    weight: 288,
-    stock: 100
-  },
-  {
-    id: 46,
-    productName: 'Product 46',
-    price: 22000,
-    category: {
-      id: 15
-    },
-    imageUrls: [''],
-    desc: 'Description for product 46Description for product 46Description for product 46Description for product 46Description for product 46Description for prod',
-    weight: 564,
-    stock: 20
-  },
-  {
-    id: 47,
-    productName: 'Product 47',
-    price: 31000,
-    category: {
-      id: 17
-    },
-    imageUrls: [''],
-    desc: 'Description for product 47Description for product 47Description for product 47Description for product 47Description for product 47Description for prod',
-    weight: 246,
-    stock: 21
-  },
-  {
-    id: 48,
-    productName: 'Product 48',
-    price: 15000,
-    category: {
-      id: 17
-    },
-    imageUrls: [''],
-    desc: 'Description for product 48Description for product 48Description for product 48Description for product 48Description for product 48Description for prod',
-    weight: 202,
-    stock: 67
-  },
-  {
-    id: 49,
-    productName: 'Product 49',
-    price: 62000,
-    category: {
-      id: 12
-    },
-    imageUrls: [''],
-    desc: 'Description for product 49Description for product 49Description for product 49Description for product 49Description for product 49Description for prod',
-    weight: 286,
-    stock: 4
-  },
-  {
-    id: 50,
-    productName: 'Product 50',
-    price: 20000,
-    category: {
-      id: 9
-    },
-    imageUrls: [''],
-    desc: 'Description for product 50Description for product 50Description for product 50Description for product 50Description for product 50Description for prod',
-    weight: 435,
-    stock: 1
-  }
-];
-
-interface DummyData {
-  sales: { [key: string]: number[] };
-}
-
-export const dummyData: DummyData = {
-  sales: {
-    All: [14, 22, 23, 10, 3, 7],
-    'Store Jakarta': [12, 19, 3, 5, 2, 3],
-    'Store Bandung': [2, 3, 20, 5, 1, 4]
-  }
-};
-
-export interface Store {
-  id: number;
-  name: string;
-}
-
 export const dummyStores = [
-  { id: 0, name: 'Store Jakarta' },
-  { id: 1, name: 'Store Bandung' }
-];
-
-export interface Product {
-  id?: number;
-  price?: number;
-  imageUrls?: string[];
-  categoryId?: number;
-  productName?: string;
-  desc?: string;
-  weight?: number;
-  category?: Category;
-}
-
-export interface Discount {
-  id: number;
-  name: string;
-  discountType: DiscountType;
-  discountAmount?: number | null;
-  discountPercentage?: number | null;
-  appliedDiscountType: AppliedDiscountType;
-  minimumPurchaseAmount?: number;
-  products?: Product[];
-}
-
-enum AppliedDiscountType {
-  ON_PRODUCT = 'ON_PRODUCT',
-  MINIMUM_PURCHASE = 'MINIMUM_PURCHASE',
-  BUY_ONE_GET_ONE = 'BUY_ONE_GET_ONE'
-}
-
-enum DiscountType {
-  PERCENTAGE = 'PERCENTAGE',
-  AMOUNT = 'AMOUNT'
-}
+  { id: 0, name: 'Store Jakarta', address: 'Jl. Jakarta No. 1' },
+  { id: 1, name: 'Store Bandung', address: 'Jl. Bandung No. 2' }
+] as Store[];
 
 export const dummyDiscounts = [
   {
     id: 1,
     name: 'Summer Sale',
-    discountType: DiscountType.PERCENTAGE,
+    discountType: 'PERCENTAGE',
     discountAmount: null,
     discountPercentage: 20,
-    appliedDiscountType: AppliedDiscountType.ON_PRODUCT
+    appliedDiscountType: 'ON_PRODUCT'
   },
   {
     id: 2,
     name: 'Winter Sale',
-    discountType: DiscountType.AMOUNT,
+    discountType: 'AMOUNT',
     discountAmount: 50000,
     discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.MINIMUM_PURCHASE,
+    appliedDiscountType: 'MINIMUM_PURCHASE',
     minimumPurchaseAmount: 100000
   },
   {
     id: 3,
     name: 'Black Friday',
-    discountType: DiscountType.PERCENTAGE,
+    discountType: 'PERCENTAGE',
     discountAmount: null,
     discountPercentage: 30,
-    appliedDiscountType: AppliedDiscountType.BUY_ONE_GET_ONE
+    appliedDiscountType: 'BUY_ONE_GET_ONE'
   },
   {
     id: 4,
     name: 'Cyber Monday',
-    discountType: DiscountType.AMOUNT,
+    discountType: 'AMOUNT',
     discountAmount: 100000,
     discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.ON_PRODUCT,
+    appliedDiscountType: 'ON_PRODUCT',
     products: dummyProducts.slice(1, 5)
   },
   {
     id: 5,
     name: 'New Year Sale',
-    discountType: DiscountType.AMOUNT,
+    discountType: 'AMOUNT',
     discountAmount: 25000,
     discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.MINIMUM_PURCHASE,
+    appliedDiscountType: 'MINIMUM_PURCHASE',
     minimumPurchaseAmount: 100000
   },
   {
     id: 6,
     name: "Valentine's Day",
-    discountType: DiscountType.PERCENTAGE,
+    discountType: 'PERCENTAGE',
     discountAmount: null,
     discountPercentage: 75,
-    appliedDiscountType: AppliedDiscountType.BUY_ONE_GET_ONE,
+    appliedDiscountType: 'BUY_ONE_GET_ONE',
     products: dummyProducts.slice(1, 6)
   },
   {
     id: 7,
     name: 'Easter Sale',
-    discountType: DiscountType.PERCENTAGE,
+    discountType: 'PERCENTAGE',
     discountAmount: null,
     discountPercentage: 15,
-    appliedDiscountType: AppliedDiscountType.ON_PRODUCT,
+    appliedDiscountType: 'ON_PRODUCT',
     products: dummyProducts.slice(1, 3)
   },
   {
     id: 8,
     name: 'Halloween Sale',
-    discountType: DiscountType.AMOUNT,
+    discountType: 'AMOUNT',
     discountAmount: 60000,
     discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.MINIMUM_PURCHASE,
+    appliedDiscountType: 'MINIMUM_PURCHASE',
     minimumPurchaseAmount: 100000
   },
   {
     id: 9,
     name: 'Thanksgiving Sale',
-    discountType: DiscountType.PERCENTAGE,
+    discountType: 'PERCENTAGE',
     discountAmount: null,
     discountPercentage: 10,
-    appliedDiscountType: AppliedDiscountType.BUY_ONE_GET_ONE,
+    appliedDiscountType: 'BUY_ONE_GET_ONE',
     products: dummyProducts.slice(2, 8)
   },
   {
     id: 10,
     name: 'Christmas Sale',
-    discountType: DiscountType.AMOUNT,
+    discountType: 'AMOUNT',
     discountAmount: 150000,
     discountPercentage: null,
-    appliedDiscountType: AppliedDiscountType.ON_PRODUCT,
+    appliedDiscountType: 'ON_PRODUCT',
     products: dummyProducts.slice(1, 2)
   }
 ] as Discount[];
 
-export enum Role {
-  SUPER_ADMIN,
-  STORE_ADMIN,
-  USER
-}
-
-export interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: Role;
-  storeId?: number;
-  store?: Store;
-}
-
-export const dummyStoreAdmins: User[] = [
+export const dummyStoreAdmins = [
   {
     id: 1,
     firstName: 'Eren',
@@ -841,16 +480,53 @@ export const dummyStoreAdmins: User[] = [
     storeId: dummyStores[0].id,
     store: dummyStores[0]
   }
-];
+] as User[];
 
-export interface Stock {
-  id: number;
-  productId: number;
-  storeId: number;
-  store: Store;
-  product: Product;
-  quantity: number;
-}
+export const dummyUsers = [
+  {
+    id: 1,
+    username: 'eren.yeager',
+    firstName: 'Eren',
+    lastName: 'Yeager',
+    email: 'superadmin@example.com',
+    role: 'SUPER_ADMIN',
+    password: '12345',
+    avatar: '',
+    isVerify: 1,
+    mobileNum: 9232392832,
+    createdAt: '2024-11-16 11:23:36.335341',
+    updatedAt: '2024-11-16 11:23:36.335341'
+  },
+  {
+    id: 2,
+    username: 'mikasa.ackerman',
+    firstName: 'Mikasa',
+    lastName: 'Ackerman',
+    email: 'store1admin@example.com',
+    role: 'STORE_ADMIN',
+    storeId: 1,
+    password: '12345',
+    avatar: '',
+    isVerify: 1,
+    mobileNum: 9232392832,
+    createdAt: '2024-11-16 11:23:36.335341',
+    updatedAt: '2024-11-16 11:23:36.335341'
+  },
+  {
+    id: 3,
+    username: 'armin.arlert',
+    firstName: 'Armin',
+    lastName: 'Arlert',
+    email: 'user1@example.com',
+    role: 'USER',
+    password: '12345',
+    avatar: '',
+    isVerify: 1,
+    mobileNum: 9232392832,
+    createdAt: '2024-11-16 11:23:36.335341',
+    updatedAt: '2024-11-16 11:23:36.335341'
+  }
+];
 
 export const dummyStocks = [
   {
@@ -893,22 +569,9 @@ export const dummyStocks = [
     store: dummyStores[0],
     quantity: 30
   }
-];
+] as Stock[];
 
-export interface StockHistory {
-  id: number;
-  userId: number;
-  user: User;
-  product: Product;
-  productId: number;
-  quantity: number;
-  totalQuantity: number;
-  storeId: number;
-  store: Store;
-  createdAt: Date;
-}
-
-export const dummyStockHistories: StockHistory[] = [
+export const dummyStockHistories = [
   {
     id: 1,
     userId: dummyStoreAdmins[0].id,
@@ -941,6 +604,7 @@ export const dummyStockHistories: StockHistory[] = [
     product: dummyProducts[1],
     quantity: 5,
     totalQuantity: 5,
+    quantityChanged: 5,
     storeId: dummyStores[1].id,
     store: dummyStores[1],
     createdAt: new Date('2023-01-01T00:00:00Z')
@@ -1028,5 +692,412 @@ export const dummyStockHistories: StockHistory[] = [
     storeId: dummyStores[0].id,
     store: dummyStores[0],
     createdAt: new Date('2023-01-02T00:00:00Z')
+  }
+] as StockHistory[];
+
+interface DummyData {
+  sales: { [key: string]: number[] };
+}
+
+export const dummyData: DummyData = {
+  sales: {
+    All: [14, 22, 23, 10, 3, 7],
+    'Store Jakarta': [12, 19, 3, 5, 2, 3],
+    'Store Bandung': [2, 3, 20, 5, 1, 4]
+  }
+};
+
+// createdAt      DateTime @default(now())
+// userId         Int
+// quantityChanged Int
+// totalQuantity  Int
+
+const dummyStockHistory22 = [
+  {
+    id: 1,
+    productId: 1,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 20,
+    quantityChanged: 20,
+    createdAt: '2023-01-16 11:23:36.000'
+  },
+  {
+    id: 39,
+    productId: 1,
+    storeId: 1,
+    userId: 1,
+    totalQuantity: 15,
+    quantityChanged: -5,
+    createdAt: '2023-02-16 11:23:36.000'
+  },
+  {
+    id: 2,
+    productId: 2,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 10,
+    quantityChanged: 10,
+    createdAt: '2023-03-16 11:23:36.000'
+  },
+  {
+    id: 40,
+    productId: 2,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 2,
+    quantityChanged: -8,
+    createdAt: '2023-04-16 11:23:36.000'
+  },
+  {
+    id: 3,
+    productId: 2,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 34,
+    quantityChanged: 34,
+    createdAt: '2023-05-16 11:23:36.000'
+  },
+  {
+    id: 4,
+    productId: 3,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 20,
+    quantityChanged: 20,
+    createdAt: '2023-06-16 11:23:36.000'
+  },
+  {
+    id: 41,
+    productId: 3,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 12,
+    quantityChanged: -8,
+    createdAt: '2023-07-16 11:23:36.000'
+  },
+  {
+    id: 5,
+    productId: 3,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 3,
+    quantityChanged: 3,
+    createdAt: '2023-08-16 11:23:36.000'
+  },
+  {
+    id: 6,
+    productId: 4,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 300,
+    quantityChanged: 300,
+    createdAt: '2023-09-16 11:23:36.000'
+  },
+  {
+    id: 42,
+    productId: 4,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 234,
+    quantityChanged: -66,
+    createdAt: '2023-10-16 11:23:36.000'
+  },
+  {
+    id: 7,
+    productId: 5,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 5,
+    quantityChanged: 5,
+    createdAt: '2023-11-16 11:23:36.000'
+  },
+  {
+    id: 8,
+    productId: 5,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 56,
+    quantityChanged: 56,
+    createdAt: '2023-12-16 11:23:36.000'
+  },
+  {
+    id: 9,
+    productId: 6,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 234,
+    quantityChanged: 234,
+    createdAt: '2024-01-16 11:23:36.000'
+  },
+  {
+    id: 10,
+    productId: 6,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 20,
+    quantityChanged: 20,
+    createdAt: '2024-02-16 11:23:36.000'
+  },
+  {
+    id: 43,
+    productId: 6,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 12,
+    quantityChanged: -8,
+    createdAt: '2024-03-16 11:23:36.000'
+  },
+  {
+    id: 11,
+    productId: 7,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 66,
+    quantityChanged: 66,
+    createdAt: '2024-04-16 11:23:36.000'
+  },
+  {
+    id: 12,
+    productId: 8,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 45,
+    quantityChanged: 45,
+    createdAt: '2024-05-16 11:23:36.000'
+  },
+  {
+    id: 13,
+    productId: 8,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 334,
+    quantityChanged: 334,
+    createdAt: '2024-06-16 11:23:36.000'
+  },
+  {
+    id: 14,
+    productId: 9,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 45,
+    quantityChanged: 45,
+    createdAt: '2024-07-16 11:23:36.000'
+  },
+  {
+    id: 15,
+    productId: 9,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 33,
+    quantityChanged: 33,
+    createdAt: '2024-08-16 11:23:36.000'
+  },
+  {
+    id: 16,
+    productId: 10,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 33,
+    quantityChanged: 33,
+    createdAt: '2024-09-16 11:23:36.000'
+  },
+  {
+    id: 17,
+    productId: 10,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 77,
+    quantityChanged: 77,
+    createdAt: '2024-10-16 11:23:36.000'
+  },
+  {
+    id: 18,
+    productId: 11,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 23,
+    quantityChanged: 23,
+    createdAt: '2024-11-16 11:23:36.000'
+  },
+  {
+    id: 19,
+    productId: 12,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 44,
+    quantityChanged: 44,
+    createdAt: '2024-12-16 11:23:36.000'
+  },
+  {
+    id: 20,
+    productId: 13,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 55,
+    quantityChanged: 55,
+    createdAt: '2023-01-16 11:23:36.000'
+  },
+  {
+    id: 21,
+    productId: 14,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 34,
+    quantityChanged: 34,
+    createdAt: '2023-02-16 11:23:36.000'
+  },
+  {
+    id: 22,
+    productId: 14,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 11,
+    quantityChanged: 11,
+    createdAt: '2023-03-16 11:23:36.000'
+  },
+  {
+    id: 23,
+    productId: 15,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 1,
+    quantityChanged: 1,
+    createdAt: '2023-04-16 11:23:36.000'
+  },
+  {
+    id: 24,
+    productId: 15,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 34,
+    quantityChanged: 34,
+    createdAt: '2023-05-16 11:23:36.000'
+  },
+  {
+    id: 25,
+    productId: 16,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 5,
+    quantityChanged: 5,
+    createdAt: '2023-06-16 11:23:36.000'
+  },
+  {
+    id: 26,
+    productId: 16,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 54,
+    quantityChanged: 54,
+    createdAt: '2023-07-16 11:23:36.000'
+  },
+  {
+    id: 27,
+    productId: 17,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 53,
+    quantityChanged: 53,
+    createdAt: '2023-08-16 11:23:36.000'
+  },
+  {
+    id: 28,
+    productId: 18,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 53,
+    quantityChanged: 53,
+    createdAt: '2023-09-16 11:23:36.000'
+  },
+  {
+    id: 29,
+    productId: 18,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 53,
+    quantityChanged: 53,
+    createdAt: '2023-10-16 11:23:36.000'
+  },
+  {
+    id: 30,
+    productId: 19,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 53,
+    quantityChanged: 53,
+    createdAt: '2023-11-16 11:23:36.000'
+  },
+  {
+    id: 31,
+    productId: 20,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 22,
+    quantityChanged: 22,
+    createdAt: '2023-12-16 11:23:36.000'
+  },
+  {
+    id: 32,
+    productId: 21,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 22,
+    quantityChanged: 22,
+    createdAt: '2024-01-16 11:23:36.000'
+  },
+  {
+    id: 33,
+    productId: 21,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 23,
+    quantityChanged: 23,
+    createdAt: '2024-02-16 11:23:36.000'
+  },
+  {
+    id: 34,
+    productId: 22,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 53,
+    quantityChanged: 53,
+    createdAt: '2024-03-16 11:23:36.000'
+  },
+  {
+    id: 35,
+    productId: 22,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 53,
+    quantityChanged: 53,
+    createdAt: '2024-04-16 11:23:36.000'
+  },
+  {
+    id: 36,
+    productId: 23,
+    storeId: 1,
+    userId: 2,
+    totalQuantity: 11,
+    quantityChanged: 11,
+    createdAt: '2024-05-16 11:23:36.000'
+  },
+  {
+    id: 37,
+    productId: 24,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 34,
+    quantityChanged: 34,
+    createdAt: '2024-06-16 11:23:36.000'
+  },
+  {
+    id: 38,
+    productId: 25,
+    storeId: 2,
+    userId: 4,
+    totalQuantity: 34,
+    quantityChanged: 34,
+    createdAt: '2024-07-16 11:23:36.000'
   }
 ];

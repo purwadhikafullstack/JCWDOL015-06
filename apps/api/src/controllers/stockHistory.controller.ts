@@ -36,14 +36,23 @@ export class StockHistoryController {
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
+      const whereFilter = {
+        AND: [
+          { product: { productName: { contains: productName as string } } },
+          { store: { name: { contains: storeName as string } } },
+        ],
+      } as any;
+      if (date && typeof date === 'string') {
+        whereFilter.AND.push({
+          createdAt: {
+            gte: new Date(date as string),
+            lt: new Date(date as string),
+          },
+        });
+      }
+
       const stockHistories = await prisma.stockHistory.findMany({
-        where: {
-          OR: [
-            { createdAt: { gte: new Date(date as string) } },
-            { product: { productName: { contains: productName as string } } },
-            { store: { name: { contains: storeName as string } } },
-          ],
-        },
+        where: whereFilter,
         include: {
           product: true,
           store: true,

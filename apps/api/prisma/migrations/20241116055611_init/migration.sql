@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Discount` MODIFY `discountType` ENUM('PERCENTAGE', 'AMOUNT', 'BUY_ONE_GET_ONE') NOT NULL;

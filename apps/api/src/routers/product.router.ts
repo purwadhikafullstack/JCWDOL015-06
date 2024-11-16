@@ -1,13 +1,45 @@
 import { Router } from 'express';
 import { ProductController } from '@/controllers/product.controller';
+import upload from '@/middlewares/upload';
+export class ProductRouter {
+  private router: Router;
+  private productController: ProductController;
 
-const router = Router();
-const productController = new ProductController();
+  constructor() {
+    this.productController = new ProductController();
+    this.router = Router();
+    this.initializeRoutes();
+  }
 
-router.post('/products', productController.createProduct);
-router.get('/products', productController.getProducts);
-router.get('/products/:id', productController.getProductById);
-router.put('/products/:id', productController.updateProduct);
-router.delete('/products/:id', productController.deleteProduct);
+  private initializeRoutes(): void {
+    this.router.post('/', this.productController.createProduct);
+    this.router.get('/', this.productController.getProducts);
+    this.router.get('/:id', this.productController.getProductById);
+    this.router.put('/:id', this.productController.updateProduct);
+    this.router.delete('/:id', this.productController.deleteProduct);
+    this.router.post(
+      '/upload-images',
+      upload.array('images', 5),
+      async (req, res) => {
+        try {
+          const filePaths = Array.isArray(req.files)
+            ? req.files.map((file: Express.Multer.File) => file.path)
+            : [];
+          res.json({
+            message: 'Files uploaded successfully',
+            files: filePaths,
+          });
+        } catch (error) {
+          res.status(400).send({
+            status: 'error',
+            msg: error,
+          });
+        }
+      },
+    );
+  }
 
-export default router;
+  getRouter(): Router {
+    return this.router;
+  }
+}

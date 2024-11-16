@@ -38,7 +38,7 @@ const Carousel: React.FC = () => {
         {promoProducts.map((product) => (
           <div key={product.id} className="w-full flex-shrink-0 relative" onClick={() => handleClick(product.id)}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={product.image_urls[0]} alt={product.productName} className="w-full h-[60vh] object-cover" />
+            <img src={product.imageUrls[0]} alt={product.productName} className="w-full h-[60vh] object-cover" />
           </div>
         ))}
       </div>

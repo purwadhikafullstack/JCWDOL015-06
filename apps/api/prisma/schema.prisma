@@ -15,6 +15,10 @@ model Store {
   StockHistory StockHistory[]
   User User[]
   Stock Stock[]
+
+  Cart Cart[]
+
+  Order Order[]
 }
 
 model User {
@@ -34,6 +38,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   StockHistory StockHistory[]
+  Cart Cart[]
+  Order Order[]
 }
 
 model Category {
@@ -52,9 +58,9 @@ model Product {
   categoryId Int
   category   Category  @relation(fields: [categoryId], references: [id])
 
-  DiscountProduct DiscountProduct[]
   StockHistory StockHistory[]
   Stock Stock[]
+  Discount Discount[]
 }
 
 model Discount {
@@ -64,16 +70,7 @@ model Discount {
   appliedDiscountType   AppliedDiscountType
   discountPercentage    Int?
   discountAmount        Int?
-
-  DiscountProduct DiscountProduct[]
-}
-
-model DiscountProduct {
-  id         Int      @id @default(autoincrement())
-  discountId Int
-  productId  Int
-  discount   Discount @relation(fields: [discountId], references: [id])
-  product    Product  @relation(fields: [productId], references: [id])
+  appliedOnProducts     Product[]
 }
 
 model Stock {
@@ -104,7 +101,10 @@ model Cart {
   totalPrice     Float
   totalDiscount  Float
   createdAt      DateTime @default(now())
-  storeId        Int
+  storeId         Int
+  store           Store   @relation(fields: [storeId], references: [id])
+  userId         Int
+  user           User    @relation(fields: [userId], references: [id])
   cartItems      CartItem[]
 }
 
@@ -125,8 +125,11 @@ model Order {
   totalPrice     Float
   totalDiscount  Float
   createdAt      DateTime @default(now())
-  storeId        Int
-  orderItemIds   OrderItem[]
+  storeId         Int
+  store           Store   @relation(fields: [storeId], references: [id])
+  userId         Int
+  user           User    @relation(fields: [userId], references: [id])
+  orderItems      OrderItem[]
 }
 
 model OrderItem {

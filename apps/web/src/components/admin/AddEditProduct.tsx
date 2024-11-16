@@ -25,11 +25,11 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data, onS
   useEffect(() => {
     if (mode === 'edit' && data) {
       setName(data.productName ?? '');
-      // setImages(data.image_urls ?? []);
+      // setImages(data.imageUrls ?? []);
       setDescription(data.desc ?? '');
       setWeight(data.weight ?? 0);
-      if (data.image_urls) {
-        setImagePreviews(data.image_urls);
+      if (data.imageUrls) {
+        setImagePreviews(data.imageUrls);
         // const previews = data.images.map((image) => {
         //   const reader = new FileReader();
         //   reader.readAsDataURL(image);

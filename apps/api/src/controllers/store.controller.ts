@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
-export class CategoryController {
-  async createCategory(req: Request, res: Response) {
+export class StoreController {
+  async createStore(req: Request, res: Response) {
     try {
-      const { name } = req.body;
-      const category = await prisma.category.create({
-        data: { name },
+      const { name, address } = req.body;
+      const store = await prisma.store.create({
+        data: { name, address },
       });
-      res.status(201).json(category);
+      res.status(201).json(store);
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -17,19 +17,19 @@ export class CategoryController {
     }
   }
 
-  async getCategories(req: Request, res: Response) {
+  async getStores(req: Request, res: Response) {
     try {
       const { name, page = 1, pageSize = 10 } = req.query;
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const categories = await prisma.category.findMany({
+      const stores = await prisma.store.findMany({
         where: { name: { contains: name as string } },
         skip,
         take,
       });
 
-      res.status(200).json(categories);
+      res.status(200).json(stores);
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -38,18 +38,18 @@ export class CategoryController {
     }
   }
 
-  async getCategoryById(req: Request, res: Response) {
+  async getStoreById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const category = await prisma.category.findUnique({
+      const store = await prisma.store.findUnique({
         where: { id: Number(id) },
       });
 
-      if (!category) {
-        return res.status(404).json({ error: 'Category not found' });
+      if (!store) {
+        return res.status(404).json({ error: 'Store not found' });
       }
 
-      res.status(200).json(category);
+      res.status(200).json(store);
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -58,17 +58,17 @@ export class CategoryController {
     }
   }
 
-  async updateCategory(req: Request, res: Response) {
+  async updateStore(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const { name } = req.body;
 
-      const category = await prisma.category.update({
+      const store = await prisma.store.update({
         where: { id: Number(id) },
         data: { name },
       });
 
-      res.status(200).json(category);
+      res.status(200).json(store);
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -77,11 +77,11 @@ export class CategoryController {
     }
   }
 
-  async deleteCategory(req: Request, res: Response) {
+  async deleteStore(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
-      await prisma.category.delete({
+      await prisma.store.delete({
         where: { id: Number(id) },
       });
 

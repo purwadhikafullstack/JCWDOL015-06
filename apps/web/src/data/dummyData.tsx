@@ -34,7 +34,7 @@ export const dummyProducts = [
     category: {
       id: 20
     },
-    image_urls: [
+    imageUrls: [
       'https://i2.wp.com/juragansapi.com/wp-content/uploads/2020/05/promo-daging-sapisegar-lebaran-2020.jpg?fit=800%2C500&ssl=1'
     ],
     desc: 'Description for product 1Description for product 1Description for product 1Description for product 1Description for product 1Description for product 1',
@@ -48,7 +48,7 @@ export const dummyProducts = [
     category: {
       id: 16
     },
-    image_urls: [
+    imageUrls: [
       'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//catalog-image/116/MTA-96749279/br-m036969-08463_-promo-kentang-goreng-fiesta-french-fries-shoestring-1-kg-500-gr_full01.jpg'
     ],
     desc: 'Description for product 2Description for product 2Description for product 2Description for product 2Description for product 2Description for product 2',
@@ -62,7 +62,7 @@ export const dummyProducts = [
     category: {
       id: 19
     },
-    image_urls: ['https://assets.klikindomaret.com/share/HERO_BNR_BANGO-17-MEI.jpg'],
+    imageUrls: ['https://assets.klikindomaret.com/share/HERO_BNR_BANGO-17-MEI.jpg'],
     desc: 'Description for product 3Description for product 3Description for product 3Description for product 3Description for product 3Description for product 3',
     weight: 339,
     stock: 39
@@ -74,7 +74,7 @@ export const dummyProducts = [
     category: {
       id: 20
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 4Description for product 4Description for product 4Description for product 4Description for product 4Description for product 4',
     weight: 178,
     stock: 38
@@ -86,7 +86,7 @@ export const dummyProducts = [
     category: {
       id: 19
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 5Description for product 5Description for product 5Description for product 5Description for product 5Description for product 5',
     weight: 403,
     stock: 10
@@ -98,7 +98,7 @@ export const dummyProducts = [
     category: {
       id: 17
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 6Description for product 6Description for product 6Description for product 6Description for product 6Description for product 6',
     weight: 301,
     stock: 94
@@ -110,7 +110,7 @@ export const dummyProducts = [
     category: {
       id: 20
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 7Description for product 7Description for product 7Description for product 7Description for product 7Description for product 7',
     weight: 531,
     stock: 72
@@ -122,7 +122,7 @@ export const dummyProducts = [
     category: {
       id: 6
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 8Description for product 8Description for product 8Description for product 8Description for product 8Description for product 8',
     weight: 179,
     stock: 72
@@ -134,7 +134,7 @@ export const dummyProducts = [
     category: {
       id: 12
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 9Description for product 9Description for product 9Description for product 9Description for product 9Description for product 9',
     weight: 331,
     stock: 21
@@ -146,7 +146,7 @@ export const dummyProducts = [
     category: {
       id: 12
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 10Description for product 10Description for product 10Description for product 10Description for product 10Description for prod',
     weight: 524,
     stock: 67
@@ -158,7 +158,7 @@ export const dummyProducts = [
     category: {
       id: 18
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 11Description for product 11Description for product 11Description for product 11Description for product 11Description for prod',
     weight: 522,
     stock: 2
@@ -170,7 +170,7 @@ export const dummyProducts = [
     category: {
       id: 10
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 12Description for product 12Description for product 12Description for product 12Description for product 12Description for prod',
     weight: 223,
     stock: 31
@@ -182,7 +182,7 @@ export const dummyProducts = [
     category: {
       id: 5
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 13Description for product 13Description for product 13Description for product 13Description for product 13Description for prod',
     weight: 241,
     stock: 45
@@ -194,7 +194,7 @@ export const dummyProducts = [
     category: {
       id: 16
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 14Description for product 14Description for product 14Description for product 14Description for product 14Description for prod',
     weight: 479,
     stock: 100
@@ -206,7 +206,7 @@ export const dummyProducts = [
     category: {
       id: 7
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 15Description for product 15Description for product 15Description for product 15Description for product 15Description for prod',
     weight: 172,
     stock: 88
@@ -218,7 +218,7 @@ export const dummyProducts = [
     category: {
       id: 11
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 16Description for product 16Description for product 16Description for product 16Description for product 16Description for prod',
     weight: 382,
     stock: 31
@@ -230,7 +230,7 @@ export const dummyProducts = [
     category: {
       id: 17
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 17Description for product 17Description for product 17Description for product 17Description for product 17Description for prod',
     weight: 206,
     stock: 24
@@ -242,7 +242,7 @@ export const dummyProducts = [
     category: {
       id: 20
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 18Description for product 18Description for product 18Description for product 18Description for product 18Description for prod',
     weight: 268,
     stock: 12
@@ -254,7 +254,7 @@ export const dummyProducts = [
     category: {
       id: 19
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 19Description for product 19Description for product 19Description for product 19Description for product 19Description for prod',
     weight: 125,
     stock: 19
@@ -266,7 +266,7 @@ export const dummyProducts = [
     category: {
       id: 13
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 20Description for product 20Description for product 20Description for product 20Description for product 20Description for prod',
     weight: 479,
     stock: 40
@@ -278,7 +278,7 @@ export const dummyProducts = [
     category: {
       id: 4
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 21Description for product 21Description for product 21Description for product 21Description for product 21Description for prod',
     weight: 201,
     stock: 10
@@ -290,7 +290,7 @@ export const dummyProducts = [
     category: {
       id: 9
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 22Description for product 22Description for product 22Description for product 22Description for product 22Description for prod',
     weight: 532,
     stock: 26
@@ -302,7 +302,7 @@ export const dummyProducts = [
     category: {
       id: 9
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 23Description for product 23Description for product 23Description for product 23Description for product 23Description for prod',
     weight: 560,
     stock: 19
@@ -314,7 +314,7 @@ export const dummyProducts = [
     category: {
       id: 14
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 24Description for product 24Description for product 24Description for product 24Description for product 24Description for prod',
     weight: 106,
     stock: 22
@@ -326,7 +326,7 @@ export const dummyProducts = [
     category: {
       id: 7
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 25Description for product 25Description for product 25Description for product 25Description for product 25Description for prod',
     weight: 436,
     stock: 71
@@ -338,7 +338,7 @@ export const dummyProducts = [
     category: {
       id: 11
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 26Description for product 26Description for product 26Description for product 26Description for product 26Description for prod',
     weight: 489,
     stock: 49
@@ -350,7 +350,7 @@ export const dummyProducts = [
     category: {
       id: 18
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 27Description for product 27Description for product 27Description for product 27Description for product 27Description for prod',
     weight: 177,
     stock: 58
@@ -362,7 +362,7 @@ export const dummyProducts = [
     category: {
       id: 3
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 28Description for product 28Description for product 28Description for product 28Description for product 28Description for prod',
     weight: 157,
     stock: 78
@@ -374,7 +374,7 @@ export const dummyProducts = [
     category: {
       id: 11
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 29Description for product 29Description for product 29Description for product 29Description for product 29Description for prod',
     weight: 525,
     stock: 90
@@ -386,7 +386,7 @@ export const dummyProducts = [
     category: {
       id: 6
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 30Description for product 30Description for product 30Description for product 30Description for product 30Description for prod',
     weight: 494,
     stock: 61
@@ -398,7 +398,7 @@ export const dummyProducts = [
     category: {
       id: 5
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 31Description for product 31Description for product 31Description for product 31Description for product 31Description for prod',
     weight: 160,
     stock: 11
@@ -410,7 +410,7 @@ export const dummyProducts = [
     category: {
       id: 6
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 32Description for product 32Description for product 32Description for product 32Description for product 32Description for prod',
     weight: 425,
     stock: 87
@@ -422,7 +422,7 @@ export const dummyProducts = [
     category: {
       id: 1
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 33Description for product 33Description for product 33Description for product 33Description for product 33Description for prod',
     weight: 262,
     stock: 57
@@ -434,7 +434,7 @@ export const dummyProducts = [
     category: {
       id: 7
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 34Description for product 34Description for product 34Description for product 34Description for product 34Description for prod',
     weight: 254,
     stock: 2
@@ -446,7 +446,7 @@ export const dummyProducts = [
     category: {
       id: 17
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 35Description for product 35Description for product 35Description for product 35Description for product 35Description for prod',
     weight: 485,
     stock: 36
@@ -458,7 +458,7 @@ export const dummyProducts = [
     category: {
       id: 12
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 36Description for product 36Description for product 36Description for product 36Description for product 36Description for prod',
     weight: 229,
     stock: 93
@@ -470,7 +470,7 @@ export const dummyProducts = [
     category: {
       id: 16
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 37Description for product 37Description for product 37Description for product 37Description for product 37Description for prod',
     weight: 168,
     stock: 2
@@ -482,7 +482,7 @@ export const dummyProducts = [
     category: {
       id: 6
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 38Description for product 38Description for product 38Description for product 38Description for product 38Description for prod',
     weight: 576,
     stock: 78
@@ -494,7 +494,7 @@ export const dummyProducts = [
     category: {
       id: 4
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 39Description for product 39Description for product 39Description for product 39Description for product 39Description for prod',
     weight: 203,
     stock: 22
@@ -506,7 +506,7 @@ export const dummyProducts = [
     category: {
       id: 11
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 40Description for product 40Description for product 40Description for product 40Description for product 40Description for prod',
     weight: 230,
     stock: 97
@@ -518,7 +518,7 @@ export const dummyProducts = [
     category: {
       id: 8
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 41Description for product 41Description for product 41Description for product 41Description for product 41Description for prod',
     weight: 414,
     stock: 91
@@ -530,7 +530,7 @@ export const dummyProducts = [
     category: {
       id: 18
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 42Description for product 42Description for product 42Description for product 42Description for product 42Description for prod',
     weight: 368,
     stock: 22
@@ -542,7 +542,7 @@ export const dummyProducts = [
     category: {
       id: 9
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 43Description for product 43Description for product 43Description for product 43Description for product 43Description for prod',
     weight: 404,
     stock: 30
@@ -554,7 +554,7 @@ export const dummyProducts = [
     category: {
       id: 9
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 44Description for product 44Description for product 44Description for product 44Description for product 44Description for prod',
     weight: 317,
     stock: 5
@@ -566,7 +566,7 @@ export const dummyProducts = [
     category: {
       id: 14
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 45Description for product 45Description for product 45Description for product 45Description for product 45Description for prod',
     weight: 288,
     stock: 100
@@ -578,7 +578,7 @@ export const dummyProducts = [
     category: {
       id: 15
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 46Description for product 46Description for product 46Description for product 46Description for product 46Description for prod',
     weight: 564,
     stock: 20
@@ -590,7 +590,7 @@ export const dummyProducts = [
     category: {
       id: 17
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 47Description for product 47Description for product 47Description for product 47Description for product 47Description for prod',
     weight: 246,
     stock: 21
@@ -602,7 +602,7 @@ export const dummyProducts = [
     category: {
       id: 17
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 48Description for product 48Description for product 48Description for product 48Description for product 48Description for prod',
     weight: 202,
     stock: 67
@@ -614,7 +614,7 @@ export const dummyProducts = [
     category: {
       id: 12
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 49Description for product 49Description for product 49Description for product 49Description for product 49Description for prod',
     weight: 286,
     stock: 4
@@ -626,7 +626,7 @@ export const dummyProducts = [
     category: {
       id: 9
     },
-    image_urls: [''],
+    imageUrls: [''],
     desc: 'Description for product 50Description for product 50Description for product 50Description for product 50Description for product 50Description for prod',
     weight: 435,
     stock: 1
@@ -658,7 +658,7 @@ export const dummyStores = [
 export interface Product {
   id?: number;
   price?: number;
-  image_urls?: string[];
+  imageUrls?: string[];
   categoryId?: number;
   productName?: string;
   desc?: string;

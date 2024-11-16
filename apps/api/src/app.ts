@@ -5,7 +5,6 @@ import express, {
   Request,
   Response,
   NextFunction,
-  Router,
 } from 'express';
 import cors from 'cors';
 import { PORT } from './config';
@@ -13,7 +12,7 @@ import { SampleRouter } from './routers/sample.router';
 import { AccountRouter } from './routers/account.router';
 
 export default class App {
-  private app: Express;
+  private readonly app: Express;
 
   constructor() {
     this.app = express();

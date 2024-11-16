@@ -29,7 +29,7 @@ export default function ProductsGrid({ products, pagination, onChangePage }: Rea
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={product.image_urls?.[0]}
+              src={product.imageUrls?.[0]}
               alt={product.productName}
               className="w-64 h-32 object-cover mb-2 rounded-md"
             />

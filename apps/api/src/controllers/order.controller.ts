@@ -1,32 +1,30 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
-export class CartController {
-  async createCart(req: Request, res: Response) {
+export class OrderController {
+  async createOrder(req: Request, res: Response) {
     try {
       const {
         discountId,
         totalPrice,
         totalDiscount,
         storeId,
-        cartItemIds,
+        orderItemIds,
         userId,
       } = req.body;
-
-      const cart = await prisma.cart.create({
+      const order = await prisma.order.create({
         data: {
           discountId,
           totalPrice,
           totalDiscount,
           storeId,
           userId,
-          cartItems: {
-            connect: cartItemIds.map((id: number) => ({ id })),
+          orderItems: {
+            connect: orderItemIds.map((id: number) => ({ id })),
           },
         },
       });
-
-      res.status(201).json(cart);
+      res.status(201).json(order);
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -35,27 +33,34 @@ export class CartController {
     }
   }
 
-  async getCarts(req: Request, res: Response) {
+  async getOrders(req: Request, res: Response) {
     try {
-      const { userName, userId, page = 1, pageSize = 10 } = req.query;
+      const {
+        userName,
+        userId,
+        createdAt,
+        page = 1,
+        pageSize = 10,
+      } = req.query;
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
-      const carts = await prisma.cart.findMany({
+      const orders = await prisma.order.findMany({
         where: {
           OR: [
             { user: { username: { contains: userName as string } } },
             { userId: Number(userId) },
+            { createdAt: { gte: new Date(createdAt as string) } },
           ],
         },
         include: {
-          cartItems: true,
+          orderItems: true,
         },
         skip,
         take,
       });
 
-      res.status(200).json(carts);
+      res.status(200).json(orders);
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -64,19 +69,19 @@ export class CartController {
     }
   }
 
-  async getCartById(req: Request, res: Response) {
+  async getOrderById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const cart = await prisma.cart.findUnique({
+      const order = await prisma.order.findUnique({
         where: { id: Number(id) },
-        include: { cartItems: true },
+        include: { orderItems: true },
       });
 
-      if (!cart) {
-        return res.status(404).json({ error: 'Cart not found' });
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
       }
 
-      res.status(200).json(cart);
+      res.status(200).json(order);
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -85,26 +90,26 @@ export class CartController {
     }
   }
 
-  async updateCart(req: Request, res: Response) {
+  async updateOrder(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { discountId, totalPrice, totalDiscount, storeId, cartItemIds } =
+      const { discountId, totalPrice, totalDiscount, storeId, orderItemIds } =
         req.body;
 
-      const cart = await prisma.cart.update({
+      const order = await prisma.order.update({
         where: { id: Number(id) },
         data: {
           discountId,
           totalPrice,
           totalDiscount,
           storeId,
-          cartItems: {
-            connect: cartItemIds.map((id: number) => ({ id })),
+          orderItems: {
+            connect: orderItemIds.map((id: number) => ({ id })),
           },
         },
       });
 
-      res.status(200).json(cart);
+      res.status(200).json(order);
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -113,11 +118,11 @@ export class CartController {
     }
   }
 
-  async deleteCart(req: Request, res: Response) {
+  async deleteOrder(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
-      await prisma.cart.delete({
+      await prisma.order.delete({
         where: { id: Number(id) },
       });
 

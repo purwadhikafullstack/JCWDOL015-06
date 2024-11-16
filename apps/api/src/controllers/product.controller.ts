@@ -2,17 +2,45 @@ import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
 export class ProductController {
+  async createProduct(req: Request, res: Response) {
+    try {
+      const { price, productName, desc, imageUrls, categoryId } = req.body;
+      const product = await prisma.product.create({
+        data: { price, productName, desc, imageUrls, categoryId },
+      });
+      res.status(201).json(product);
+    } catch (err) {
+      res.status(400).send({
+        status: 'error',
+        msg: err,
+      });
+    }
+  }
+
   async getProducts(req: Request, res: Response) {
     try {
-      const products = await prisma.product.findMany();
+      const { name, category, page = 1, pageSize = 10 } = req.query;
+      const skip = (Number(page) - 1) * Number(pageSize);
+      const take = Number(pageSize);
 
-      res.status(200).send({
-        status: 'ok',
-        products,
+      const products = await prisma.product.findMany({
+        where: {
+          OR: [
+            { productName: { contains: name as string } },
+            { category: { name: { contains: category as string } } },
+          ],
+        },
+        include: {
+          category: true,
+        },
+        skip,
+        take,
       });
+
+      res.status(200).json(products);
     } catch (err) {
-      res.status(500).send({
-        status: 'error fething products data',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -20,102 +48,39 @@ export class ProductController {
 
   async getProductById(req: Request, res: Response) {
     try {
-      const { id } = req.body;
-
+      const { id } = req.params;
       const product = await prisma.product.findUnique({
-        where: { id: id },
+        where: { id: Number(id) },
+        include: { category: true },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Product Detail Fetched!',
-        product,
-      });
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+
+      res.status(200).json(product);
     } catch (err) {
-      res.status(500).send({
-        status: 'error fetching product detail',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
   }
 
-  // Create product
-  async createProduct(req: Request, res: Response) {
-    try {
-      const {
-        price,
-        image_url,
-        categoryId,
-        productDiscountId,
-        productName,
-        desc,
-        weight,
-        Stock,
-      } = req.body;
-
-      const product = await prisma.product.create({
-        data: {
-          price,
-          image_url,
-          categoryId,
-          productDiscountId,
-          productName,
-          desc,
-          weight,
-          Stock,
-        },
-      });
-
-      res.status(201).send({
-        status: 'ok',
-        msg: 'Product Created!',
-        product,
-      });
-    } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Create Product!',
-        msg: err,
-      });
-    }
-  }
-
-  // Update product
   async updateProduct(req: Request, res: Response) {
     try {
-      const {
-        id,
-        price,
-        image_url,
-        categoryId,
-        productDiscountId,
-        productName,
-        desc,
-        weight,
-        Stock,
-      } = req.body;
+      const { id } = req.params;
+      const { price, productName, desc, imageUrls, categoryId } = req.body;
 
       const product = await prisma.product.update({
-        where: { id: id },
-        data: {
-          price,
-          image_url,
-          categoryId,
-          productDiscountId,
-          productName,
-          desc,
-          weight,
-          Stock,
-        },
+        where: { id: Number(id) },
+        data: { price, productName, desc, imageUrls, categoryId },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Product Updated!',
-        product,
-      });
+      res.status(200).json(product);
     } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Update Product!',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -123,20 +88,16 @@ export class ProductController {
 
   async deleteProduct(req: Request, res: Response) {
     try {
-      const { id } = req.body;
+      const { id } = req.params;
 
-      const product = await prisma.product.delete({
-        where: { id: id },
+      await prisma.product.delete({
+        where: { id: Number(id) },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Product Deleted!',
-        product,
-      });
+      res.status(204).send();
     } catch (err) {
-      res.status(500).send({
-        status: 'error deleting product',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }

@@ -13,6 +13,7 @@ import { SampleRouter } from './routers/sample.router';
 import { AccountRouter } from './routers/account.router';
 import { ProductRouter } from './routers/product.router';
 import { CategoryRouter } from './routers/category.router';
+import { AddressRouter } from './routers/address.router';
 
 export default class App {
   private app: Express;
@@ -58,6 +59,7 @@ export default class App {
     const accountRouter = new AccountRouter();
     const productRouter = new ProductRouter();
     const categoryRouter = new CategoryRouter();
+    const addressRouter = new AddressRouter()
 
     // default path
     this.app.get('/api', (req: Request, res: Response) => {
@@ -69,6 +71,7 @@ export default class App {
     this.app.use('/api/account', accountRouter.getRouter());
     this.app.use('/api/product', productRouter.getRouter());
     this.app.use('/api/category', categoryRouter.getRouter());
+    this.app.use('/api/address', addressRouter.getRouter());
   }
 
   public start(): void {

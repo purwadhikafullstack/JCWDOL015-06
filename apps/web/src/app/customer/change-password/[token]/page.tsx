@@ -35,7 +35,7 @@ export default function ChangePassword() {
         console.log(params);
         
         
-      const { result } = await changePassword(data.password, params.token);
+      const { result } = await changePassword(data.password, params.token, null);
 
       if (result.status != 'ok') throw result.msg;
 

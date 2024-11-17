@@ -1,5 +1,6 @@
-import { DecodedToken, IForgot, IRegister, IRegLogin } from '@/types/account';
+import { DecodedToken, IForgot, IRegister, IRegLogin, IUpdateBasic, IUpdateEmail } from '@/types/account';
 import { jwtDecode } from 'jwt-decode';
+import { getToken } from './cookie';
 
 export const regulerLogin = async (data: IRegLogin) => {
   console.log('DATA FROM FORM, ', data);
@@ -88,7 +89,7 @@ export const verifyAccount = async (token: string) => {
 };
 // Unexpected token 'N', "Not found !" is not valid JSON
 
-export const changePassword = async (password: string, token: string) => {
+export const changePassword = async (password: string, token: string, email: string | null) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}account/change-password`, {
     method: 'PATCH',
     headers: {
@@ -96,7 +97,8 @@ export const changePassword = async (password: string, token: string) => {
     },
     body: JSON.stringify({
       password: password,
-      token: token
+      token: token,
+      email: email
     })
   });
 
@@ -113,6 +115,63 @@ export const forgotPassword = async (data: IForgot) => {
     },
     body: JSON.stringify({
       email: data.email
+    })
+  });
+
+  const result = await res.json();
+
+  return { result };
+};
+
+export const getAccountDetail = async (token: string) => {
+  
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}account/account-detail`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const result = await res.json();
+
+  return { result };
+};
+
+export const updateAccountEmail = async (data: IUpdateEmail) => {
+  const token = await getToken();
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}account/update-email`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      id: data.id,
+      email: data.email
+    })
+  });
+
+  const result = await res.json();
+
+  return { result };
+};
+
+export const updateAccountBasic = async (id: number, data: IUpdateBasic) => {
+  const token = await getToken();
+
+  // Send data as JSON
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}account/update-basic`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      id: id,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      mobileNum: data.mobileNum
     })
   });
 

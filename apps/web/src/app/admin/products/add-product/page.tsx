@@ -1,6 +1,6 @@
 'use client';
 
-import AddEditProductForm from '@/components/admin/AddEditProduct';
+import AddEditProductForm from '@/components/Admin/AddEditProduct';
 
 const AddProduct = () => {
   const handleSubmit = async (product: {

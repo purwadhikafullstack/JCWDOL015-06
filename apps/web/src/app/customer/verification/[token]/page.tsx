@@ -74,7 +74,6 @@ import { verifyAccount } from '@/lib/account';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
-import { redirect } from "react-router-dom";
 
 export default function VerifyAccount() {
   // const [isVerified, setIsVerified] = useState(false);

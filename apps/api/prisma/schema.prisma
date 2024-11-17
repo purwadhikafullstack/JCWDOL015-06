@@ -164,8 +164,9 @@ model Address {
   desc       String
   provinceId Int
   cityId     Int
-  coor_lat   String
-  coor_lng   String
+  coor_lat   String?
+  coor_lng   String?
+  isMain     Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
 }

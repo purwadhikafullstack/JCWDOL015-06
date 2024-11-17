@@ -13,13 +13,13 @@ export class AccountRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', verifyToken, this.accountController.getUsersData);
+    this.router.get('/', verifyToken, this.accountController.getUsers);
     this.router.get(
-      '/profile-detail',
+      '/account-detail',
       verifyToken,
-      this.accountController.profileDetail,
+      this.accountController.getAccountDetail,
     );
-    this.router.post('/register', this.accountController.createAccountData);
+    this.router.post('/register', this.accountController.createAccount);
     this.router.post('/login', this.accountController.loginAccount);
     this.router.get('/oauth-creds', this.accountController.oauthCreds);
     this.router.get('/google', this.accountController.loginGoogle);
@@ -37,6 +37,17 @@ export class AccountRouter {
       '/change-password',
       this.accountController.changePassword,
     );
+    this.router.patch(
+      '/update-email',
+      verifyToken,
+      this.accountController.updateAccountEmail,
+    );
+    this.router.patch(
+      '/update-basic',
+      verifyToken,
+      this.accountController.updateAccountBasic,
+    );
+    
   }
 
   getRouter(): Router {

@@ -13,12 +13,7 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       // Ensure the router is ready before accessing `router.query`
-      // if (!router.isReady) return;
-
-      // const { token } = router.query;
       const token = searchParams.get('token');
-
-      const res = fetch('')
 
       if (token) {
         // Set the token in cookies
@@ -35,7 +30,7 @@ const AuthCallback = () => {
           title: 'Error',
           text: 'Authentication failed. Please try again.',
           icon: 'error',
-          timer: 5000,
+          timer: 5000
         });
         window.close();
       }

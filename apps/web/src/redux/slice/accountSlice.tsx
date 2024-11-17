@@ -8,6 +8,7 @@ const initialState: IAccountState = {
   firstName: '',
   lastName: '',
   email: '',
+  isVerify: 0,
 };
 
 // Set Slice
@@ -16,13 +17,14 @@ export const accountSlice = createSlice({
   initialState,
   reducers: {
     setLoginState: (state, action: PayloadAction<IAccountState>) => {
-      const { accountState, id, firstName, lastName, email } = action.payload;
+      const { accountState, id, firstName, lastName, email, isVerify } = action.payload;
 
       state.accountState = accountState;
       state.id = id;
       state.firstName = firstName;
       state.lastName = lastName;
       state.email = email;
+      state.isVerify = isVerify;
     },
     setLogoutState: (state) => {
       state.accountState = false;
@@ -30,6 +32,7 @@ export const accountSlice = createSlice({
       state.firstName = "";
       state.lastName = "";
       state.email = "";
+      state.isVerify = 0
     }
   },
 });

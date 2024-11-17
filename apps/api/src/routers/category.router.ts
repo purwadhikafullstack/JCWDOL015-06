@@ -13,7 +13,7 @@ export class CategoryRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', this.categoryController.getCategoriesList)
+    this.router.get('/', this.categoryController.getCategories)
   }
 
   getRouter(): Router {

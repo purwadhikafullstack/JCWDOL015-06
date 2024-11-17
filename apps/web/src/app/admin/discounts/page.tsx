@@ -15,7 +15,7 @@ import {
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Discount, dummyDiscounts } from '@/data/dummyData';
-import AddEditDiscount from '@/components/admin/AddEditDiscount';
+import AddEditDiscount from '@/components/Admin/AddEditDiscount';
 
 export default function DiscountsPage() {
   const [currentPage, setCurrentPage] = useState(1);

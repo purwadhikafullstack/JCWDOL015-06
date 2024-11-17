@@ -10,15 +10,8 @@ import { IChangePassword } from '@/types/account';
 
 export class AccountController {
   // fetching user's data
-  async getUsersData(req: Request, res: Response) {
+  async getUsers(req: Request, res: Response) {
     try {
-      // const accounts = await prisma.user.findMany({
-      //   include: {
-      //     address: true,
-      //     store: true
-      //   }
-      // });
-
       const accounts = await prisma.user.findMany({
         include: {
           store: true,
@@ -27,7 +20,6 @@ export class AccountController {
 
       res.status(200).send({
         status: 'ok',
-        // msg: 'Account Created!',
         accounts,
       });
     } catch (error) {
@@ -92,7 +84,7 @@ export class AccountController {
   }
 
   // Create account for user
-  async createAccountData(req: Request, res: Response) {
+  async createAccount(req: Request, res: Response) {
     console.log('\n\nAPI REGISTER STARTS\n\n');
 
     try {
@@ -141,10 +133,6 @@ export class AccountController {
         name: `${account.firstName} ${account.lastName}`,
         link: `${process.env.NEXT_URL}customer/verification/${token}`,
       });
-      // const html = compiledTemplate({
-      //   name: `${account.firstName} ${account.lastName}`,
-      //   link: `http://localhost:3333/verify/${token}`,
-      // });
 
       await transporter.sendMail({
         from: process.env.MAIL_USER,
@@ -273,11 +261,6 @@ export class AccountController {
       // User's google profile
       const tokenInfoRes = await token_info_response.json();
 
-      // res.status(token_info_response.status).send({
-      //   status: 'ok',
-      //   msg: tokenInfoRes,
-      // });
-
       // Set certain detail in data from google' profile
       const { email, email_verified, given_name, family_name, picture } =
         tokenInfoRes;
@@ -303,26 +286,10 @@ export class AccountController {
           expiresIn: '1d',
         });
 
-        // res
-        //   .status(200)
-        //   .send({
-        //     status: 'ok',
-        //     msg: 'login success!',
-        //     token,
-        //     user: existingUser,
-        //   })
-        //   .redirect(`${process.env.NEXT_URL}/auth-google/callback?token=${token}`);
-
         res.redirect(
           `${process.env.NEXT_URL}customer/auth-google/callback?token=${token}`,
         );
       } else {
-        /*
-        const account = await prisma.user.create({
-        data: { firstName, lastName, email, password: hashPassword, mobileNum, role: 'USER', isVerify:0, storeId:1  },
-      });
-         */
-
         // Upload user registration to database
         const account = await prisma.user.create({
           data: {
@@ -333,7 +300,7 @@ export class AccountController {
             mobileNum: 0,
             avatar: picture,
             role: 'USER',
-            isVerify: 1
+            isVerify: 1,
           },
         });
 
@@ -343,22 +310,13 @@ export class AccountController {
           email: account.email,
           firstName: account.firstName,
           lastName: account.lastName,
-          role: 'REGULER',
+          role: 'USER',
+          isVerify: 1,
         };
 
         const token = sign(payload, process.env.SECRET_JWT!, {
           expiresIn: '1d',
         });
-
-        // res
-        //   .status(201)
-        //   .send({
-        //     status: 'ok',
-        //     msg: 'login success!',
-        //     token,
-        //     user: account,
-        //   })
-        //   .redirect(`${process.env.NEXT_URL}/auth-google/callback?token=${token}`);
 
         res.redirect(
           `${process.env.NEXT_URL}customer/auth-google/callback?token=${token}`,
@@ -389,8 +347,6 @@ export class AccountController {
 
       const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${process.env.GOOGLE_OAUTH_URL}?client_id=${process.env.CLIENT_ID}&redirect_uri=${GOOGLE_CALLBACK_URL}&access_type=offline&response_type=code&state=${state}&scope=${scopes}`;
 
-      // const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${process.env.GOOGLE_OAUTH_URL}?client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.NEXT_URL}/auth/callback&access_type=offline&response_type=code&state=${state}&scope=${scopes}`;
-
       res.status(200).send({
         status: 'ok',
         url: GOOGLE_OAUTH_CONSENT_SCREEN_URL,
@@ -404,7 +360,7 @@ export class AccountController {
   }
 
   // User Account Profile Detail
-  async profileDetail(req: Request, res: Response) {
+  async getAccountDetail(req: Request, res: Response) {
     try {
       const userDetail = await prisma.user.findUnique({
         where: {
@@ -462,19 +418,19 @@ export class AccountController {
   // First Step To User's account Password Reset
   async confirmPasswordChange(req: Request, res: Response) {
     try {
-      const {email} = req.body;
+      const { email } = req.body;
 
       console.log('\n\n\n API CHANGE PASSWORD \n');
 
-      console.log(email);      
+      console.log(email);
 
       const existingUser = await prisma.user.findUnique({
-        where: {email: email}
-      })
+        where: { email: email },
+      });
 
       if (!existingUser) throw 'Account Email Not Found';
 
-      const payload = {email: email, isPasswordChange: true}
+      const payload = { email: email, isPasswordChange: true };
       const token = sign(payload, process.env.SECRET_JWT!, {
         expiresIn: '10m',
       });
@@ -503,7 +459,6 @@ export class AccountController {
         status: 'ok',
         msg: 'Email Confirmed, Please Check Your Email!',
       });
-
     } catch (error) {
       res.status(400).send({
         status: 'error confirm password change',
@@ -514,36 +469,173 @@ export class AccountController {
 
   async changePassword(req: Request, res: Response) {
     try {
-      const {password, token} = req.body;
+      const { password, token, email } = req.body;
 
-      const verifyToken = verify(token, process.env.SECRET_JWT!);
+      if (token === 'update-password' && email !== null) {
+        const salt = await genSalt(10);
+        const hashPassword = await hash(password, salt);
 
-      if (!verifyToken) throw "Time Limit Exceeded. Please Send New Password Change Request!";
+        await prisma.user.update({
+          where: {
+            email: email,
+          },
+          data: {
+            password: hashPassword,
+          },
+        });
 
-      const payload = verifyToken as IChangePassword;
+        res.status(201).send({
+          status: 'ok',
+          msg: 'Password Successfully Changed!',
+        });
+      } else {
+        const verifyToken = verify(token, process.env.SECRET_JWT!);
 
-      if (payload.isPasswordChange == undefined || payload.isPasswordChange == false) throw "Unknown Request, Please Send New Password Change Request!"
+        if (!verifyToken)
+          throw 'Time Limit Exceeded. Please Send New Password Change Request!';
 
-      const salt = await genSalt(10);
-      const hashPassword = await hash(password, salt);
+        const payload = verifyToken as IChangePassword;
 
-      await prisma.user.update({
-        where: {
-          email: payload.email
-        }, data: {
-          password: hashPassword
-        }
-      })
-      
-      res.status(201).send({
-        status: 'ok',
-        msg: 'Password Successfully Changed!',
-      });
-      
+        if (
+          payload.isPasswordChange == undefined ||
+          payload.isPasswordChange == false
+        )
+          throw 'Unknown Request, Please Send New Password Change Request!';
+
+        const salt = await genSalt(10);
+        const hashPassword = await hash(password, salt);
+
+        await prisma.user.update({
+          where: {
+            email: payload.email,
+          },
+          data: {
+            password: hashPassword,
+          },
+        });
+
+        res.status(201).send({
+          status: 'ok',
+          msg: 'Password Successfully Changed!',
+        });
+      }
     } catch (error) {
       res.status(400).send({
         status: 'error change password',
         msg: error,
+      });
+    }
+  }
+
+  async updateAccountBasic(req: Request, res: Response) {
+    try {
+      const { id, firstName, lastName, mobileNum } = req.body;
+
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          id: id,
+        },
+      });
+
+      if (!existingUser) throw 'User Not Found!';
+
+      let ffirstName: string;
+      let llastName: string;
+      let mmobileNum: number;
+
+      if (firstName) {
+        ffirstName = firstName;
+      } else {
+        ffirstName = existingUser?.firstName;
+      }
+
+      if (lastName) {
+        llastName = lastName;
+      } else {
+        llastName = existingUser?.lastName;
+      }
+
+      if (mobileNum && mobileNum > 0) {
+        mmobileNum = mobileNum;
+      } else {
+        mmobileNum = existingUser?.mobileNum;
+      }
+
+      const user = await prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          firstName: ffirstName,
+          lastName: llastName,
+          mobileNum: mmobileNum,
+        },
+      });
+
+      res.status(201).send({
+        status: 'ok',
+        msg: 'Account Info Updated Successfully!',
+        user,
+      });
+    } catch (error) {
+      res.status(400).send({
+        status: 'error account update',
+        msg: error,
+      });
+    }
+  }
+
+  async updateAccountEmail(req: Request, res: Response) {
+    try {
+      const { id, email } = req.body;
+
+      const existingUser = await prisma.user.findUnique({
+        where: { id: id },
+      });
+
+      if (!existingUser) throw 'Account Email Not Found';
+
+      await prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          email: email,
+          isVerify: 0,
+        },
+      });
+
+      const payload = { id: id };
+      const token = sign(payload, process.env.SECRET_JWT!, {
+        expiresIn: '1d',
+      });
+      const templatePath = path.join(
+        __dirname,
+        '../templates',
+        'verification.hbs',
+      );
+      const templateSource = fs.readFileSync(templatePath, 'utf-8');
+      const compiledTemplate = handlebars.compile(templateSource);
+      const html = compiledTemplate({
+        name: `${existingUser.firstName} ${existingUser.lastName}`,
+        link: `${process.env.NEXT_URL}customer/verification/${token}`,
+      });
+
+      await transporter.sendMail({
+        from: process.env.MAIL_USER,
+        to: email,
+        subject: 'Verify Account Grocery G6',
+        html: html,
+      });
+
+      res.status(201).send({
+        status: 'ok',
+        msg: 'Account Email Updated Successfully, Please Verify Email Again And Login With New Email!',
+      });
+    } catch (error) {
+      res.status(400).send({
+        status: 'error account email update',
+        msg: error, 
       });
     }
   }

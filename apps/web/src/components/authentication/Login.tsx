@@ -1,9 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import React, { useState } from 'react';
-import { IoLogoGoogle, IoLogoFacebook } from 'react-icons/io5';
-import { FaXTwitter } from 'react-icons/fa6';
+import { IoLogoGoogle } from 'react-icons/io5';
 import * as yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/redux/store';
@@ -24,10 +22,6 @@ const LoginSchema = yup.object().shape({
       'Invalid email format or contains forbidden characters'
     )
     .required('Email Is Required!'),
-  // password: yup.string().matches(
-  //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
-  //   'Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, and one number. Special characters like quotation marks are not allowed.'
-  // ).required('Password Is Required!')
   password: yup
     .string()
     .matches(
@@ -86,7 +80,8 @@ const Login: React.FC = () => {
           id: result.user.id,
           firstName: result.user.firstName,
           lastName: result.user.lastName,
-          email: result.user.email
+          email: result.user.email,
+          isVerify: result.user.isVerify
         };
 
         Swal.fire({
@@ -120,12 +115,14 @@ const Login: React.FC = () => {
     }
   };
 
+  //
+
   const handleSubmitPassword = async (data: IForgot, action: FormikHelpers<IForgot>) => {
     try {
       console.log('\n\n\n');
 
       console.log(data);
-      
+
       // Sending Form Data To Action
       const { result } = await forgotPassword(data);
 
@@ -148,7 +145,7 @@ const Login: React.FC = () => {
       console.log('\n\n');
 
       console.log(error);
-      
+
       Swal.fire({
         title: 'Error',
         text: `${error}`,
@@ -188,7 +185,8 @@ const Login: React.FC = () => {
           id: decodedToken.id,
           firstName: decodedToken.firstName,
           lastName: decodedToken.lastName,
-          email: decodedToken.email
+          email: decodedToken.email,
+          isVerify: decodedToken.isVerify
         };
 
         console.log('\n\n LOGIN PAGE CHECK setState \n');

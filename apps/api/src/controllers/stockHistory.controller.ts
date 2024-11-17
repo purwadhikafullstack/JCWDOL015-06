@@ -1,4 +1,4 @@
-import e, { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
 export class StockHistoryController {
@@ -29,7 +29,7 @@ export class StockHistoryController {
       const {
         start_date,
         end_date,
-        productName,
+        // productName,
         storeName,
         userName,
         storeId,
@@ -41,7 +41,7 @@ export class StockHistoryController {
 
       const whereFilter = {
         AND: [
-          { product: { productName: { contains: productName as string } } },
+          // { product: { productName: { contains: productName as string } } },
           { store: { name: { contains: storeName as string } } },
           {
             OR: [{ user: { username: { contains: userName as string } } }],

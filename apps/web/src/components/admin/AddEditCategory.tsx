@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Button } from '@nextui-org/react';
 
 interface AddEditCategoryProps {
@@ -13,6 +13,10 @@ interface AddEditCategoryProps {
 
 const AddEditCategory: React.FC<AddEditCategoryProps> = ({ isOpen, name, addEditMode, handleSave, onClose }) => {
   const [categoryName, setCategoryName] = useState<string>(name ?? '');
+
+  useEffect(() => {
+    setCategoryName(name ?? '');
+  }, [name]);
 
   return (
     <Modal size="xl" isOpen={isOpen} onClose={onClose} closeButton>

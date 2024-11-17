@@ -15,7 +15,14 @@ export const fetchProducts = async (queryParams: { [key: string]: any } = {}) =>
   }
 };
 
-export const createProduct = async (productData: { name: string }) => {
+export const createProduct = async (productData: {
+  productName?: string;
+  desc?: string;
+  price?: number;
+  weight?: number;
+  imageUrls?: string;
+  categoryId?: number;
+}) => {
   try {
     const response = await axios.post(`${PRODUCT_BASE_URL}`, productData, {
       headers: {
@@ -37,7 +44,17 @@ export const getProductById = async (id: number) => {
   }
 };
 
-export const updateProduct = async (id: number, productData: { name: string }) => {
+export const updateProduct = async (
+  id: number,
+  productData: {
+    productName?: string;
+    desc?: string;
+    price?: number;
+    weight?: number;
+    imageUrls?: string;
+    categoryId?: number;
+  }
+) => {
   try {
     const response = await axios.put(`${PRODUCT_BASE_URL}/${id}`, productData, {
       headers: {

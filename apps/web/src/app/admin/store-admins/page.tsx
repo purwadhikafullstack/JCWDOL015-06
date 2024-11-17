@@ -53,6 +53,10 @@ const StoreAdminsPage = () => {
     }
   }, [currentPage, nameFilter]);
 
+  const onResetFilter = () => {
+    setNameFilter('');
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [nameFilter]);
@@ -128,6 +132,7 @@ const StoreAdminsPage = () => {
         await deleteStoreAdmin(selectedStoreAdmin?.id);
         toastSuccess('Deleted store admin successfully');
         setIsDeleteModalOpen(false);
+        setCurrentPage(1);
         loadStoreAdmins();
       } catch (err) {
         toastFailed('Failed to delete store admin');
@@ -152,7 +157,9 @@ const StoreAdminsPage = () => {
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}
         />
-        <FaSearch className="ml-2 text-gray-500" />
+        <Button className="bg-gray-100" onClick={onResetFilter}>
+          Reset
+        </Button>
       </div>
 
       <Table
@@ -178,7 +185,7 @@ const StoreAdminsPage = () => {
             Action
           </TableColumn>
         </TableHeader>
-        <TableBody>
+        <TableBody emptyContent={'No store admin found'}>
           {storeAdmin?.map((admin) => (
             <TableRow key={admin.id}>
               <TableCell>{`${admin.firstName} ${admin.lastName}`}</TableCell>

@@ -16,20 +16,20 @@ interface ProductsGridProps {
 }
 
 export default function ProductsGrid({ products, pagination, onChangePage }: Readonly<ProductsGridProps>) {
-  const currentProducts = products.slice((pagination.currentPage - 1) * 20, pagination.currentPage * 20);
+  let baseImagePath = 'http://localhost:8000/uploads/';
 
   return (
     <>
       <div className="my-2 text-lg font-semibold">Products</div>
       <div className="flex flex-wrap gap-4">
-        {currentProducts.map((product) => (
+        {products.map((product) => (
           <div
             key={product.id}
             className="flex flex-col items-center p-4 border rounded-lg shadow-md min-w-[200px] h-[220px] transition-transform transform hover:cursor-pointer hover:scale-105"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={product.imageUrls?.[0]}
+              src={`${baseImagePath}${product.imageUrls?.split(',')?.[0]}`}
               alt={product.productName}
               className="w-64 h-32 object-cover mb-2 rounded-md"
             />

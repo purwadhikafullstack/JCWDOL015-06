@@ -219,10 +219,6 @@ const AdminDashboardPage = () => {
 
       <div className="flex flex-row gap-10 w-full p-4">
         <div className="w-full">
-          <div className="text-base font-semibold">Sales Report</div>
-          <Bar data={salesData} />
-        </div>
-        <div className="w-full">
           <div className="text-base font-semibold">Stock Report</div>
           <Bar data={stockData} />
         </div>

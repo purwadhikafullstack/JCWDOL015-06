@@ -11,7 +11,8 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-  Pagination
+  Pagination,
+  Button
 } from '@nextui-org/react';
 import { parseDate, getLocalTimeZone } from '@internationalized/date';
 import { fetchOrders } from '@/api/order.api';
@@ -20,7 +21,7 @@ import { toastFailed } from '@/utils/toastHelper';
 const OrderReport = () => {
   const filter = useRef({
     userName: '',
-    productName: '',
+    // productName: '',
     storeName: '',
     start_date: '',
     end_date: ''
@@ -37,15 +38,25 @@ const OrderReport = () => {
 
   const handleDateChange = (date: Date | null, type: 'start_date' | 'end_date') => {
     const splitDate = date?.toLocaleString().split('/');
-    const year = splitDate?.[2]?.slice(0, 4);
-    const month = Number(splitDate?.[0]) > 9 ? splitDate?.[0] : `0${splitDate?.[0]}`;
-    let day = Number(splitDate?.[1]) > 9 ? splitDate?.[1] : `0${splitDate?.[1]}`;
+    const yearb = splitDate?.[2]?.slice(0, 4);
+    const monthb = Number(splitDate?.[0]) > 9 ? splitDate?.[0] : `0${splitDate?.[0]}`;
+    let dayb = Number(splitDate?.[1]) > 9 ? splitDate?.[1] : `0${splitDate?.[1]}`;
+
+    const dateBefore = `${yearb}-${monthb}-${dayb}`;
+    const adjustedDate = new Date(dateBefore);
+
     if (type === 'end_date') {
-      day = `${Number(day) + 1}`;
+      adjustedDate.setDate(adjustedDate.getDate() + 1);
     } else {
-      day = `${Number(day) - 1}`;
+      adjustedDate.setDate(adjustedDate.getDate() - 1);
     }
+
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(adjustedDate.getDate()).padStart(2, '0');
+
     const newDate = `${year}-${month}-${day}`;
+
     filter.current = {
       ...filter.current,
       [type]: date ? newDate : ''
@@ -55,14 +66,23 @@ const OrderReport = () => {
 
   const dateRender = (date: string, type: 'start_date' | 'end_date') => {
     const splitDate = date?.toLocaleString().split('-');
-    const year = splitDate?.[0];
-    const month = Number(splitDate?.[1]) > 9 ? splitDate?.[1] : `0${splitDate?.[1]}`;
-    let day = Number(splitDate?.[2]) > 9 ? splitDate?.[2] : `0${splitDate?.[2]}`;
+    const yearb = splitDate?.[0];
+    let monthb = Number(splitDate?.[1]) > 9 ? splitDate?.[1] : `0${splitDate?.[1]}`;
+    let dayb = Number(splitDate?.[2]) > 9 ? splitDate?.[2] : `0${splitDate?.[2]}`;
+
+    const dateBefore = `${yearb}-${monthb}-${dayb}`;
+    const adjustedDate = new Date(dateBefore);
+
     if (type === 'end_date') {
-      day = `${Number(day) - 1}`;
+      adjustedDate.setDate(adjustedDate.getDate() - 1);
     } else {
-      day = `${Number(day) + 1}`;
+      adjustedDate.setDate(adjustedDate.getDate() + 1);
     }
+
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(adjustedDate.getDate()).padStart(2, '0');
+
     const newDate = `${year}-${month}-${day}`;
 
     return parseDate(newDate);
@@ -86,9 +106,9 @@ const OrderReport = () => {
       if (filter.current.userName) {
         queryParams.userName = filter.current.userName;
       }
-      if (filter.current.productName) {
-        queryParams.productName = filter.current.productName;
-      }
+      // if (filter.current.productName) {
+      //   queryParams.productName = filter.current.productName;
+      // }
       if (filter.current.storeName) {
         queryParams.storeName = filter.current.storeName;
       }
@@ -113,6 +133,16 @@ const OrderReport = () => {
       setTotalOrders(0);
     }
   }, [currentPage, filter.current]);
+
+  const onResetFilter = () => {
+    filter.current = {
+      userName: '',
+      // productName: '',
+      storeName: '',
+      start_date: '',
+      end_date: ''
+    };
+  };
 
   useEffect(() => {
     loadOrders();
@@ -141,13 +171,13 @@ const OrderReport = () => {
             handleDateChange(date ? date.toDate(getLocalTimeZone()) : null, 'end_date');
           }}
         />
-        <Input
+        {/* <Input
           type="text"
           name="productName"
           placeholder="Filter by Product Name"
           value={filter.current.productName}
           onChange={handleFilterChange}
-        />
+        /> */}
         <Input
           type="text"
           name="storeName"
@@ -163,18 +193,21 @@ const OrderReport = () => {
           value={filter.current.userName}
           onChange={handleFilterChange}
         />
+        <Button className="bg-gray-100" onClick={onResetFilter}>
+          Reset
+        </Button>
       </div>
       <div className="p-4">
         <Table aria-label="Order Report" className="min-w-[100%] h-auto">
           <TableHeader>
-            <TableColumn>Date</TableColumn>
-            <TableColumn>Products ordered</TableColumn>
-            <TableColumn>Store Name</TableColumn>
-            <TableColumn>Order Discount</TableColumn>
-            <TableColumn>Order Total Discount</TableColumn>
-            <TableColumn>Order Total Price</TableColumn>
+            <TableColumn allowsSorting>Date</TableColumn>
+            <TableColumn allowsSorting>Products ordered</TableColumn>
+            <TableColumn allowsSorting>Store Name</TableColumn>
+            <TableColumn allowsSorting>Order Discount</TableColumn>
+            <TableColumn allowsSorting>Order Total Discount</TableColumn>
+            <TableColumn allowsSorting>Order Total Price</TableColumn>
           </TableHeader>
-          <TableBody>
+          <TableBody emptyContent={'No order found'}>
             {orders?.map((history, index) => (
               <TableRow key={index}>
                 <TableCell>{new Date(String(history.createdAt)).toLocaleString('id-ID')}</TableCell>
@@ -227,21 +260,7 @@ const OrderReport = () => {
                 </TableCell>
                 <TableCell>{history.store?.name}</TableCell>
                 <TableCell>{history.discount?.name ?? '-'}</TableCell>
-                <TableCell>
-                  {history.discount?.discountType == 'BUY_ONE_GET_ONE'
-                    ? ''
-                    : history.discount?.discountType == 'PERCENTAGE'
-                      ? '%'
-                      : history.discount?.discountType == 'AMOUNT'
-                        ? 'Rp.'
-                        : ''}
-                  {history.discount?.discountType == 'BUY_ONE_GET_ONE'
-                    ? ''
-                    : history.discount?.discountType == 'PERCENTAGE'
-                      ? history.discount.discountPercentage
-                      : history.discount?.discountAmount}{' '}
-                  (Rp. {history.totalDiscount?.toLocaleString('id-ID')})
-                </TableCell>
+                <TableCell>(Rp. {history.totalDiscount?.toLocaleString('id-ID')})</TableCell>
                 <TableCell>Rp. {history.totalPrice?.toLocaleString('id-ID')}</TableCell>
               </TableRow>
             ))}

@@ -12,7 +12,7 @@ import {
   TableRow,
   Input
 } from '@nextui-org/react';
-import { FaPencilAlt, FaSearch, FaTrash } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Stock, Role } from '@/types/types';
 import { fetchStocks, getStockById, createStock, updateStock, deleteStock } from '@/api/stock.api';
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
@@ -44,7 +44,7 @@ const StocksPage = () => {
         queryParams.storeName = storeNameFilter;
       }
 
-      const storeId = JSON.parse(localStorage.getItem('user') as string).store.id;
+      const storeId = JSON.parse(localStorage.getItem('user') as string)?.store?.id;
       if (storeId && userRole === 'STORE_ADMIN') {
         queryParams.storeId = storeId;
       }
@@ -57,6 +57,11 @@ const StocksPage = () => {
       setTotalStocks(0);
     }
   }, [currentPage, productNameFilter, storeNameFilter]);
+
+  const onResetFilter = () => {
+    setStoreNameFilter('');
+    setProductNameFilter('');
+  };
 
   useEffect(() => {
     setCurrentPage(1);
@@ -105,11 +110,10 @@ const StocksPage = () => {
             userId: Number(userId),
             quantityChanged
           });
-          toastSuccess('Created stock successfully');
           setIsAddEditModalOpen(false);
           loadStocks();
         } catch (err) {
-          toastFailed('Failed to create stock');
+          toastFailed('Failed to update stock');
         }
 
         // chagne stock
@@ -124,10 +128,13 @@ const StocksPage = () => {
       }
     } else {
       try {
-        const response = await fetchStocks({
-          storeId: Number(stock.storeId),
-          productId: Number(stock.productId)
-        });
+        const queryParams = { page: currentPage, pageSize } as { [key: string]: any };
+
+        queryParams.storeId = Number(stock.storeId);
+        queryParams.productId = Number(stock.productId);
+
+        const response = await fetchStocks(queryParams);
+
         if (response.stocks.length > 0) {
           toastFailed('Stock for this store and product already exists');
           return;
@@ -142,7 +149,6 @@ const StocksPage = () => {
               userId: Number(userId),
               quantityChanged: Number(stock.quantity)
             });
-            toastSuccess('Created stock successfully');
             setIsAddEditModalOpen(false);
             loadStocks();
           } catch (err) {
@@ -175,6 +181,7 @@ const StocksPage = () => {
         await deleteStock(selectedStock?.id);
         toastSuccess('Deleted stock successfully');
         setIsDeleteModalOpen(false);
+        setCurrentPage(1);
         loadStocks();
       } catch (err) {
         toastFailed('Failed to delete stock');
@@ -208,7 +215,9 @@ const StocksPage = () => {
           value={productNameFilter}
           onChange={(e) => setProductNameFilter(e.target.value)}
         />
-        <FaSearch className="ml-2 text-gray-500" />
+        <Button className="bg-gray-100" onClick={onResetFilter}>
+          Reset
+        </Button>
       </div>
 
       <Table
@@ -218,18 +227,18 @@ const StocksPage = () => {
         aria-label="Stocks Table"
       >
         <TableHeader>
-          <TableColumn allowsSorting={true} className="text-md text-gray-700">
+          <TableColumn allowsSorting className="text-md text-gray-700">
             Store
           </TableColumn>
-          <TableColumn allowsSorting={true} className="text-md text-gray-700">
+          <TableColumn allowsSorting className="text-md text-gray-700">
             Product
           </TableColumn>
-          <TableColumn allowsSorting={true} className="text-md text-gray-700">
+          <TableColumn allowsSorting className="text-md text-gray-700">
             Quantity
           </TableColumn>
           <TableColumn className="text-md text-gray-700">Action</TableColumn>
         </TableHeader>
-        <TableBody>
+        <TableBody emptyContent={'No stock found'}>
           {stocks.map((stock) => (
             <TableRow key={stock.id}>
               <TableCell>{stock.store?.name}</TableCell>

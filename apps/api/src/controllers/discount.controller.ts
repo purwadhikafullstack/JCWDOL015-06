@@ -11,23 +11,40 @@ export class DiscountController {
         appliedDiscountType,
         discountPercentage,
         discountAmount,
-        appliedOnProductIds,
+        selectedProductIds,
+        minimumPurchaseAmount,
       } = req.body;
-      const discount = await prisma.discount.create({
-        data: {
-          name,
-          discountType,
-          appliedDiscountType,
-          discountPercentage,
-          discountAmount,
-          ProductDiscount: {
-            create: appliedOnProductIds.map((productId: number) => ({
-              productId,
-            })),
+
+      if (selectedProductIds) {
+        const discount = await prisma.discount.create({
+          data: {
+            name,
+            discountType,
+            appliedDiscountType,
+            discountPercentage,
+            discountAmount,
+            minimumPurchaseAmount,
+            ProductDiscount: {
+              create: selectedProductIds.map((productId: number) => ({
+                productId,
+              })),
+            },
           },
-        },
-      });
-      res.status(201).json(discount);
+        });
+        res.status(201).json(discount);
+      } else {
+        const discount = await prisma.discount.create({
+          data: {
+            name,
+            discountType,
+            appliedDiscountType,
+            discountPercentage,
+            discountAmount,
+            minimumPurchaseAmount,
+          },
+        });
+        res.status(201).json(discount);
+      }
     } catch (err) {
       res.status(400).send({
         status: 'error',
@@ -127,7 +144,8 @@ export class DiscountController {
         appliedDiscountType,
         discountPercentage,
         discountAmount,
-        appliedOnProductIds,
+        selectedProductIds,
+        minimumPurchaseAmount,
       } = req.body;
 
       const discount = await prisma.discount.update({
@@ -138,6 +156,12 @@ export class DiscountController {
           appliedDiscountType,
           discountPercentage,
           discountAmount,
+          minimumPurchaseAmount,
+          ProductDiscount: {
+            create: selectedProductIds.map((productId: number) => ({
+              productId,
+            })),
+          },
         },
       });
 
@@ -147,7 +171,7 @@ export class DiscountController {
       });
 
       await prisma.productDiscount.createMany({
-        data: appliedOnProductIds.map((productId: number) => ({
+        data: selectedProductIds.map((productId: number) => ({
           discountId: Number(id),
           productId,
         })),

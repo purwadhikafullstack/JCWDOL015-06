@@ -20,22 +20,7 @@ export class ProductRouter {
     this.router.post(
       '/upload-images',
       upload.array('images', 5),
-      async (req, res) => {
-        try {
-          const filePaths = Array.isArray(req.files)
-            ? req.files.map((file: Express.Multer.File) => file.path)
-            : [];
-          res.json({
-            message: 'Files uploaded successfully',
-            files: filePaths,
-          });
-        } catch (error) {
-          res.status(400).send({
-            status: 'error',
-            msg: error,
-          });
-        }
-      },
+      this.productController.uploadImage,
     );
   }
 

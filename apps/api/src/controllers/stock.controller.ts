@@ -45,25 +45,15 @@ export class StockController {
         ],
       } as any;
 
-      if (productId && storeId) {
-        whereFilter.OR.push({
-          AND: [
-            {
-              productId: { equals: Number(productId) },
-            },
-            {
-              storeId: { equals: Number(storeId) },
-            },
-          ],
-        });
-      }
-
-      if (storeId && !productId) {
+      if (storeId && productId) {
         whereFilter = {
           AND: [
             whereFilter,
             {
               storeId: { equals: Number(storeId) },
+            },
+            {
+              productId: { equals: Number(productId) },
             },
           ],
         };

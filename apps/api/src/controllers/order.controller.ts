@@ -50,11 +50,11 @@ export class OrderController {
 
       const whereFilter = {
         AND: [
-          {
-            orderItems: {
-              product: { productName: { contains: productName as string } },
-            },
-          },
+          // {
+          //   orderItems: {
+          //     product: { productName: { contains: productName as string } },
+          //   },
+          // },
           { store: { name: { contains: storeName as string } } },
           {
             OR: [
@@ -65,6 +65,12 @@ export class OrderController {
           },
         ],
       } as any;
+
+      if (storeId) {
+        whereFilter.AND.push({
+          storeId: { equals: Number(storeId) },
+        });
+      }
       if (
         start_date &&
         typeof start_date === 'string' &&
@@ -102,15 +108,10 @@ export class OrderController {
           },
         });
       }
-      if (storeId) {
-        whereFilter.AND.push({
-          storeId: { equals: Number(storeId) },
-        });
-      }
 
       const [orders, total] = await prisma.$transaction([
         prisma.order.findMany({
-          // where: whereFilter,
+          where: whereFilter,
           include: {
             orderItems: {
               include: {
@@ -119,13 +120,14 @@ export class OrderController {
               },
             },
             store: true,
+            discount: true,
           },
           skip,
           take,
           orderBy: { createdAt: 'desc' },
         }),
         prisma.order.count({
-          // where: whereFilter,
+          where: whereFilter,
         }),
       ]);
 

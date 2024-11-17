@@ -39,7 +39,7 @@ export default function ProductsTable({
     return (
       <TableHeader>
         {header.map((item, index) => (
-          <TableColumn key={item} className="text-md text-gray-700">
+          <TableColumn allowsSorting key={item} className="text-md text-gray-700">
             {item}
           </TableColumn>
         ))}
@@ -49,32 +49,34 @@ export default function ProductsTable({
 
   const renderTableRow = (product: Product) => {
     const tableCells = [
-      <TableCell key={product.id}>{product.productName}</TableCell>,
-      <TableCell key={product.id}>Rp. {product.price?.toLocaleString('id-ID')}</TableCell>,
-      <TableCell key={product.id} className="max-w-[100px]">
+      <TableCell key={`name-${product.id}`}>{product.productName}</TableCell>,
+      <TableCell key={`price-${product.id}`}>Rp. {product.price?.toLocaleString('id-ID')}</TableCell>,
+      <TableCell key={`category-${product.id}`} className="max-w-[100px]">
         {product?.category?.name ?? '-'}
       </TableCell>,
-      <TableCell key={product.id} className="max-w-[100px] truncate">
+      <TableCell key={`desc-${product.id}`} className="max-w-[100px] truncate">
         <span className="truncate">{product.desc}</span>
       </TableCell>,
-      <TableCell key={product.id}>
-        <div className="flex flex-col gap-1 bg-gray-100 p-2 m-1 rounded-md">
-          {product.Stock?.map((stock) => {
-            return (
-              <div>
-                <span key={stock.id} className="text-xs bg-gray-200 px-2 py-1 rounded-md">
-                  {stock.store?.name}: {stock.quantity}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+      <TableCell key={`stock-${product.id}`}>
+        {product.Stock && product.Stock?.length > 0 && (
+          <div className="flex flex-col gap-1 bg-gray-100 p-2 m-1 rounded-md">
+            {product.Stock?.map((stock) => {
+              return (
+                <div key={`stock-details-${stock.id}`}>
+                  <span className="text-xs bg-gray-200 px-2 py-1 rounded-md">
+                    {stock.store?.name}: {stock.quantity}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </TableCell>
     ];
 
     if (isAdmin) {
       tableCells.push(
-        <TableCell key={product.id}>
+        <TableCell key={`action-${product.id}`}>
           <div className="flex gap-2">
             <Button
               size="sm"
@@ -116,7 +118,7 @@ export default function ProductsTable({
     <>
       <Table aria-label="Products Table">
         {renderTableHeader()}
-        <TableBody>{products.map((product) => renderTableRow(product))}</TableBody>
+        <TableBody emptyContent={'No product found'}>{products.map((product) => renderTableRow(product))}</TableBody>
       </Table>
       <Pagination
         showControls

@@ -1,27 +1,35 @@
 'use client';
 
+import { getProductById } from '@/api/product.api';
 import AddEditProductForm from '@/components/admin/AddEditProduct';
 import { Product, dummyProducts } from '@/types/types';
+import { toastFailed } from '@/utils/toastHelper';
 import { Spinner } from '@nextui-org/react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 const EditProduct = () => {
-  const handleSubmit = async (product: Product) => {
-    console.log(product);
-  };
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [product, setProduct] = useState<Product | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    if (id) {
-      const foundProduct = dummyProducts.find((prod) => prod.id === Number(id));
-      if (foundProduct) {
-        setProduct(foundProduct);
+    const getDetails = async () => {
+      if (id) {
+        try {
+          const response = await getProductById(Number(id));
+          console.log(response);
+          setProduct(response);
+        } catch (err) {
+          toastFailed('Failed to fetch product');
+          router.back();
+        }
       }
-    }
-  }, [id]);
+    };
+
+    getDetails();
+  }, [id, router]);
 
   if (!product) {
     return (
@@ -35,7 +43,7 @@ const EditProduct = () => {
   return (
     <div style={{ padding: '20px' }}>
       <div className="text-lg font-semibold">Edit Product</div>
-      <AddEditProductForm onSubmit={handleSubmit} data={product} mode="edit" />
+      <AddEditProductForm data={product} mode="edit" />
     </div>
   );
 };

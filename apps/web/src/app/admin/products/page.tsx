@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Input } from '@nextui-org/react';
-import { FaSearch } from 'react-icons/fa';
-import { Product, Role } from '@/types/types';
+import { Button, Input, Select, SelectItem } from '@nextui-org/react';
+import { Category, Product, Role } from '@/types/types';
 import { fetchProducts, deleteProduct } from '@/api/product.api';
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useRouter } from 'next/navigation';
 import ProductsTable from '@/components/common/ProductTable';
+import { fetchCategories } from '@/api/category.api';
 
 const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,14 +17,35 @@ const ProductsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [totalProducts, setTotalProducts] = useState<number>();
   const [nameFilter, setNameFilter] = useState<string | undefined>();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set([]));
   const router = useRouter();
   const pageSize = 10;
 
+  useEffect(() => {
+    const getStores = async () => {
+      const response = await fetchCategories({ page: 1, pageSize: 100 });
+      const categoriesResponse = response.categories?.map((store: any) => {
+        return {
+          ...store,
+          id: String(store.id)
+        };
+      });
+      setCategories(categoriesResponse);
+    };
+
+    getStores();
+  }, []);
+
   const loadProducts = useCallback(async () => {
     try {
+      const selectedCategoryIds = Array.from(selectedCategories);
       const queryParams = { page: currentPage, pageSize } as { [key: string]: any };
       if (nameFilter) {
         queryParams.name = nameFilter;
+      }
+      if (selectedCategoryIds) {
+        queryParams.categoryIds = selectedCategoryIds;
       }
       const response = await fetchProducts(queryParams);
       setProducts(response.products);
@@ -34,7 +55,12 @@ const ProductsPage = () => {
       setProducts([]);
       setTotalProducts(0);
     }
-  }, [currentPage, nameFilter]);
+  }, [currentPage, nameFilter, selectedCategories]);
+
+  const onResetFilter = () => {
+    setNameFilter('');
+    setSelectedCategories(new Set([]));
+  };
 
   useEffect(() => {
     setCurrentPage(1);
@@ -63,6 +89,7 @@ const ProductsPage = () => {
         await deleteProduct(selectedProduct?.id);
         toastSuccess('Deleted product successfully');
         setIsDeleteModalOpen(false);
+        setCurrentPage(1);
         loadProducts();
       } catch (err) {
         toastFailed('Failed to delete product');
@@ -86,7 +113,26 @@ const ProductsPage = () => {
           Add New
         </Button>
         <Input size="sm" label="Search by Name" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} />
-        <FaSearch className="ml-2 text-gray-500" />
+        <Select
+          fullWidth
+          multiple={true}
+          label="Filter By Cateogry"
+          selectedKeys={selectedCategories}
+          onSelectionChange={(e) => {
+            const newCategories = [...selectedCategories, String(e.currentKey)];
+
+            setSelectedCategories(new Set([...newCategories]));
+          }}
+        >
+          {categories?.map((category) => (
+            <SelectItem key={category.id} textValue={category.name} value={category.id}>
+              {category.name}
+            </SelectItem>
+          ))}
+        </Select>
+        <Button className="bg-gray-100" onClick={onResetFilter}>
+          Reset
+        </Button>
       </div>
 
       <ProductsTable

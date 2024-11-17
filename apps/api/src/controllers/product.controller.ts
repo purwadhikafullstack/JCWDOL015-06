@@ -20,18 +20,29 @@ export class ProductController {
 
   async getProducts(req: Request, res: Response) {
     try {
-      const { name, category, page = 1, pageSize = 10 } = req.query;
+      const { name, categoryIds, page = 1, pageSize = 10 } = req.query;
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
+      const whereFilter = {
+        AND: [{ productName: { contains: name as string } }],
+      } as any;
+
+      const modifiedCategoryIds = Array.isArray(categoryIds)
+        ? categoryIds
+        : categoryIds
+          ? [categoryIds]
+          : [];
+
+      if (modifiedCategoryIds && modifiedCategoryIds.length > 0) {
+        whereFilter.AND.push({
+          categoryId: { in: modifiedCategoryIds.map((id) => Number(id)) },
+        });
+      }
+
       const [products, total] = await prisma.$transaction([
         prisma.product.findMany({
-          where: {
-            AND: [
-              { productName: { contains: name as string } },
-              { category: { name: { contains: category as string } } },
-            ],
-          },
+          where: whereFilter,
           include: {
             category: true,
             productDiscounts: {
@@ -49,12 +60,7 @@ export class ProductController {
           take,
         }),
         prisma.product.count({
-          where: {
-            AND: [
-              { productName: { contains: name as string } },
-              { category: { name: { contains: category as string } } },
-            ],
-          },
+          where: whereFilter,
         }),
       ]);
 
@@ -132,6 +138,29 @@ export class ProductController {
       res.status(400).send({
         status: 'error',
         msg: err,
+      });
+    }
+  }
+
+  async uploadImage(req: Request, res: Response) {
+    try {
+      console.log(req.files);
+      console.log('something something');
+      const filePaths = Array.isArray(req.files)
+        ? req.files.map((file: Express.Multer.File) => {
+            const fileSplit = file.path?.split('/');
+            const path = fileSplit[fileSplit.length - 1];
+            return `/${path}`;
+          })
+        : [];
+      res.json({
+        message: 'Files uploaded successfully',
+        files: filePaths,
+      });
+    } catch (error) {
+      res.status(400).send({
+        status: 'error',
+        msg: error,
       });
     }
   }

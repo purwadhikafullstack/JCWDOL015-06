@@ -75,14 +75,13 @@ model ProductDiscount {
 model Discount {
   id                    Int       @id @default(autoincrement())
   name                  String
-  discountType          DiscountType
+  discountType          DiscountType?
   appliedDiscountType   AppliedDiscountType
   discountPercentage    Int?
   discountAmount        Int?
   minimumPurchaseAmount Int?
 
   ProductDiscount ProductDiscount[]
-
   Cart Cart[]
   CartItem CartItem[]
   Order Order[]

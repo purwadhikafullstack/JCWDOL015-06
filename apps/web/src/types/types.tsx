@@ -57,7 +57,7 @@ export interface Product {
 }
 
 export interface Discount {
-  id: number;
+  id?: number;
   name: string;
   discountType: DiscountType;
   discountAmount?: number | null;
@@ -65,6 +65,13 @@ export interface Discount {
   appliedDiscountType: AppliedDiscountType;
   minimumPurchaseAmount?: number;
   products?: Product[];
+  selectedProductIds?: number[] | string[];
+  selectedProducts?: Product[];
+  ProductDiscount?: {
+    id?: number;
+    productId?: number;
+    product?: Product[];
+  }[];
 }
 
 export interface Stock {

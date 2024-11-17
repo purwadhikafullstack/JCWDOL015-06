@@ -47,6 +47,10 @@ const CategoriesPage = () => {
     }
   }, [currentPage, nameFilter]);
 
+  const onResetFilter = () => {
+    setNameFilter('');
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [nameFilter]);
@@ -105,6 +109,7 @@ const CategoriesPage = () => {
         await deleteCategory(selectedCategory?.id);
         toastSuccess('Deleted category successfully');
         setIsDeleteModalOpen(false);
+        setCurrentPage(1);
         loadCategories();
       } catch (err) {
         toastFailed('Failed to delete category');
@@ -132,7 +137,9 @@ const CategoriesPage = () => {
           Add New
         </Button>
         <Input size="sm" label="Search by Name" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} />
-        <FaSearch className="ml-2 text-gray-500" />
+        <Button className="bg-gray-100" onClick={onResetFilter}>
+          Reset
+        </Button>
       </div>
 
       <Table
@@ -142,12 +149,12 @@ const CategoriesPage = () => {
         aria-label="Categories Table"
       >
         <TableHeader>
-          <TableColumn allowsSorting={true} className="text-md text-gray-700">
+          <TableColumn allowsSorting className="text-md text-gray-700">
             Name
           </TableColumn>
           <TableColumn className="text-md text-gray-700">Action</TableColumn>
         </TableHeader>
-        <TableBody>
+        <TableBody emptyContent={'No category found'}>
           {categories.map((category) => (
             <TableRow key={category.id}>
               <TableCell>{category.name}</TableCell>

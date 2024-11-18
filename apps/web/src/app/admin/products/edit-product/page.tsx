@@ -1,8 +1,8 @@
 'use client';
 
-import { getProductById } from '@/lib/product.api';
+import { getProductById } from '@/api/product.api';
 import AddEditProductForm from '@/components/admin/AddEditProduct';
-import { Product, dummyProducts } from '@/types/types';
+import { Product } from '@/types/types';
 import { toastFailed } from '@/utils/toastHelper';
 import { Spinner } from '@nextui-org/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -19,7 +19,7 @@ const EditProduct = () => {
       if (id) {
         try {
           const response = await getProductById(Number(id));
-          console.log(response);
+
           setProduct(response);
         } catch (err) {
           toastFailed('Failed to fetch product');

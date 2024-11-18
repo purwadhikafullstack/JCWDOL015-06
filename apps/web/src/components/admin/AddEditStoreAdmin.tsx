@@ -13,7 +13,7 @@ import {
   SelectItem
 } from '@nextui-org/react';
 import { Store, StoreAdmin } from '@/types/types';
-import { fetchStores } from '@/lib/store.api';
+import { fetchStores } from '@/api/store.api';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 
 interface AddEditStoreAdminProps {

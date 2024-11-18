@@ -15,8 +15,8 @@ import {
   AutocompleteItem
 } from '@nextui-org/react';
 import { Store, Stock, Product } from '@/types/types';
-import { fetchStores } from '@/lib/store.api';
-import { fetchProducts } from '@/lib/product.api';
+import { fetchStores } from '@/api/store.api';
+import { fetchProducts } from '@/api/product.api';
 
 interface AddEditStockProps {
   isOpen: boolean;

@@ -3,12 +3,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Input, Select, SelectItem } from '@nextui-org/react';
 import { Category, Product, Role } from '@/types/types';
-import { fetchProducts, deleteProduct } from '@/lib/product.api';
+import { fetchProducts, deleteProduct } from '@/api/product.api';
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useRouter } from 'next/navigation';
 import ProductsTable from '@/components/common/ProductTable';
-import { fetchCategories } from '@/lib/category.api';
+import { fetchCategories } from '@/api/category.api';
 
 const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);

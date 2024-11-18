@@ -1,13 +1,32 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { dummyProducts } from '@/types/types';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Product } from '@/types/types';
 import { useRouter } from 'next/navigation';
 import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from 'react-icons/md';
+import { fetchProducts } from '@/api/product.api';
+import { toastFailed } from '@/utils/toastHelper';
+import { FaCircle } from 'react-icons/fa';
 
 const Carousel: React.FC = () => {
   const router = useRouter();
-  const promoProducts = dummyProducts.slice(0, 3);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const loadProducts = useCallback(async () => {
+    try {
+      const queryParams = { page: 1, pageSize: 5 } as { [key: string]: any };
+
+      const response = await fetchProducts(queryParams);
+      setProducts(response.products);
+    } catch (err) {
+      toastFailed('Failed to fetch products');
+      setProducts([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -16,18 +35,12 @@ const Carousel: React.FC = () => {
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % promoProducts.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % products.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex === 0 ? promoProducts.length - 1 : prevIndex - 1));
+    setCurrentIndex((prevIndex) => (prevIndex === 0 ? products.length - 1 : prevIndex - 1));
   };
-
-  useEffect(() => {
-    const interval = setInterval(nextSlide, 3000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className="relative w-full p-4 mx-auto overflow-hidden">
@@ -35,10 +48,18 @@ const Carousel: React.FC = () => {
         className="flex w-full transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
-        {promoProducts.map((product) => (
-          <div key={product.id} className="w-full flex-shrink-0 relative" onClick={() => handleClick(product.id)}>
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className="w-full flex-shrink-0 relative"
+            onClick={() => handleClick(Number(product.id))}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={product.imageUrls[0]} alt={product.productName} className="w-full h-[60vh] object-cover" />
+            <img
+              src={`http://localhost:8000/uploads/${product.imageUrls?.split(',')?.[0]}`}
+              alt={product.productName}
+              className="w-full h-[60vh] object-cover"
+            />
           </div>
         ))}
       </div>
@@ -57,12 +78,10 @@ const Carousel: React.FC = () => {
       </button>
 
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2 z-10">
-        {promoProducts.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`h-2 w-2 rounded-full ${currentIndex === index ? 'bg-gray-800' : 'bg-gray-400'}`}
-          ></button>
+        {products.map((_, index) => (
+          <button key={index} onClick={() => setCurrentIndex(index)}>
+            <FaCircle size={12} className={`${currentIndex === index ? 'text-gray-800' : 'text-gray-400'}`} />
+          </button>
         ))}
       </div>
     </div>

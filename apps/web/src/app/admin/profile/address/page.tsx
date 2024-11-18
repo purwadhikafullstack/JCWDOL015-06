@@ -5,15 +5,15 @@ import Swal from 'sweetalert2';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import * as yup from 'yup';
 import { Wrapper } from '@/components/Wrapper';
-import { Button } from '@nextui-org/react';
+import { Button, Skeleton } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
 import {
-  createAddress,
+  createAddressAdmin,
   deleteAddress,
-  getAccountAddress,
+  getAdminAddress,
   getCitiesByProvince,
   getProvinces,
-  setMainAddress
+  setMainAddressAdmin
 } from '@/lib/address';
 import { toastFailed } from '@/utils/toastHelper';
 
@@ -29,7 +29,7 @@ const schema = yup.object().shape({
   desc: yup.string().required('Please Fill In Address Detail')
 });
 
-export default function UpdateAddress() {
+export default function AdminAddress() {
   const router = useRouter();
 
   const swalSuccess = (message: string) =>
@@ -55,7 +55,7 @@ export default function UpdateAddress() {
   useEffect(() => {
     const getAddress = async () => {
       try {
-        const { result } = await getAccountAddress();
+        const { result } = await getAdminAddress();
 
         if (result.status !== 'ok') throw result.msg;
 
@@ -111,7 +111,7 @@ export default function UpdateAddress() {
   ) => {
     try {
 
-      const { result } = await createAddress(data);
+      const { result } = await createAddressAdmin(data);
 
       if (result.status != 'ok') throw `${result.msg}`;
 
@@ -134,7 +134,7 @@ export default function UpdateAddress() {
 
   const handleMainChange = async (id: number) => {
     try {
-      const { result } = await setMainAddress(id);
+      const { result } = await setMainAddressAdmin(id);
 
       if (result.status !== 'ok') throw result.msg;
 
@@ -167,7 +167,7 @@ export default function UpdateAddress() {
   };
 
   return (
-    <Wrapper additional="border-0 flex-col justify-center items-center gap-8">
+    <Wrapper additional="border-0 md:p-7 flex-col justify-center items-center gap-8">
       {accountAddress ? (
         accountAddress.map((a) => (
           <div
@@ -217,14 +217,13 @@ export default function UpdateAddress() {
           </div>
         ))
       ) : (
-        <div className="flex flex-col w-full h-fit p-5 border-4 border-red-400">
+        <div className="flex flex-col w-full h-fit p-5 border-4 gap-6">
           <div className="flex">
-            <h1>City</h1>
-            <h1>Province</h1>
+          <Skeleton className="flex rounded-lg w-full max-w-24" />
+          <Skeleton className="flex rounded-lg w-full max-w-24" />
           </div>
           <div className="flex">
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Minima reprehenderit esse itaque repudiandae
-            veritatis.
+          <Skeleton className="flex rounded-lg w-full max-w-32" />
           </div>
         </div>
       )}

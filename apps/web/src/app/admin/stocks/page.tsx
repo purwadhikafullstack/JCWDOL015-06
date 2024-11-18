@@ -14,11 +14,11 @@ import {
 } from '@nextui-org/react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Stock, Role } from '@/types/types';
-import { fetchStocks, getStockById, createStock, updateStock, deleteStock } from '@/lib/stock.api';
+import { fetchStocks, getStockById, createStock, updateStock, deleteStock } from '@/api/stock.api';
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import AddEditStock from '@/components/admin/AddEditStock';
-import { createStockHistory } from '@/lib/stockHistory.api';
+import { createStockHistory } from '@/api/stockHistory.api';
 
 const StocksPage = () => {
   const [currentPage, setCurrentPage] = useState(1);

@@ -16,7 +16,7 @@ import {
 } from '@nextui-org/react';
 import { FaPencilAlt, FaSearch, FaTrash } from 'react-icons/fa';
 import { Discount, Role } from '@/types/types';
-import { fetchDiscounts, getDiscountById, createDiscount, updateDiscount, deleteDiscount } from '@/lib/discount.api';
+import { fetchDiscounts, getDiscountById, createDiscount, updateDiscount, deleteDiscount } from '@/api/discount.api';
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import AddEditDiscount from '@/components/admin/AddEditDiscount';

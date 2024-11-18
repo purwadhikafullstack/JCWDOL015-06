@@ -15,7 +15,7 @@ import {
   Button
 } from '@nextui-org/react';
 import { parseDate, getLocalTimeZone } from '@internationalized/date';
-import { fetchOrders } from '@/lib/order.api';
+import { fetchOrders } from '@/api/order.api';
 import { toastFailed } from '@/utils/toastHelper';
 
 const OrderReport = () => {

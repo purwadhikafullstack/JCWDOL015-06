@@ -45,6 +45,17 @@ export class StockController {
         ],
       } as any;
 
+      if (storeId) {
+        whereFilter = {
+          AND: [
+            whereFilter,
+            {
+              storeId: { equals: Number(storeId) },
+            },
+          ],
+        };
+      }
+
       if (storeId && productId) {
         whereFilter = {
           AND: [
@@ -68,6 +79,11 @@ export class StockController {
           },
           skip,
           take,
+          orderBy: [
+            {
+              quantity: 'desc',
+            },
+          ],
         }),
         prisma.stock.count({
           where: whereFilter,

@@ -15,6 +15,20 @@ export const getAccountAddress = async () => {
   return { result };
 };
 
+export const getAdminAddress = async () => {
+  const token = await getToken();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}address/admin`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const result = await res.json();
+
+  return { result };
+};
+
 export const getProvincesAndCities = async () => {
   const res1 = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}address/provinces`, {
     method: 'GET'
@@ -69,9 +83,47 @@ export const createAddress = async (data: IAddressCreate) => {
   return { result };
 };
 
-export const updateAddress = async (id: number) => {
+export const createAddressAdmin = async (data: IAddressCreate) => {
+  const token = await getToken();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}address/admin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      provinceId: data.provinceId,
+      cityId: data.cityId,
+      desc: data.desc
+    })
+  });
+
+  const result = await res.json();
+
+  return { result };
+};
+
+export const setMainAddress = async (id: number) => {
   const token = await getToken();
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}address/user`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      id: id
+    })
+  });
+
+  const result = await res.json();
+
+  return { result };
+};
+
+export const setMainAddressAdmin = async (id: number) => {
+  const token = await getToken();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}address/admin`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',

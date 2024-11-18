@@ -1,28 +1,18 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
+import { CartItem } from '@prisma/client';
 
 export class CartController {
   async createCart(req: Request, res: Response) {
     try {
-      const {
-        discountId,
-        totalPrice,
-        totalDiscount,
-        storeId,
-        cartItemIds,
-        userId,
-      } = req.body;
+      const { storeId, userId } = req.body;
 
       const cart = await prisma.cart.create({
         data: {
-          discountId,
-          totalPrice,
-          totalDiscount,
           storeId,
           userId,
-          cartItems: {
-            connect: cartItemIds.map((id: number) => ({ id })),
-          },
+          totalDiscount: 0,
+          totalPrice: 0,
         },
       });
 
@@ -37,18 +27,21 @@ export class CartController {
 
   async getCarts(req: Request, res: Response) {
     try {
-      const { userName, userId, page = 1, pageSize = 10 } = req.query;
+      const { userId, storeId, page = 1, pageSize = 10 } = req.query;
       const skip = (Number(page) - 1) * Number(pageSize);
       const take = Number(pageSize);
 
+      const whereFilter = {
+        AND: [{ userId: Number(userId) }],
+      } as any;
+
+      if (storeId) {
+        whereFilter.AND.push({ storeId: Number(storeId) });
+      }
+
       const [carts, total] = await prisma.$transaction([
         prisma.cart.findMany({
-          where: {
-            OR: [
-              { user: { username: { contains: userName as string } } },
-              { userId: Number(userId) },
-            ],
-          },
+          where: whereFilter,
           include: {
             cartItems: {
               include: {
@@ -64,12 +57,7 @@ export class CartController {
           take,
         }),
         prisma.cart.count({
-          where: {
-            OR: [
-              { user: { username: { contains: userName as string } } },
-              { userId: Number(userId) },
-            ],
-          },
+          where: whereFilter,
         }),
       ]);
 
@@ -116,8 +104,42 @@ export class CartController {
   async updateCart(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { discountId, totalPrice, totalDiscount, storeId, cartItemIds } =
-        req.body;
+      const { discountId, totalPrice, totalDiscount, cartItems } = req.body;
+
+      if (!Array.isArray(cartItems) || cartItems.length === 0) {
+        return res.status(400).json({
+          status: 'error',
+          msg: 'cartItems array must be provided and cannot be empty.',
+        });
+      }
+
+      // Update cartItem
+      await prisma.cartItem.deleteMany({
+        where: { cartId: Number(id) },
+      });
+
+      await Promise.all(
+        cartItems.map(async (cartItem: any) => {
+          const {
+            productId,
+            quantity,
+            discountId: cartItemDiscountId,
+            totalPrice,
+            totalDiscount,
+          } = cartItem;
+
+          return prisma.cartItem.create({
+            data: {
+              cartId: Number(id),
+              productId,
+              quantity,
+              discountId: cartItemDiscountId || null,
+              totalPrice,
+              totalDiscount,
+            },
+          });
+        }),
+      );
 
       const cart = await prisma.cart.update({
         where: { id: Number(id) },
@@ -125,10 +147,6 @@ export class CartController {
           discountId,
           totalPrice,
           totalDiscount,
-          storeId,
-          cartItems: {
-            set: cartItemIds.map((id: number) => ({ id })),
-          },
         },
         include: {
           cartItems: {

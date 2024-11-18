@@ -7,8 +7,8 @@ import { Input, Textarea, Button, Select, SelectItem } from '@nextui-org/react';
 // import Image from 'next/image';
 import { Category, Product } from '@/types/types';
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
-import { createProduct, updateProduct } from '@/lib/product.api';
-import { fetchCategories } from '@/lib/category.api';
+import { createProduct, updateProduct } from '@/api/product.api';
+import { fetchCategories } from '@/api/category.api';
 
 interface AddEditProductFormProps {
   mode: 'add' | 'edit';
@@ -59,7 +59,13 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
       setPrice(data.price ?? 0);
       setSelectedCategory(data?.category?.id ? new Set([String(data?.category?.id)]) : new Set());
       if (data.imageUrls) {
-        setImagePreviews(data.imageUrls.split(','));
+        let baseImagePath = 'http://localhost:8000/uploads';
+
+        const imageUrlsAsArray = data.imageUrls.split(',');
+        const imageUrlsAsArrayRender = imageUrlsAsArray.map((val) => {
+          return `${baseImagePath}${val}`;
+        });
+        setImagePreviews(imageUrlsAsArrayRender);
       }
     }
   }, [mode, data]);
@@ -105,8 +111,6 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log(images);
-
       //upload image
       if (images?.length > 0) {
         try {
@@ -119,19 +123,11 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
           });
 
           const result = await response.json();
-          console.log(result);
-          const imageUrls = result.files.join(',');
-          console.log(imageUrls);
-
-          console.log({
-            id: data?.id,
-            productName: name,
-            desc: description,
-            price: Number(price),
-            weight: Number(weight),
-            imageUrls,
-            categoryId: Number(Array.from(selectedCategory)[0])
-          });
+          let imageUrls = result.files.join(',');
+          if (data?.imageUrls && data?.imageUrls.split(',')?.length > 0) {
+            const allImageUrls = data?.imageUrls.split(',').concat(result.files);
+            imageUrls = allImageUrls.join(',');
+          }
 
           if (data?.id && mode == 'edit') {
             //edit
@@ -141,7 +137,7 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
                 desc: description,
                 price: Number(price),
                 weight: Number(weight),
-                imageUrls,
+                imageUrls: imageUrls,
                 categoryId: Number(Array.from(selectedCategory)[0])
               });
               toastSuccess('Updated product successfully');
@@ -280,7 +276,6 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
                 <span className="text-lg">Image Previews:</span>
                 <div className="flex flex-wrap gap-2">
                   {imagePreviews.map((preview, index) => {
-                    console.log(preview);
                     let baseImagePath = 'http://localhost:8000/uploads/';
                     let imagePath = preview;
                     if (preview.startsWith('/')) {
@@ -367,6 +362,7 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
           <button onClick={handlePrevImage} className="absolute left-4 text-white text-2xl">
             &lt;
           </button>
+
           <img
             src={imagePreviews[currentImageIndex]}
             alt={`Product Preview ${currentImageIndex + 1}`}

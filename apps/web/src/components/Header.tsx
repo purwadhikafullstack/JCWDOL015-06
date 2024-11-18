@@ -100,11 +100,13 @@ export const Header = () => {
             Contact
           </a>
           {userRole == 'USER' && (
-            <Button className="relative">
+            <Button
+              onClick={() => {
+                router.push('/user/carts');
+              }}
+              className="relative"
+            >
               <FaShoppingCart />
-              <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
-                3
-              </span>
             </Button>
           )}
 
@@ -133,6 +135,9 @@ export const Header = () => {
                   <Avatar isBordered color="success" src="https://i.pravatar.cc/150?u=a042581f4e29026704d" size="md" />
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Static Actions">
+                <DropdownItem key="new" onPress={() => router.push('/admin/profile/address')}>
+                    Address
+                  </DropdownItem>
                   <DropdownItem key="delete" onPress={logoutAction} className="text-danger" color="danger">
                     Logout
                   </DropdownItem>

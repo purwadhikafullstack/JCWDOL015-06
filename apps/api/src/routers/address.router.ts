@@ -35,6 +35,21 @@ export class AddressRouter {
       verifyToken,
       this.addressController.createAddress,
     );
+    this.router.get(
+      '/admin',
+      verifyToken,
+      this.addressController.getAdminAddress,
+    );
+    this.router.patch(
+      '/admin',
+      verifyToken,
+      this.addressController.setMainAddressAdmin,
+    );
+    this.router.post(
+      '/admin',
+      verifyToken,
+      this.addressController.createAddressAdmin,
+    );
     this.router.delete(
       '/user',
       this.addressController.deleteAddress,

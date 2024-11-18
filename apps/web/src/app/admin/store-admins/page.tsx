@@ -20,7 +20,7 @@ import {
   createStoreAdmin,
   updateStoreAdmin,
   deleteStoreAdmin
-} from '@/lib/storeAdmin.api';
+} from '@/api/storeAdmin.api';
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import AddEditStoreAdmin from '@/components/admin/AddEditStoreAdmin';

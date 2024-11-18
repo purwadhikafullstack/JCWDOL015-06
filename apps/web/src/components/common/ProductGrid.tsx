@@ -3,6 +3,7 @@
 import React from 'react';
 import { Pagination } from '@nextui-org/react';
 import { Product } from '@/types/types';
+import { useRouter } from 'next/navigation';
 
 interface PaginationProps {
   totalPage: number;
@@ -17,13 +18,17 @@ interface ProductsGridProps {
 
 export default function ProductsGrid({ products, pagination, onChangePage }: Readonly<ProductsGridProps>) {
   let baseImagePath = 'http://localhost:8000/uploads/';
+  const router = useRouter();
 
   return (
-    <>
+    <div className="flex flex-col ">
       <div className="my-2 text-lg font-semibold">Products</div>
       <div className="flex flex-wrap gap-4">
         {products.map((product) => (
           <div
+            onClick={() => {
+              router.push(`/user/products/detail?id=${product.id}`);
+            }}
             key={product.id}
             className="flex flex-col items-center p-4 border rounded-lg shadow-md min-w-[200px] h-[220px] transition-transform transform hover:cursor-pointer hover:scale-105"
           >
@@ -45,6 +50,6 @@ export default function ProductsGrid({ products, pagination, onChangePage }: Rea
         initialPage={pagination.currentPage}
         onChange={(page) => onChangePage(page)}
       />
-    </>
+    </div>
   );
 }

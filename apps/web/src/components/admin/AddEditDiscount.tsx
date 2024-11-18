@@ -13,7 +13,7 @@ import {
   ModalContent
 } from '@nextui-org/react';
 import { Discount, Product } from '@/types/types';
-import { fetchProducts } from '@/lib/product.api';
+import { fetchProducts } from '@/api/product.api';
 
 interface AddEditDiscountProps {
   addEditMode: 'add' | 'edit';

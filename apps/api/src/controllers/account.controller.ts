@@ -315,7 +315,7 @@ export class AccountController {
         });
 
         res.redirect(
-          `${process.env.NEXT_URL}customer/auth-google/callback?token=${token}`,
+          `${process.env.NEXT_URL}login/auth-google/callback?token=${token}`,
         );
       } else {
         // Upload user registration to database
@@ -698,7 +698,7 @@ export class AccountController {
       const compiledTemplate = handlebars.compile(templateSource);
       const html = compiledTemplate({
         name: `${existingUser.firstName} ${existingUser.lastName}`,
-        link: `${process.env.NEXT_URL}customer/verification/${token}`,
+        link: `${process.env.NEXT_URL}user/verification/${token}`,
       });
 
       await transporter.sendMail({

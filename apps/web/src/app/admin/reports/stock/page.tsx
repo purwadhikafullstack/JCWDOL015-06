@@ -15,7 +15,7 @@ import {
   Button
 } from '@nextui-org/react';
 import { parseDate, getLocalTimeZone } from '@internationalized/date';
-import { fetchStockHistories } from '@/lib/stockHistory.api';
+import { fetchStockHistories } from '@/api/stockHistory.api';
 import { toastFailed } from '@/utils/toastHelper';
 
 const StockHistoryReport = () => {

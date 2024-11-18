@@ -14,7 +14,7 @@ import {
 } from '@nextui-org/react';
 import { FaPencilAlt, FaSearch, FaTrash } from 'react-icons/fa';
 import { Category, Role } from '@/types/types';
-import { fetchCategories, getCategoryById, createCategory, updateCategory, deleteCategory } from '@/lib/category.api';
+import { fetchCategories, getCategoryById, createCategory, updateCategory, deleteCategory } from '@/api/category.api';
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import AddEditCategory from '@/components/Admin/AddEditCategory';

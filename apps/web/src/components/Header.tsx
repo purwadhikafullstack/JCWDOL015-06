@@ -1,76 +1,28 @@
 'use client';
 
-import { useAppDispatch, useAppSelector } from '@/redux/store';
-import { setLoginState, setLogoutState } from '@/redux/slice/accountSlice';
-import Login from './Authentication/Login';
-import Register from './Authentication/Register';
-import { Wrapper } from './Wrapper';
-import { IoSearch, IoCartOutline } from 'react-icons/io5';
-import { useEffect } from 'react';
-import { deleteToken, getToken } from '@/lib/cookie';
-import { Input, Button } from '@nextui-org/react';
+import { Avatar, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react';
 import { FaShoppingCart } from 'react-icons/fa';
-import { getAccountDetail } from '@/lib/account';
+import { usePathname } from 'next/navigation';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { logout } from '@/store/slices/authSlice';
+import { deleteToken } from '@/lib/cookie';
 import Swal from 'sweetalert2';
+import { PiListMagnifyingGlassLight } from 'react-icons/pi';
 import { useRouter } from 'next/navigation';
 
-export const Header: React.FC = () => {
+export const Header = () => {
+  const currentRoute = usePathname();
   const dispatch = useAppDispatch();
+  const userRole = useAppSelector((state) => state.auth.userRole);
 
-  const accountState = useAppSelector((state) => state.account.accountState);
-
-  const emailState = useAppSelector((state) => state.account.email);
-
-  const router = useRouter()
-
-  useEffect(() => {
-    console.log('Header Starts');
-
-    const checkingLoginStatus = async () => {
-      try {
-        const token = await getToken();
-
-        // console.log('\n HEADER CHECKING TOKEN');
-        // console.log(token);
-
-        if (!token) dispatch(setLogoutState());
-
-        if (!emailState && token) {
-          const { result } = await getAccountDetail(token);
-
-          if (result.status != 'ok') {
-            console.log('\n\n ===== LOGIN ERROR');
-            console.log(result.msg);
-            throw result.msg;
-          } else {
-            const setState = {
-              accountState: true,
-              id: result.user.id,
-              firstName: result.user.firstName,
-              lastName: result.user.lastName,
-              email: result.user.email,
-              isVerify: result.user.isVerify
-            };
-            dispatch(setLoginState(setState));
-          }
-        }
-      } catch (error) {
-        Swal.fire({
-          titleText: `${error}`,
-          icon: 'error',
-          confirmButtonText: 'Ok',
-          timer: 4000
-        });
-      }
-    };
-
-    checkingLoginStatus();
-  }, [dispatch, emailState]);
+  const router = useRouter();
 
   const logoutAction = async () => {
-    await deleteToken();
+    const currentRole = userRole;
 
-    dispatch(setLogoutState());
+    dispatch(logout());
+
+    await deleteToken();
 
     Swal.fire({
       titleText: `Successfully Logged Out`,
@@ -79,54 +31,124 @@ export const Header: React.FC = () => {
       timer: 4000
     });
 
-    router.push('/')
+    router.push(currentRole == 'USER' ? '/user' : '/login');
   };
 
   return (
     <header className="bg-white shadow-md p-4">
       <div className="max-w-screen-xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <div className="text-3xl font-bold text-primary">
+        <div className="md:text-3xl font-bold text-primary flex gap-2">
+          <div className="visible md:hidden w-fit h-fit">
+            <Dropdown placement="bottom-start">
+              <DropdownTrigger>
+                <PiListMagnifyingGlassLight size={'1.4rem'} />
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Static Actions">
+                <DropdownItem key="new" onPress={() => router.push('/user')}>
+                  Home
+                </DropdownItem>
+                <DropdownItem key="new" onPress={() => router.push('/user/products')}>
+                  Products
+                </DropdownItem>
+                <DropdownItem key="new" onPress={() => router.push('/about')}>
+                  About
+                </DropdownItem>
+                <DropdownItem key="new" onPress={() => router.push('/contact')}>
+                  Contact
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
           <a href="/">GroceryStore</a>
         </div>
 
-        {/* Navigation */}
-        <nav className="space-x-6 text-gray-700">
-          <a href="/" className="hover:text-primary">
-            Home
-          </a>
-          <a href="/products" className="hover:text-primary">
-            Products
-          </a>
-          <a href="/about" className="hover:text-primary">
-            About
-          </a>
-          <a href="/contact" className="hover:text-primary">
-            Contact
-          </a>
-        </nav>
-
-        {/* Search Bar */}
-        <div className="flex items-center space-x-4">
-          <Input aria-label="Search products" placeholder="Search..." isClearable className="w-72" />
-          <Button className="relative">
-            <FaShoppingCart />
-            <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
-              3
-            </span>
-          </Button>
+        <div className="visible md:hidden w-fit">
+          <Dropdown>
+            <DropdownTrigger>
+              <Avatar isBordered color="success" src="https://i.pravatar.cc/150?u=a042581f4e29026704d" size="sm" />
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Static Actions">
+              <DropdownItem key="new" onPress={() => router.push('/user/profile')}>
+                Profile
+              </DropdownItem>
+              <DropdownItem key="delete" onPress={logoutAction} className="text-danger" color="danger">
+                Logout
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
 
-        {accountState ? (
-          <div className="p-3">
-            <button onClick={logoutAction}>Log out</button>
-          </div>
-        ) : (
-          <div className="p-3 flex gap-2">
-            <Login />
-            <Register />
-          </div>
-        )}
+        {/* Navigation */}
+        <nav className="space-x-6 text-gray-700 hidden md:flex items-center sm:visible w-fit">
+          <a
+            href={userRole == 'USER' ? '/user' : '/admin'}
+            className={`hover:text-black ${currentRoute === (userRole == 'USER' ? '/user' : '/admin') ? 'text-primary' : ''}`}
+          >
+            Home
+          </a>
+          <a
+            href={userRole == 'USER' ? '/user/products' : '/admin/products'}
+            className={`hover:text-black ${currentRoute === (userRole == 'USER' ? '/user/products' : '/admin/products') ? 'text-primary' : ''}`}
+          >
+            Products
+          </a>
+          <a href="/about" className={`hover:text-black ${currentRoute === '/about' ? 'text-primary' : ''}`}>
+            About
+          </a>
+          <a href="/contact" className={`hover:text-black ${currentRoute === '/contact' ? 'text-primary' : ''}`}>
+            Contact
+          </a>
+          {userRole == 'USER' && (
+            <Button className="relative">
+              <FaShoppingCart />
+              <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
+                3
+              </span>
+            </Button>
+          )}
+
+          {userRole === 'USER' && (
+            <div className="w-fit">
+              <Dropdown>
+                <DropdownTrigger>
+                  <Avatar isBordered color="success" src="https://i.pravatar.cc/150?u=a042581f4e29026704d" size="md" />
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Static Actions">
+                  <DropdownItem key="new" onPress={() => router.push('/user/profile')}>
+                    Profile
+                  </DropdownItem>
+                  <DropdownItem key="delete" onPress={logoutAction} className="text-danger" color="danger">
+                    Logout
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          )}
+
+          {(userRole === 'STORE_ADMIN' || userRole === 'SUPER_ADMIN') && (
+            <div className="w-fit">
+              <Dropdown>
+                <DropdownTrigger>
+                  <Avatar isBordered color="success" src="https://i.pravatar.cc/150?u=a042581f4e29026704d" size="md" />
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Static Actions">
+                  <DropdownItem key="delete" onPress={logoutAction} className="text-danger" color="danger">
+                    Logout
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          )}
+
+          {!userRole && (
+            <a href="/login">
+              <Button color="primary" variant="ghost">
+                Sign In/Sign Up
+              </Button>
+            </a>
+          )}
+        </nav>
       </div>
     </header>
   );

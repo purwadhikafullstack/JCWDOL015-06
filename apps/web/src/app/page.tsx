@@ -1,89 +1,51 @@
-// 'use client';
+'use client';
 
-import CarouselHero from '@/components/LandingPage/CarouselHero';
-import Categories from '@/components/LandingPage/Categories';
-import NearestStoreWDiscounted from '@/components/LandingPage/NearestStoreWDiscounted';
-import NearestStoreWTopProduct from '@/components/LandingPage/NearestStoreWTopProduct';
-import { Wrapper } from '@/components/Wrapper';
-// import { getCategoriesList } from '@/lib/category';
-// import { getProductList } from '@/lib/product';
-// import Image from 'next/image';
-// import { useEffect, useState } from 'react';
-// import { toast } from 'react-toastify';
+import { useEffect } from 'react';
+import useRoleBasedRedirect from '@/utils/redirectHelper';
+import { Spinner } from '@nextui-org/react';
+import { DecodedToken } from '@/types/account';
+import { jwtDecode } from 'jwt-decode';
+import { login, logout } from '@/store/slices/authSlice';
+import { getToken } from '@/lib/cookie';
+import { useAppDispatch, useAppSelector } from '@/store';
 
 export default function Home() {
-  // const [products, setProducts] = useState<any[] | null>(null);
-  // const [categories, setCategoriess] = useState<any[] | null>(null);
+  const dispatch = useAppDispatch();
 
-  // useEffect(() => {
-  //   const fetchingProducts = async () => {
-  //     console.log('HOME GETTING PRODUCTS');
+  // const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
-  //     const { result } = await getProductList();
+  useEffect(() => {
+    const fetchingCredential = async () => {
+      const token = await getToken();
 
-  //     if (result.status == 'ok') {
-  //       console.log(result);
+      if (!token) {
+        dispatch(logout());
+      } 
+      // else {
+      //   const decodedToken: DecodedToken = jwtDecode<DecodedToken>(token);
 
-  //       toast.success('success products');
+      //   if (!isAuthenticated) {
+      //     const setState: any = {
+      //       userRole: decodedToken.userRole,
+      //       id: decodedToken.id,
+      //       email: decodedToken.email,
+      //       isVerify: decodedToken.userRole
+      //     };
 
-  //       setProducts(result.products);
+      //     dispatch(login(setState));
+      //   }
+      // }
+    };
 
-  //       setCategoriess(result.categories);
-  //     } else {
-  //       toast.error(result.msg);
-  //     }
-  //   };
+    fetchingCredential();
+  }, [dispatch]);
 
-  //   fetchingProducts();
-  // }, []);
-
-  // useEffect(() => {
-  //   const fetchingProducts = async () => {
-  //     console.log('HOME GETTING PRODUCTS');
-
-  //     const { result } = await getProductList();
-
-  //     if (result.status == 'ok') {
-  //       console.log(result);
-
-  //       toast.success('success products');
-
-  //       setProducts(result.products);
-  //     } else {
-  //       toast.error(result.msg);
-  //     }
-  //   };
-
-  //   fetchingProducts();
-  // }, []);
-
-  // useEffect(() => {
-  //   const fetchingCategories = async () => {
-  //     console.log('HOME GETTING PRODUCTS');
-
-  //     const { result } = await getCategoriesList();
-
-  //     if (result.status == 'ok') {
-  //       console.log(result);
-
-  //       toast.success('success categories');
-
-  //       setCategoriess(result.categories);
-  //     } else {
-  //       toast.error(result.msg);
-  //     }
-  //   };
-
-  //   fetchingCategories();
-  // }, []);
+  useRoleBasedRedirect();
 
   return (
-    <Wrapper additional="gap-5 bg-slate-200 py-5 lg:px-5">
-      <CarouselHero />
-      {/* <Categories categories={categories} /> */}
-      <Categories />
-      <NearestStoreWDiscounted />
-      <NearestStoreWTopProduct />
-    </Wrapper>
+    <div className="min-w-[100vw] min-h-[100vh] flex gap-4 justify-center items-center">
+      <Spinner size="lg" />
+      <div className="text-xl font-bold self-center">Redirecting...</div>
+    </div>
   );
 }

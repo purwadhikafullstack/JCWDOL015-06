@@ -2,15 +2,16 @@
 
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
-import { ErrorMessage, Field, Form, Formik, FormikHelpers, useFormik } from 'formik';
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import * as yup from 'yup';
 import { IChangePassword } from '@/types/account';
 import { changePassword } from '@/lib/account';
 import { Wrapper } from '@/components/Wrapper';
 import { Button } from '@nextui-org/react';
-import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { useAppDispatch, useAppSelector } from '@/store';
 import { deleteToken } from '@/lib/cookie';
-import { setLogoutState } from '@/redux/slice/accountSlice';
+import { logout } from '@/store/slices/authSlice';
+import { toastFailed } from '@/utils/toastHelper';
 
 const schema = yup.object().shape({
   password: yup
@@ -29,7 +30,9 @@ const schema = yup.object().shape({
 export default function UpdatePassword() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const emailState = useAppSelector((state) => state.account.email);
+  const emailState = useAppSelector((state) => state.auth.email);
+
+  const toastSeeFailed = (message: string) => toastFailed(message);
 
   const handleSubmit = async (data: IChangePassword, action: FormikHelpers<IChangePassword>) => {
     try {
@@ -47,18 +50,13 @@ export default function UpdatePassword() {
 
       await deleteToken();
 
-      dispatch(setLogoutState());
+      dispatch(logout());
 
       action.resetForm();
 
       return router.push('/');
-    } catch (error) {
-      Swal.fire({
-        title: `${error}`,
-        icon: 'error',
-        confirmButtonText: 'Ok',
-        timer: 4000
-      });
+    } catch (error: any) {
+      toastSeeFailed(error);
 
       action.resetForm();
 

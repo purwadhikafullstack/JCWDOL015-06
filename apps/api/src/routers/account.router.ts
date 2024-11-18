@@ -3,8 +3,8 @@ import { AccountController } from '@/controllers/account.controller';
 import { verifyToken } from '@/middlewares/token';
 
 export class AccountRouter {
-  private router: Router;
-  private accountController: AccountController;
+  private readonly router: Router;
+  private readonly accountController: AccountController;
 
   constructor() {
     this.accountController = new AccountController();

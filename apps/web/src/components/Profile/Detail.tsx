@@ -46,7 +46,7 @@ const Detail: React.FC<IDetail> = ({ data, visible1, visible2 }) => {
         ))}
       {visible2 &&
         (data ? (
-          <div className="flex flex-col w-full h-fit gap-5 items-center text-center border-4 border-slate-500 rounded-2xl">
+          <div className="flex flex-col w-full h-fit gap-5 items-center text-center border-4 border-green-500 py-3 rounded-2xl">
             <div className="flex flex-col gap-2">
               <h1 className="text-lg font-medium">Full Name</h1>
               <h1>

@@ -2,17 +2,42 @@ import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
 export class CategoryController {
+  async createCategory(req: Request, res: Response) {
+    try {
+      const { name } = req.body;
+      const category = await prisma.category.create({
+        data: { name },
+      });
+      res.status(201).json(category);
+    } catch (err) {
+      res.status(400).send({
+        status: 'error',
+        msg: err,
+      });
+    }
+  }
+
   async getCategories(req: Request, res: Response) {
     try {
-      const categories = await prisma.category.findMany();
+      const { name, page = 1, pageSize = 10 } = req.query;
+      const skip = (Number(page) - 1) * Number(pageSize);
+      const take = Number(pageSize);
 
-      res.status(200).send({
-        status: 'ok',
-        categories,
-      });
+      const [categories, total] = await prisma.$transaction([
+        prisma.category.findMany({
+          where: { name: { contains: name as string } },
+          skip,
+          take,
+        }),
+        prisma.category.count({
+          where: { name: { contains: name as string } },
+        }),
+      ]);
+
+      res.status(200).json({ categories, total });
     } catch (err) {
-      res.status(500).send({
-        status: 'error fething categories',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -20,81 +45,38 @@ export class CategoryController {
 
   async getCategoryById(req: Request, res: Response) {
     try {
-      const { id } = req.body;
-
+      const { id } = req.params;
       const category = await prisma.category.findUnique({
-        where: { id: id },
+        where: { id: Number(id) },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Category Fetched!',
-        category,
-      });
+      if (!category) {
+        return res.status(404).json({ error: 'Category not found' });
+      }
+
+      res.status(200).json(category);
     } catch (err) {
-      res.status(500).send({
-        status: 'error fetching category',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
   }
 
-  // Create category
-  async createCategory(req: Request, res: Response) {
-    try {
-      const { name } = req.body;
-
-      const existingCategory = await prisma.category.findUnique({
-        where: { name: name },
-      });
-
-      if (existingCategory) throw 'duplicate category!';
-
-      const category = await prisma.category.create({
-        data: {
-          name,
-        },
-      });
-
-      res.status(201).send({
-        status: 'ok',
-        msg: 'Category Created!',
-        category,
-      });
-    } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Create Category!',
-        msg: err,
-      });
-    }
-  }
-
-  // Update category
   async updateCategory(req: Request, res: Response) {
     try {
-      const { id, name } = req.body;
-
-      const existingCategory = await prisma.category.findUnique({
-        where: { name: name },
-      });
-
-      if (existingCategory) throw 'duplicate category!';
+      const { id } = req.params;
+      const { name } = req.body;
 
       const category = await prisma.category.update({
-        where: { id: id },
-        data: {
-          name,
-        },
+        where: { id: Number(id) },
+        data: { name },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Category Updated!',
-        category,
-      });
+      res.status(200).json(category);
     } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Update Category!',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -102,20 +84,16 @@ export class CategoryController {
 
   async deleteCategory(req: Request, res: Response) {
     try {
-      const { id } = req.body;
+      const { id } = req.params;
 
-      const category = await prisma.category.delete({
-        where: { id: id },
+      await prisma.category.delete({
+        where: { id: Number(id) },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Category Deleted!',
-        category,
-      });
+      res.status(204).send();
     } catch (err) {
-      res.status(500).send({
-        status: 'error deleting category',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }

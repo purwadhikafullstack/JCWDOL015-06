@@ -2,34 +2,36 @@
 
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
-import { ErrorMessage, Field, Form, Formik, FormikHelpers, useFormik } from 'formik';
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import * as yup from 'yup';
 import { IUpdateBasic } from '@/types/account';
 import { updateAccountBasic } from '@/lib/account';
 import { Wrapper } from '@/components/Wrapper';
 import { Button } from '@nextui-org/react';
-import { useAppDispatch, useAppSelector } from '@/redux/store';
-import { setLoginState } from '@/redux/slice/accountSlice';
-
-// const schema = yup.object().shape({
-//   firstName: yup.string().required('First Name Is Required'),
-//   lastName: yup.string().required('Last Name Is Required'),
-//   mobileNum: yup.number().required('Mobile Number Is Required')
-// });
+import { useAppDispatch, useAppSelector } from '@/store';
+import { login } from '@/store/slices/authSlice';
+import { toastFailed } from '@/utils/toastHelper';
 
 const schema = yup.object().shape({
-    firstName: yup.string(),
-    lastName: yup.string(),
-    mobileNum: yup.number()
-  });
+  firstName: yup.string(),
+  lastName: yup.string(),
+  mobileNum: yup.number()
+});
 
 export default function UpdateBasic() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-//   const emailState = useAppSelector((state) => state.account.email);
-  const idState = useAppSelector((state) => state.account.id);
-//   const isVerifiedState = useAppSelector((state) => state.account.isVerify);
+  const swalSuccess = (message: string) =>
+    Swal.fire({
+      titleText: message,
+      icon: 'success',
+      confirmButtonText: 'Cool',
+      timer: 5000
+    });
+  const toastSeeFailed = (message: string) => toastFailed(message);
+
+  const idState = useAppSelector((state) => state.auth.id);
 
   const handleSubmit = async (data: IUpdateBasic, action: FormikHelpers<IUpdateBasic>) => {
     try {
@@ -37,38 +39,25 @@ export default function UpdateBasic() {
 
       if (result.status != 'ok') throw result.msg;
 
-      const setState = {
-        accountState: true,
+      const setState: any = {
+        userRole: 'USER',
         id: result.user.id,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        email: result.user.email,
-        isVerify: result.user.isVerify
+        email: result.user.email
       };
 
-      Swal.fire({
-        titleText: `${result.msg}`,
-        icon: 'success',
-        confirmButtonText: 'Cool',
-        timer: 7000
-      });
+      swalSuccess(result.msg);
 
-      dispatch(setLoginState(setState));
+      dispatch(login(setState));
 
       action.resetForm();
 
-      return router.push('/customer/profile');
-    } catch (error) {
-      Swal.fire({
-        title: `${error}`,
-        icon: 'error',
-        confirmButtonText: 'Ok',
-        timer: 4000
-      });
+      return router.push('/user/profile');
+    } catch (error: any) {
+      toastSeeFailed(error);
 
       action.resetForm();
 
-      return router.push('/customer/profile');
+      return router.push('/user/profile');
     }
   };
 
@@ -85,7 +74,7 @@ export default function UpdateBasic() {
       >
         {() => {
           return (
-            <Form className="w-2/6 p-3 mx-auto flex flex-col flex-wrap gap-7 border-0">
+            <Form className="md:w-2/6 p-3 mx-auto flex flex-col flex-wrap gap-7 border-0">
               {/* Input First Name */}
               <label className="form-control w-full max-w-lg">
                 <div className="label">

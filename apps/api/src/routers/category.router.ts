@@ -1,10 +1,8 @@
 import { Router } from 'express';
 import { CategoryController } from '@/controllers/category.controller';
-import { verifyToken } from '@/middlewares/token';
-
 export class CategoryRouter {
-  private router: Router;
-  private categoryController: CategoryController;
+  private readonly router: Router;
+  private readonly categoryController: CategoryController;
 
   constructor() {
     this.categoryController = new CategoryController();
@@ -13,7 +11,11 @@ export class CategoryRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', this.categoryController.getCategories)
+    this.router.post('/', this.categoryController.createCategory);
+    this.router.get('/', this.categoryController.getCategories);
+    this.router.get('/:id', this.categoryController.getCategoryById);
+    this.router.put('/:id', this.categoryController.updateCategory);
+    this.router.delete('/:id', this.categoryController.deleteCategory);
   }
 
   getRouter(): Router {

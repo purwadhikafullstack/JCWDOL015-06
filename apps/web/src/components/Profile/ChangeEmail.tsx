@@ -3,14 +3,15 @@
 import * as yup from 'yup';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import { IForgot, IUpdateEmail } from '@/types/account';
-import { useAppDispatch, useAppSelector } from '@/redux/store';
 import { updateAccountEmail } from '@/lib/account';
 import Swal from 'sweetalert2';
 import { Wrapper } from '../Wrapper';
 import { Button } from '@nextui-org/react';
-import { setLoginState, setLogoutState } from '@/redux/slice/accountSlice';
 import { deleteToken } from '@/lib/cookie';
 import { useRouter } from 'next/navigation';
+import { useAppSelector, useAppDispatch } from '@/store';
+import { logout } from '@/store/slices/authSlice';
+import { toastFailed } from '@/utils/toastHelper';
 
 const EmailSchema = yup.object().shape({
   email: yup
@@ -26,8 +27,17 @@ const ChangeEmail: React.FC = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const emailState = useAppSelector((state) => state.account.email);
-  const idState = useAppSelector((state) => state.account.id);
+  const emailState = useAppSelector((state) => state.auth.email);
+  const idState = useAppSelector((state) => state.auth.id);
+
+  const swalSuccess = (message: string) =>
+    Swal.fire({
+      titleText: message,
+      icon: 'success',
+      confirmButtonText: 'Cool',
+      timer: 5000
+    });
+  const toastSeeFailed = (message: string) => toastFailed(message);
 
   const handleSubmit = async (data: IUpdateEmail, action: FormikHelpers<IUpdateEmail>) => {
     try {
@@ -37,27 +47,17 @@ const ChangeEmail: React.FC = () => {
       // Checking Result From Action
       if (result.status != 'ok') throw result.msg;
 
-      Swal.fire({
-        titleText: `${result.msg}`,
-        icon: 'success',
-        confirmButtonText: 'Cool',
-        timer: 7000
-      });
+      swalSuccess(result.msg);
 
       await deleteToken();
 
-      dispatch(setLogoutState());
+      dispatch(logout());
 
       action.resetForm();
 
       router.push('/');
-    } catch (error) {
-      Swal.fire({
-        title: `${error}`,
-        icon: 'error',
-        confirmButtonText: 'Ok',
-        timer: 4000
-      });
+    } catch (error: any) {
+      toastSeeFailed(error);
     }
   };
   return (

@@ -1,18 +1,108 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
+import { AppliedDiscountType, DiscountType } from '@prisma/client';
 
 export class DiscountController {
+  async createDiscount(req: Request, res: Response) {
+    try {
+      const {
+        name,
+        discountType,
+        appliedDiscountType,
+        discountPercentage,
+        discountAmount,
+        selectedProductIds,
+        minimumPurchaseAmount,
+      } = req.body;
+
+      if (selectedProductIds) {
+        const discount = await prisma.discount.create({
+          data: {
+            name,
+            discountType,
+            appliedDiscountType,
+            discountPercentage,
+            discountAmount,
+            minimumPurchaseAmount,
+            ProductDiscount: {
+              create: selectedProductIds.map((productId: number) => ({
+                productId,
+              })),
+            },
+          },
+        });
+        res.status(201).json(discount);
+      } else {
+        const discount = await prisma.discount.create({
+          data: {
+            name,
+            discountType,
+            appliedDiscountType,
+            discountPercentage,
+            discountAmount,
+            minimumPurchaseAmount,
+          },
+        });
+        res.status(201).json(discount);
+      }
+    } catch (err) {
+      res.status(400).send({
+        status: 'error',
+        msg: err,
+      });
+    }
+  }
+
   async getDiscounts(req: Request, res: Response) {
     try {
-      const discounts = await prisma.discount.findMany();
+      const {
+        appliedDiscountType,
+        discountType,
+        name,
+        page = 1,
+        pageSize = 10,
+      } = req.query;
+      const skip = (Number(page) - 1) * Number(pageSize);
+      const take = Number(pageSize);
 
-      res.status(200).send({
-        status: 'ok',
-        discounts,
-      });
+      const [discounts, total] = await prisma.$transaction([
+        prisma.discount.findMany({
+          where: {
+            AND: [
+              {
+                appliedDiscountType: appliedDiscountType as AppliedDiscountType,
+              },
+              { discountType: discountType as DiscountType },
+              { name: { contains: name as string } },
+            ],
+          },
+          include: {
+            ProductDiscount: {
+              include: {
+                product: true,
+              },
+            },
+          },
+          skip,
+          take,
+        }),
+        prisma.discount.count({
+          where: {
+            AND: [
+              {
+                appliedDiscountType: appliedDiscountType as AppliedDiscountType,
+              },
+              { discountType: discountType as DiscountType },
+              { name: { contains: name as string } },
+            ],
+          },
+        }),
+      ]);
+
+      res.status(200).json({ discounts, total });
     } catch (err) {
-      res.status(500).send({
-        status: 'error fething discounts',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -20,110 +110,77 @@ export class DiscountController {
 
   async getDiscountById(req: Request, res: Response) {
     try {
-      const { id } = req.body;
-
+      const { id } = req.params;
       const discount = await prisma.discount.findUnique({
-        where: { id: id },
-      });
-
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Discount Detail Fetched!',
-        discount,
-      });
-    } catch (err) {
-      res.status(500).send({
-        status: 'error fetching discount',
-        msg: err,
-      });
-    }
-  }
-
-  // Create discount
-  async createDiscount(req: Request, res: Response) {
-    try {
-      const {
-        name,
-        discountType,
-        discountAmount,
-        discountPercentage,
-        appliedDiscountType,
-        Product,
-        Cart,
-      } = req.body;
-
-      const existingDiscountName = await prisma.discount.findUnique({
-        where: { name: name },
-      });
-
-      if (existingDiscountName) throw 'duplicate discount name!';
-
-      const discount = await prisma.discount.create({
-        data: {
-          name,
-          discountType,
-          discountAmount,
-          discountPercentage,
-          appliedDiscountType,
-          Product,
-          Cart,
+        where: { id: Number(id) },
+        include: {
+          ProductDiscount: {
+            include: {
+              product: true,
+            },
+          },
         },
       });
 
-      res.status(201).send({
-        status: 'ok',
-        msg: 'Discount Created!',
-        discount,
-      });
+      if (!discount) {
+        return res.status(404).json({ error: 'Discount not found' });
+      }
+
+      res.status(200).json(discount);
     } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Create Discount!',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
   }
 
-  // Update discount
   async updateDiscount(req: Request, res: Response) {
     try {
+      const { id } = req.params;
       const {
-        id,
         name,
         discountType,
-        discountAmount,
-        discountPercentage,
         appliedDiscountType,
-        Product,
-        Cart,
+        discountPercentage,
+        discountAmount,
+        selectedProductIds,
+        minimumPurchaseAmount,
       } = req.body;
 
-      const existingDiscountName = await prisma.discount.findUnique({
-        where: { name: name },
-      });
-
-      if (existingDiscountName) throw 'duplicate discount name!';
-
       const discount = await prisma.discount.update({
-        where: { id: id },
+        where: { id: Number(id) },
         data: {
           name,
           discountType,
-          discountAmount,
-          discountPercentage,
           appliedDiscountType,
-          Product,
-          Cart,
+          discountPercentage,
+          discountAmount,
+          minimumPurchaseAmount,
+          ProductDiscount: {
+            create: selectedProductIds.map((productId: number) => ({
+              productId,
+            })),
+          },
         },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Discount Updated!',
-        discount,
+      // Update ProductDiscounts
+      await prisma.productDiscount.deleteMany({
+        where: { discountId: Number(id) },
       });
+
+      await prisma.productDiscount.createMany({
+        data: selectedProductIds.map((productId: number) => ({
+          discountId: Number(id),
+          productId,
+        })),
+      });
+
+      res.status(200).json(discount);
     } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Update Discount!',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -131,20 +188,16 @@ export class DiscountController {
 
   async deleteDiscount(req: Request, res: Response) {
     try {
-      const { id } = req.body;
+      const { id } = req.params;
 
-      const discount = await prisma.discount.delete({
-        where: { id: id },
+      await prisma.discount.delete({
+        where: { id: Number(id) },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Discount Deleted!',
-        discount,
-      });
+      res.status(204).send();
     } catch (err) {
-      res.status(500).send({
-        status: 'error deleting discount',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }

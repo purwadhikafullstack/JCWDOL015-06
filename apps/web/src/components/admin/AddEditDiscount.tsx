@@ -12,169 +12,212 @@ import {
   SelectItem,
   ModalContent
 } from '@nextui-org/react';
-import { Discount, dummyProducts, Product } from '@/data/dummyData';
-import { set } from 'cypress/types/lodash';
+import { Discount, Product } from '@/types/types';
+import { fetchProducts } from '@/lib/product.api';
 
 interface AddEditDiscountProps {
-  mode: 'add' | 'edit';
-  editedData?: Discount;
+  addEditMode: 'add' | 'edit';
+  discount?: Discount;
   isOpen: boolean;
   onClose: () => void;
-  onSaveEdit: () => void;
+  handleSave: (discount: Discount) => void;
 }
 
-const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, onSaveEdit, mode, editedData }) => {
+const AddEditDiscount: React.FC<AddEditDiscountProps> = ({ isOpen, onClose, handleSave, addEditMode, discount }) => {
   const [id, setId] = useState<number>();
   const [editedDiscountName, setEditedDiscountName] = useState('');
   const [discountType, setDiscountType] = useState('PERCENTAGE');
-  const [appliedDiscountType, setAppliedDiscountType] = useState('MINIMUM_PURCHASE');
-  const [discountValue, setDiscountValue] = useState<number | string>('');
+  const [discountAmount, setDiscountAmount] = useState<number>(0);
+  const [discountPercentage, setDiscountPercentage] = useState<number>(0);
   const [minimumPurchaseAmount, setMinimumPurchaseAmount] = useState<number | string>('');
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
+  const [appliedDiscountType, setAppliedDiscountType] = useState<Set<string>>(new Set());
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const getAllProducts = async () => {
+      const response = await fetchProducts({ page: 1, pageSize: 100 });
+      const productResponse = response.products.map((product: any) => {
+        return {
+          ...product,
+          id: String(product.id)
+        };
+      });
+      setProducts(productResponse);
+    };
+
+    getAllProducts();
+  }, []);
+
+  useEffect(() => {
+    const appliedType = discount?.appliedDiscountType as string;
+    const appliedProducts = discount?.ProductDiscount;
+    const appliedProductIds = appliedProducts?.map((val) => String(val.id));
+    setAppliedDiscountType(appliedType ? new Set([appliedType]) : new Set());
+    setSelectedProductIds(appliedProductIds ? new Set([...appliedProductIds]) : new Set());
+  }, [discount]);
 
   useEffect(() => {
     if (isOpen) {
-      if (mode == 'edit') {
-        setId(editedData?.id);
-        setEditedDiscountName(editedData?.name || '');
-        setDiscountType(editedData?.discountType || 'PERCENTAGE');
-        setAppliedDiscountType(editedData?.appliedDiscountType || 'MINIMUM_PURCHASE');
-        setDiscountValue(
-          appliedDiscountType == 'PERCENTAGE'
-            ? editedData?.discountPercentage || 0
-            : editedData?.discountPercentage || 0
-        );
-        setMinimumPurchaseAmount(editedData?.minimumPurchaseAmount || 0);
-        setSelectedProductIds(
-          editedData?.products?.map((val) => {
-            return String(val.id);
-          }) || []
-        );
-        setSelectedProducts(editedData?.products || []);
+      if (addEditMode == 'edit') {
+        setId(discount?.id);
+        setEditedDiscountName(discount?.name ?? '');
+        setDiscountType(discount?.discountType ?? 'PERCENTAGE');
+        setDiscountAmount(discount?.discountAmount ?? 0);
+        setDiscountPercentage(discount?.discountPercentage ?? 0);
+        setMinimumPurchaseAmount(discount?.minimumPurchaseAmount ?? 0);
       } else {
         setEditedDiscountName('');
         setDiscountType('PERCENTAGE');
-        setAppliedDiscountType('MINIMUM_PURCHASE');
-        setDiscountValue('');
+        setDiscountAmount(0);
+        setDiscountPercentage(0);
         setMinimumPurchaseAmount('');
-        setSelectedProductIds([]);
-        setSelectedProducts([]);
       }
     }
-  }, [
-    appliedDiscountType,
-    editedData?.appliedDiscountType,
-    editedData?.discountPercentage,
-    editedData?.discountType,
-    editedData?.id,
-    editedData?.minimumPurchaseAmount,
-    editedData?.name,
-    editedData?.products,
-    isOpen,
-    mode
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleSaveEdit = () => {
-    onSaveEdit();
-    onClose();
+    handleSave({
+      id,
+      name: editedDiscountName,
+      discountType: discountType,
+      appliedDiscountType: Array.from(appliedDiscountType)[0],
+      discountAmount:
+        Array.from(appliedDiscountType)[0] !== 'BUY_ONE_GET_ONE' && discountType == 'AMOUNT' ? discountAmount : null,
+      discountPercentage:
+        Array.from(appliedDiscountType)[0] !== 'BUY_ONE_GET_ONE' && discountType == 'PERCENTAGE'
+          ? discountPercentage
+          : null,
+      minimumPurchaseAmount: Array.from(appliedDiscountType)[0] === 'MINIMUM_PURCHASE' ? minimumPurchaseAmount : null,
+      selectedProductIds:
+        Array.from(appliedDiscountType)[0] !== 'MINIMUM_PURCHASE' &&
+        Array.from(selectedProductIds)?.map((val) => Number(val))
+    } as Discount);
   };
 
   return (
-    <Modal className="overflow-auto" size="xl" isOpen={isOpen} onClose={onClose} closeButton>
+    <Modal className="overflow-auto" size="3xl" isOpen={isOpen} onClose={onClose} closeButton>
       <ModalContent>
         {(onClose) => (
           <>
             <ModalHeader>Edit Discount</ModalHeader>
             <ModalBody>
-              <Input
-                fullWidth
-                label="Discount Name"
-                value={editedDiscountName}
-                onChange={(e) => setEditedDiscountName(e.target.value)}
-              />
-              <RadioGroup value={discountType} onValueChange={(value) => setDiscountType(value)} label="Discount Type">
-                <Radio value="PERCENTAGE">Percentage</Radio>
-                <Radio value="AMOUNT">Amount</Radio>
-              </RadioGroup>
-              {discountType === 'PERCENTAGE' ? (
-                <Input
-                  fullWidth
-                  label="Discount Percentage"
-                  type="number"
-                  endContent="%"
-                  value={String(discountValue)}
-                  onChange={(e) => setDiscountValue(e.target.value)}
-                />
-              ) : (
-                <Input
-                  fullWidth
-                  label="Discount Amount"
-                  type="number"
-                  startContent="Rp."
-                  value={String(discountValue)}
-                  onChange={(e) => setDiscountValue(new Intl.NumberFormat('id-ID').format(Number(e.target.value)))}
-                />
-              )}
-              <Select
-                label="Applied Discount Type"
-                value={appliedDiscountType}
-                onChange={(e) => setAppliedDiscountType(e.target.value)}
-              >
-                <SelectItem key="MINIMUM_PURCHASE" value="MINIMUM_PURCHASE">
-                  Minimum Purchase
-                </SelectItem>
-                <SelectItem key="ON_PRODUCT" value="ON_PRODUCT">
-                  On Product
-                </SelectItem>
-                <SelectItem key="BUY_ONE_GET_ONE" value="BUY_ONE_GET_ONE">
-                  Buy One Get One
-                </SelectItem>
-              </Select>
-              {appliedDiscountType === 'MINIMUM_PURCHASE' && (
-                <Input
-                  fullWidth
-                  label="Minimum Purchase Amount"
-                  type="number"
-                  startContent="Rp."
-                  value={String(minimumPurchaseAmount)}
-                  onChange={(e) =>
-                    setMinimumPurchaseAmount(new Intl.NumberFormat('id-ID').format(Number(e.target.value)))
+              <div className="flex flex-row w-[100%] gap-2">
+                <div
+                  className={
+                    Array.from(appliedDiscountType)[0] === 'ON_PRODUCT' ||
+                    Array.from(appliedDiscountType)[0] === 'BUY_ONE_GET_ONE'
+                      ? 'flex flex-col gap-2'
+                      : 'flex flex-col gap-2 w-[100%]'
                   }
-                />
-              )}
-              {(appliedDiscountType === 'ON_PRODUCT' || appliedDiscountType === 'BUY_ONE_GET_ONE') && (
-                <>
+                >
+                  <Input
+                    fullWidth
+                    label="Discount Name"
+                    value={editedDiscountName}
+                    onChange={(e) => setEditedDiscountName(e.target.value)}
+                  />
+                  {Array.from(appliedDiscountType)[0] !== 'BUY_ONE_GET_ONE' && (
+                    <RadioGroup
+                      value={discountType}
+                      onValueChange={(value) => setDiscountType(value)}
+                      label="Discount Type"
+                    >
+                      <Radio value="PERCENTAGE">Percentage</Radio>
+                      <Radio value="AMOUNT">Amount</Radio>
+                    </RadioGroup>
+                  )}
+                  {Array.from(appliedDiscountType)[0] !== 'BUY_ONE_GET_ONE' && discountType === 'PERCENTAGE' ? (
+                    <Input
+                      fullWidth
+                      label="Discount Percentage"
+                      type="number"
+                      endContent="%"
+                      value={String(discountPercentage)}
+                      onChange={(e) => setDiscountPercentage(Number(e.target.value))}
+                    />
+                  ) : (
+                    <Input
+                      fullWidth
+                      label="Discount Amount"
+                      type="number"
+                      startContent="Rp."
+                      value={String(discountAmount)}
+                      onChange={(e) => setDiscountAmount(Number(e.target.value))}
+                    />
+                  )}
+                  {/* {appliedDiscountType} */}
                   <Select
-                    label="Can be applied to product:"
-                    multiple
-                    value={selectedProductIds}
-                    onSelectionChange={(selected) => {
-                      const selectedIds = Array.from(selected as Set<string>);
-                      setSelectedProductIds(selectedIds);
-                      const newValues = selectedIds.map((productId) => {
-                        return dummyProducts.find((product) => String(product.id) == productId);
-                      });
-                      setSelectedProducts(newValues as Product[]);
+                    label="Applied Discount Type"
+                    selectedKeys={appliedDiscountType}
+                    onSelectionChange={(e) => {
+                      const key = e.currentKey as string;
+                      setAppliedDiscountType(new Set([key]));
                     }}
                   >
-                    {dummyProducts.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.productName}
-                      </SelectItem>
-                    ))}
+                    <SelectItem key="MINIMUM_PURCHASE" value="MINIMUM_PURCHASE">
+                      Minimum Purchase
+                    </SelectItem>
+                    <SelectItem key="ON_PRODUCT" value="ON_PRODUCT">
+                      On Product
+                    </SelectItem>
+                    <SelectItem key="BUY_ONE_GET_ONE" value="BUY_ONE_GET_ONE">
+                      Buy One Get One
+                    </SelectItem>
                   </Select>
-                  <ul>
-                    {selectedProducts.map((product) => (
-                      <li key={product.id}>{product.productName}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
+                  {Array.from(appliedDiscountType)[0] === 'MINIMUM_PURCHASE' && (
+                    <Input
+                      fullWidth
+                      label="Minimum Purchase Amount"
+                      type="number"
+                      startContent="Rp."
+                      value={String(minimumPurchaseAmount)}
+                      onChange={(e) => setMinimumPurchaseAmount(Number(e.target.value))}
+                    />
+                  )}
+                </div>
+                {(Array.from(appliedDiscountType)[0] === 'ON_PRODUCT' ||
+                  Array.from(appliedDiscountType)[0] === 'BUY_ONE_GET_ONE') && (
+                  <div className=" w-[70%]">
+                    <Select
+                      label="Can be applied to product:"
+                      selectionMode="multiple"
+                      selectedKeys={selectedProductIds}
+                      onSelectionChange={(e) => {
+                        const newSelected = [...selectedProductIds, String(e.currentKey)];
+                        setSelectedProductIds(new Set([...newSelected]));
+                      }}
+                    >
+                      {products.map((product) => (
+                        <SelectItem key={Number(product.id)} value={product.id}>
+                          {product.productName}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                    <div className="p-2 bg-gray-50 rounded-md shadow-md my-2 flex flex-col gap-2">
+                      <div className="font-semibold">List of products that can use this discounts:</div>
+                      <div className="p-y-1 px-2">
+                        <ul>
+                          {Array.from(selectedProductIds)?.map((val, index) => (
+                            <li key={val}>
+                              {index + 1}.{' '}
+                              {products.find((product) => String(product.id) == String(val))?.productName ?? ''}
+                            </li>
+                          ))}
+                        </ul>
+                        {Array.from(selectedProductIds)?.length == 0 && 'No product'}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </ModalBody>
             <ModalFooter>
               <Button onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSaveEdit}>Save</Button>
+              <Button onClick={handleSaveEdit} color="primary">
+                Save
+              </Button>
             </ModalFooter>
           </>
         )}

@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE `address` ADD COLUMN `isMain` INTEGER NOT NULL DEFAULT 0,
-    MODIFY `coor_lat` VARCHAR(191) NULL,
-    MODIFY `coor_lng` VARCHAR(191) NULL;

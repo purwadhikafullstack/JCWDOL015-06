@@ -17,6 +17,7 @@ export interface DecodedToken {
   firstName: string;
   lastName: string;
   email: string;
+  userRole: 'SUPER_ADMIN' | 'STORE_ADMIN' | 'USER' | null;
   isVerify: number;
 }
 

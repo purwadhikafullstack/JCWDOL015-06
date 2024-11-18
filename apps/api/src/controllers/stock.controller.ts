@@ -2,17 +2,82 @@ import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
 export class StockController {
+  async createStock(req: Request, res: Response) {
+    try {
+      const { productId, storeId, quantity } = req.body;
+      const stock = await prisma.stock.create({
+        data: { productId, storeId, quantity },
+      });
+      res.status(201).json(stock);
+    } catch (err) {
+      res.status(400).send({
+        status: 'error',
+        msg: err,
+      });
+    }
+  }
+
   async getStocks(req: Request, res: Response) {
     try {
-      const stocks = await prisma.stock.findMany();
+      const {
+        productName,
+        storeName,
+        productId,
+        storeId,
+        page = 1,
+        pageSize = 10,
+      } = req.query;
+      const skip = (Number(page) - 1) * Number(pageSize);
+      const take = Number(pageSize);
 
-      res.status(200).send({
-        status: 'ok',
-        stocks,
-      });
+      let whereFilter = {
+        OR: [
+          {
+            AND: [
+              {
+                product: {
+                  productName: { contains: productName as string },
+                },
+              },
+              { store: { name: { contains: storeName as string } } },
+            ],
+          },
+        ],
+      } as any;
+
+      if (storeId && productId) {
+        whereFilter = {
+          AND: [
+            whereFilter,
+            {
+              storeId: { equals: Number(storeId) },
+            },
+            {
+              productId: { equals: Number(productId) },
+            },
+          ],
+        };
+      }
+
+      const [stocks, total] = await prisma.$transaction([
+        prisma.stock.findMany({
+          where: whereFilter,
+          include: {
+            product: true,
+            store: true,
+          },
+          skip,
+          take,
+        }),
+        prisma.stock.count({
+          where: whereFilter,
+        }),
+      ]);
+
+      res.status(200).json({ stocks, total });
     } catch (err) {
-      res.status(500).send({
-        status: 'error fething stocks data',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -20,73 +85,39 @@ export class StockController {
 
   async getStockById(req: Request, res: Response) {
     try {
-      const { id } = req.body;
-
+      const { id } = req.params;
       const stock = await prisma.stock.findUnique({
-        where: { id: id },
+        where: { id: Number(id) },
+        include: { product: true, store: true },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Stock Detail Fetched!',
-        stock,
-      });
+      if (!stock) {
+        return res.status(404).json({ error: 'Stock not found' });
+      }
+
+      res.status(200).json(stock);
     } catch (err) {
-      res.status(500).send({
-        status: 'error fetching stock detail',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
   }
 
-  // Create stock
-  async createStock(req: Request, res: Response) {
-    try {
-      const { storeId, productId, stock } = req.body;
-
-      const s = await prisma.stock.create({
-        data: {
-          storeId,
-          productId,
-          stock,
-        },
-      });
-
-      res.status(201).send({
-        status: 'ok',
-        msg: 'Stock Created!',
-        s,
-      });
-    } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Create Stock!',
-        msg: err,
-      });
-    }
-  }
-
-  // Update stock
   async updateStock(req: Request, res: Response) {
     try {
-      const { id, storeId, productId, stock } = req.body;
+      const { id } = req.params;
+      const { productId, storeId, quantity } = req.body;
 
-      const s = await prisma.stock.update({
-        where: { id: id },
-        data: {
-          storeId,
-          productId,
-          stock,
-        },
+      const stock = await prisma.stock.update({
+        where: { id: Number(id) },
+        data: { productId, storeId, quantity },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Stock Updated!',
-        s,
-      });
+      res.status(200).json(stock);
     } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Update Stock!',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -94,20 +125,16 @@ export class StockController {
 
   async deleteStock(req: Request, res: Response) {
     try {
-      const { id } = req.body;
+      const { id } = req.params;
 
-      const stock = await prisma.stock.delete({
-        where: { id: id },
+      await prisma.stock.delete({
+        where: { id: Number(id) },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Stock Deleted!',
-        stock,
-      });
+      res.status(204).send();
     } catch (err) {
-      res.status(500).send({
-        status: 'error deleting stock',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }

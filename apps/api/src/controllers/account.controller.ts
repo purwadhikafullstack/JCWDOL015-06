@@ -22,11 +22,18 @@ export class AccountController {
         status: 'ok',
         accounts,
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error fething users data',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(401).send({
+          status: 'error get users',
+          msg: error.message,
+        });
+      } else {
+        res.status(401).send({
+          status: 'error get users',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -36,7 +43,7 @@ export class AccountController {
       const { email } = req.body;
 
       const existingUser = await prisma.user.findUnique({
-        where: { email: email },
+        where: { email: email as string, username: email as string },
       });
 
       if (existingUser) {
@@ -62,7 +69,7 @@ export class AccountController {
         });
 
         await prisma.user.update({
-          where: { email: email },
+          where: { email: email, username: email },
           data: {
             isVerify: 1,
           },
@@ -75,11 +82,18 @@ export class AccountController {
       } else {
         throw 'Account Not Found!';
       }
-    } catch (error) {
-      res.status(400).send({
-        status: 'error',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(400).send({
+          status: 'error login',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error login',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -93,7 +107,7 @@ export class AccountController {
 
       // Checking if email has been used
       const existingUser = await prisma.user.findUnique({
-        where: { email: email },
+        where: { email: email, username: email },
       });
 
       if (existingUser) throw 'Email Has Been Used !';
@@ -108,8 +122,9 @@ export class AccountController {
           firstName,
           lastName,
           email,
+          username: email,
           password: hashPassword,
-          mobileNum,
+          mobileNum: `${mobileNum}`,
           role: 'USER',
           isVerify: 0,
         },
@@ -131,7 +146,7 @@ export class AccountController {
       const compiledTemplate = handlebars.compile(templateSource);
       const html = compiledTemplate({
         name: `${account.firstName} ${account.lastName}`,
-        link: `${process.env.NEXT_URL}customer/verification/${token}`,
+        link: `${process.env.NEXT_URL}user/verification/${token}`,
       });
 
       await transporter.sendMail({
@@ -146,25 +161,28 @@ export class AccountController {
         msg: 'Account Created!',
         account,
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error register',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(400).send({
+          status: 'error register',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error register',
+          msg: error,
+        });
+      }
     }
   }
 
   // Reguler login process
   async loginAccount(req: Request, res: Response) {
     try {
-      console.log('\n\n\n CONTROLLER REGULER LOGIN START\n\n ');
-
-      console.log('BODY CONTENT, ', req.body.email);
-
       const { email, password } = req.body;
 
       const existingUser = await prisma.user.findUnique({
-        where: { email: email },
+        where: { email: email, username: email },
       });
 
       // Checking if email has ever been registered
@@ -197,7 +215,8 @@ export class AccountController {
         email: existingUser.email,
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
-        role: existingUser.role,
+        userRole: existingUser.role,
+        isVerify: existingUser.isVerify,
       };
       const token = sign(payload, process.env.SECRET_JWT!, { expiresIn: '1d' });
 
@@ -205,13 +224,21 @@ export class AccountController {
         status: 'ok',
         msg: 'login success!',
         token,
+        
         // user: existingUser,
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error login',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(401).send({
+          status: 'error login',
+          msg: error.message,
+        });
+      } else {
+        res.status(401).send({
+          status: 'error login',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -268,7 +295,7 @@ export class AccountController {
       if (!email_verified) throw 'Google Account Not Verified!';
 
       const existingUser = await prisma.user.findUnique({
-        where: { email: email },
+        where: { email: email, username: email },
       });
 
       // Check if email logged by google already exist
@@ -279,7 +306,8 @@ export class AccountController {
           email: existingUser.email,
           firstName: existingUser.firstName,
           lastName: existingUser.lastName,
-          role: existingUser.role,
+          userRole: existingUser.role,
+          isVerify: existingUser.isVerify,
         };
 
         const token = sign(payload, process.env.SECRET_JWT!, {
@@ -296,8 +324,9 @@ export class AccountController {
             firstName: given_name,
             lastName: family_name,
             email,
+            username: email,
             password: 'not-provided',
-            mobileNum: 0,
+            mobileNum: '',
             avatar: picture,
             role: 'USER',
             isVerify: 1,
@@ -310,7 +339,7 @@ export class AccountController {
           email: account.email,
           firstName: account.firstName,
           lastName: account.lastName,
-          role: 'USER',
+          userRole: 'USER',
           isVerify: 1,
         };
 
@@ -319,14 +348,21 @@ export class AccountController {
         });
 
         res.redirect(
-          `${process.env.NEXT_URL}customer/auth-google/callback?token=${token}`,
+          `${process.env.NEXT_URL}login/auth-google/callback?token=${token}`,
         );
       }
-    } catch (error) {
-      res.status(401).send({
-        status: 'error login',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(401).send({
+          status: 'error google login',
+          msg: error.message,
+        });
+      } else {
+        res.status(401).send({
+          status: 'error google login',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -351,11 +387,18 @@ export class AccountController {
         status: 'ok',
         url: GOOGLE_OAUTH_CONSENT_SCREEN_URL,
       });
-    } catch (error) {
-      res.status(401).send({
-        status: 'error login',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(401).send({
+          status: 'error google login',
+          msg: error.message,
+        });
+      } else {
+        res.status(401).send({
+          status: 'error google login',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -375,11 +418,18 @@ export class AccountController {
         user: userDetail,
         tokenDetail: req.user,
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error profile',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(401).send({
+          status: 'error account detail',
+          msg: error.message,
+        });
+      } else {
+        res.status(401).send({
+          status: 'error account detail',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -407,11 +457,18 @@ export class AccountController {
         status: 'ok',
         msg: 'Account Successfully Verified!',
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error account verification',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(400).send({
+          status: 'error verification',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error verification',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -425,7 +482,7 @@ export class AccountController {
       console.log(email);
 
       const existingUser = await prisma.user.findUnique({
-        where: { email: email },
+        where: { email: email, username: email },
       });
 
       if (!existingUser) throw 'Account Email Not Found';
@@ -445,7 +502,7 @@ export class AccountController {
       const compiledTemplate = handlebars.compile(templateSource);
       const html = compiledTemplate({
         name: `${existingUser.firstName} ${existingUser.lastName}`,
-        link: `${process.env.NEXT_URL}customer/change-password/${token}`,
+        link: `${process.env.NEXT_URL}login/change-password/${token}`,
       });
 
       await transporter.sendMail({
@@ -459,11 +516,18 @@ export class AccountController {
         status: 'ok',
         msg: 'Email Confirmed, Please Check Your Email!',
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error confirm password change',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(400).send({
+          status: 'error forgot password',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error forgot password',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -478,6 +542,7 @@ export class AccountController {
         await prisma.user.update({
           where: {
             email: email,
+            username: email,
           },
           data: {
             password: hashPassword,
@@ -508,6 +573,7 @@ export class AccountController {
         await prisma.user.update({
           where: {
             email: payload.email,
+            username: payload.email,
           },
           data: {
             password: hashPassword,
@@ -519,11 +585,18 @@ export class AccountController {
           msg: 'Password Successfully Changed!',
         });
       }
-    } catch (error) {
-      res.status(400).send({
-        status: 'error change password',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(400).send({
+          status: 'error forgot password',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error forgot password',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -541,7 +614,7 @@ export class AccountController {
 
       let ffirstName: string;
       let llastName: string;
-      let mmobileNum: number;
+      let mmobileNum: string;
 
       if (firstName) {
         ffirstName = firstName;
@@ -555,10 +628,10 @@ export class AccountController {
         llastName = existingUser?.lastName;
       }
 
-      if (mobileNum && mobileNum > 0) {
+      if (mobileNum) {
         mmobileNum = mobileNum;
       } else {
-        mmobileNum = existingUser?.mobileNum;
+        mmobileNum = `${existingUser?.mobileNum}`;
       }
 
       const user = await prisma.user.update({
@@ -568,7 +641,7 @@ export class AccountController {
         data: {
           firstName: ffirstName,
           lastName: llastName,
-          mobileNum: mmobileNum,
+          mobileNum: `${mmobileNum}`,
         },
       });
 
@@ -577,11 +650,18 @@ export class AccountController {
         msg: 'Account Info Updated Successfully!',
         user,
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error account update',
-        msg: error,
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(400).send({
+          status: 'error update account',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error update account',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -632,11 +712,18 @@ export class AccountController {
         status: 'ok',
         msg: 'Account Email Updated Successfully, Please Verify Email Again And Login With New Email!',
       });
-    } catch (error) {
-      res.status(400).send({
-        status: 'error account email update',
-        msg: error, 
-      });
+    } catch (error: any) {
+      if (error.message) {
+        res.status(400).send({
+          status: 'error update account',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error update account',
+          msg: error,
+        });
+      }
     }
   }
 }

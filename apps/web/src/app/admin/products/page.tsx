@@ -1,152 +1,156 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  Table,
-  Pagination,
-  Button,
-  TableHeader,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableRow,
-  Input
-} from '@nextui-org/react';
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { dummyProducts, dummyCategories } from '@/data/dummyData';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Input, Select, SelectItem } from '@nextui-org/react';
+import { Category, Product, Role } from '@/types/types';
+import { fetchProducts, deleteProduct } from '@/lib/product.api';
+import { toastFailed, toastSuccess } from '@/utils/toastHelper';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
+import { useRouter } from 'next/navigation';
+import ProductsTable from '@/components/common/ProductTable';
+import { fetchCategories } from '@/lib/category.api';
 
 const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
-  const [editedProductName, setEditedProductName] = useState('');
-  const [editedProductPrice, setEditedProductPrice] = useState(0);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [totalProducts, setTotalProducts] = useState<number>();
+  const [nameFilter, setNameFilter] = useState<string | undefined>();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set([]));
+  const router = useRouter();
+  const pageSize = 10;
 
-  const productsPerPage = 10;
+  useEffect(() => {
+    const getStores = async () => {
+      const response = await fetchCategories({ page: 1, pageSize: 100 });
+      const categoriesResponse = response.categories?.map((store: any) => {
+        return {
+          ...store,
+          id: String(store.id)
+        };
+      });
+      setCategories(categoriesResponse);
+    };
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = dummyProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+    getStores();
+  }, []);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const loadProducts = useCallback(async () => {
+    try {
+      const selectedCategoryIds = Array.from(selectedCategories);
+      const queryParams = { page: currentPage, pageSize } as { [key: string]: any };
+      if (nameFilter) {
+        queryParams.name = nameFilter;
+      }
+      if (selectedCategoryIds) {
+        queryParams.categoryIds = selectedCategoryIds;
+      }
+      const response = await fetchProducts(queryParams);
+      setProducts(response.products);
+      setTotalProducts(response.total);
+    } catch (err) {
+      toastFailed('Failed to fetch products');
+      setProducts([]);
+      setTotalProducts(0);
+    }
+  }, [currentPage, nameFilter, selectedCategories]);
 
-  const handleEditClick = (product: any) => {
-    setSelectedProduct(product);
-    setEditedProductName(product.productName);
-    setEditedProductPrice(product.price);
-    setIsEditModalOpen(true);
+  const onResetFilter = () => {
+    setNameFilter('');
+    setSelectedCategories(new Set([]));
   };
 
-  const handleDeleteClick = (product: any) => {
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [nameFilter]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  const handleAddClick = () => {
+    router.push(`/admin/products/add-product`);
+  };
+
+  const handleEditClick = (product: Product) => {
+    router.push(`/admin/products/edit-product?id=${product.id}`);
+  };
+
+  const handleDeleteClick = (product: Product) => {
     setSelectedProduct(product);
     setIsDeleteModalOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    // Save the edited product logic here
-    setIsEditModalOpen(false);
+  const handleConfirmDelete = async () => {
+    if (selectedProduct?.id) {
+      try {
+        await deleteProduct(selectedProduct?.id);
+        toastSuccess('Deleted product successfully');
+        setIsDeleteModalOpen(false);
+        setCurrentPage(1);
+        loadProducts();
+      } catch (err) {
+        toastFailed('Failed to delete product');
+      }
+    }
   };
 
-  const handleConfirmDelete = () => {
-    // Delete the product logic here
-    setIsDeleteModalOpen(false);
-  };
+  const userRole = localStorage.getItem('userRole') as Role;
 
   return (
     <div className="p-4">
       <div className="my-2 text-lg font-semibold">Products</div>
-      <Table aria-label="Products Table">
-        <TableHeader>
-          <TableColumn className="text-md text-gray-700">Name</TableColumn>
-          <TableColumn className="text-md text-gray-700">Price</TableColumn>
-          <TableColumn className="text-md text-gray-700">Category</TableColumn>
-          <TableColumn className="text-md text-gray-700">Description</TableColumn>
-          <TableColumn className="text-md text-gray-700">Stock</TableColumn>
-          <TableColumn className="text-md text-gray-700">Action</TableColumn>
-        </TableHeader>
-        <TableBody>
-          {currentProducts.map((product) => (
-            <TableRow key={product.id}>
-              <TableCell>{product.productName}</TableCell>
-              <TableCell>Rp. {product.price.toLocaleString('id-ID')}</TableCell>
-              <TableCell className="max-w-[100px]">
-                {String(dummyCategories.find((val) => val.id == product.category.id)?.name)}
-              </TableCell>
-              <TableCell className="max-w-[100px] truncate">
-                <span className="truncate">{product.desc}</span>
-              </TableCell>
-              <TableCell>{product.stock}</TableCell>
-              <TableCell>
-                <div>
-                  <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleEditClick(product)}>
-                    <div className="flex items-center gap-1 border rounded-md border-primary p-1">
-                      <FaPencilAlt size={14} className="text-primary bg-white text-lg" />
-                    </div>
-                  </Button>
-                  <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleDeleteClick(product)}>
-                    <div className="flex items-center gap-1 border rounded-md border-danger p-1">
-                      <FaTrash size={14} className="text-danger bg-white text-lg" />
-                    </div>
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
+      <div className="my-2 gap-2 p-4 border border-gray-200 shadow-md bg-white rounded-md flex items-center">
+        <Button
+          isDisabled={userRole !== 'SUPER_ADMIN'}
+          size="md"
+          color="primary"
+          className="p-2 mr-4"
+          onClick={handleAddClick}
+        >
+          Add New
+        </Button>
+        <Input size="sm" label="Search by Name" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} />
+        <Select
+          fullWidth
+          multiple={true}
+          label="Filter By Cateogry"
+          selectedKeys={selectedCategories}
+          onSelectionChange={(e) => {
+            const newCategories = [...selectedCategories, String(e.currentKey)];
+
+            setSelectedCategories(new Set([...newCategories]));
+          }}
+        >
+          {categories?.map((category) => (
+            <SelectItem key={category.id} textValue={category.name} value={category.id}>
+              {category.name}
+            </SelectItem>
           ))}
-        </TableBody>
-      </Table>
-      <Pagination
-        showControls
-        className="my-2 shadow-sm"
-        total={Math.ceil(dummyProducts.length / productsPerPage)}
-        initialPage={1}
-        onChange={(page) => paginate(page)}
+        </Select>
+        <Button className="bg-gray-100" onClick={onResetFilter}>
+          Reset
+        </Button>
+      </div>
+
+      <ProductsTable
+        isAdmin={true}
+        handleEditClick={handleEditClick}
+        handleDeleteClick={handleDeleteClick}
+        products={products}
+        pagination={{ totalPage: Math.ceil(totalProducts ? totalProducts / pageSize : 1), currentPage }}
+        onChangePage={setCurrentPage}
+        userRole={userRole}
       />
 
-      <Modal size="xl" isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} closeButton>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Edit Product</ModalHeader>
-              <ModalBody>
-                <Input
-                  fullWidth
-                  label="Product Name"
-                  value={editedProductName}
-                  onChange={(e) => setEditedProductName(e.target.value)}
-                />
-                <Input
-                  fullWidth
-                  label="Product Price"
-                  type="number"
-                  value={String(editedProductPrice)}
-                  onChange={(e) => setEditedProductPrice(Number(e.target.value))}
-                />
-              </ModalBody>
-              <ModalFooter>
-                <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-                <Button onClick={handleSaveEdit}>Save</Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      <Modal size="xl" isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} closeButton>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Confirm Delete</ModalHeader>
-              <ModalBody>Are you sure you want to delete {selectedProduct?.productName}?</ModalBody>
-              <ModalFooter>
-                <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
-                <Button onClick={handleConfirmDelete}>Yes</Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <DeleteConfirmationModal
+        selected={selectedProduct}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        handleConfirmDelete={handleConfirmDelete}
+      />
     </div>
   );
 };

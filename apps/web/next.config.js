@@ -11,7 +11,8 @@ const nextConfig = {
         pathname: `${process.env.IMG_URL_API_PATH}`
       }
     ]
-  }
+  },
+  reactStrictMode: false
 };
 
 module.exports = nextConfig;

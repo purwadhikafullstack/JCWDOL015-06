@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Table,
   Pagination,
@@ -12,68 +12,170 @@ import {
   TableRow,
   Input
 } from '@nextui-org/react';
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/modal';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { dummyCategories } from '@/data/dummyData';
+import { FaPencilAlt, FaSearch, FaTrash } from 'react-icons/fa';
+import { Category, Role } from '@/types/types';
+import { fetchCategories, getCategoryById, createCategory, updateCategory, deleteCategory } from '@/lib/category.api';
+import { toastFailed, toastSuccess } from '@/utils/toastHelper';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
+import AddEditCategory from '@/components/Admin/AddEditCategory';
 
 const CategoriesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [addEditMode, setAddEditMode] = useState<'add' | 'edit'>('add');
+  const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<{ id: number; name: string } | null>(null);
-  const [editedCategoryName, setEditedCategoryName] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [totalCategories, setTotalCategories] = useState<number>();
+  const [nameFilter, setNameFilter] = useState<string | undefined>();
 
-  const categoriesPerPage = 10;
+  const pageSize = 10;
 
-  const indexOfLastCategory = currentPage * categoriesPerPage;
-  const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
-  const currentCategories = dummyCategories.slice(indexOfFirstCategory, indexOfLastCategory);
+  const loadCategories = useCallback(async () => {
+    try {
+      const queryParams = { page: currentPage, pageSize } as { [key: string]: any };
+      if (nameFilter) {
+        queryParams.name = nameFilter;
+      }
+      const response = await fetchCategories(queryParams);
+      setCategories(response.categories);
+      setTotalCategories(response.total);
+    } catch (err) {
+      toastFailed('Failed to fetch categories');
+      setCategories([]);
+      setTotalCategories(0);
+    }
+  }, [currentPage, nameFilter]);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-  const handleEditClick = (category: { id: number; name: string }) => {
-    console.log('edit modal');
-    setSelectedCategory(category);
-    setEditedCategoryName(category.name);
-    setIsEditModalOpen(true);
+  const onResetFilter = () => {
+    setNameFilter('');
   };
 
-  const handleDeleteClick = (category: { id: number; name: string }) => {
-    console.log('delete modal');
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [nameFilter]);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
+
+  const handleAddClick = () => {
+    setAddEditMode('add');
+    setSelectedCategory(null);
+    setIsAddEditModalOpen(true);
+  };
+
+  const handleEditClick = async (category: Category) => {
+    try {
+      const response = await getCategoryById(category.id);
+      setSelectedCategory(response);
+      setAddEditMode('edit');
+      setIsAddEditModalOpen(true);
+    } catch (err) {
+      toastFailed('Failed to fetch category');
+    }
+  };
+
+  const handleDeleteClick = (category: Category) => {
     setSelectedCategory(category);
     setIsDeleteModalOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    // Save the edited category name logic here
-    setIsEditModalOpen(false);
+  const handleSave = async (categoryName: string) => {
+    if (selectedCategory?.id) {
+      try {
+        await updateCategory(selectedCategory?.id, { name: categoryName });
+        toastSuccess('Updated category successfully');
+        setIsAddEditModalOpen(false);
+        loadCategories();
+      } catch (err) {
+        toastFailed('Failed to update category');
+      }
+    } else {
+      try {
+        await createCategory({ name: categoryName });
+        toastSuccess('Created category successfully');
+        setIsAddEditModalOpen(false);
+        loadCategories();
+      } catch (err) {
+        toastFailed('Failed to create category');
+      }
+    }
   };
 
-  const handleConfirmDelete = () => {
-    // Delete the category logic here
-    setIsDeleteModalOpen(false);
+  const handleConfirmDelete = async () => {
+    if (selectedCategory?.id) {
+      try {
+        await deleteCategory(selectedCategory?.id);
+        toastSuccess('Deleted category successfully');
+        setIsDeleteModalOpen(false);
+        setCurrentPage(1);
+        loadCategories();
+      } catch (err) {
+        toastFailed('Failed to delete category');
+      }
+    }
   };
+
+  const onSortChange = (e: any) => {
+    console.log(e);
+  };
+
+  const userRole = localStorage.getItem('userRole') as Role;
 
   return (
     <div className="p-4">
       <div className="my-2 text-lg font-semibold">Categories</div>
-      <Table aria-label="Categories Table">
+      <div className="my-2 gap-2 p-4 border border-gray-200 shadow-md bg-white rounded-md flex items-center">
+        <Button
+          isDisabled={userRole !== 'SUPER_ADMIN'}
+          size="md"
+          color="primary"
+          className="p-2 mr-4"
+          onClick={handleAddClick}
+        >
+          Add New
+        </Button>
+        <Input size="sm" label="Search by Name" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} />
+        <Button className="bg-gray-100" onClick={onResetFilter}>
+          Reset
+        </Button>
+      </div>
+
+      <Table
+        onSortChange={(e) => {
+          onSortChange(e);
+        }}
+        aria-label="Categories Table"
+      >
         <TableHeader>
-          <TableColumn className="text-md text-gray-700">Name</TableColumn>
+          <TableColumn allowsSorting className="text-md text-gray-700">
+            Name
+          </TableColumn>
           <TableColumn className="text-md text-gray-700">Action</TableColumn>
         </TableHeader>
-        <TableBody>
-          {currentCategories.map((category) => (
+        <TableBody emptyContent={'No category found'}>
+          {categories.map((category) => (
             <TableRow key={category.id}>
               <TableCell>{category.name}</TableCell>
               <TableCell>
                 <div>
-                  <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleEditClick(category)}>
+                  <Button
+                    isDisabled={userRole !== 'SUPER_ADMIN'}
+                    size="sm"
+                    className="p-1 min-w-[22px] bg-white"
+                    onClick={() => handleEditClick(category)}
+                  >
                     <div className="flex items-center gap-1 border rounded-md border-primary p-1">
                       <FaPencilAlt size={14} className="text-primary bg-white text-lg" />
                     </div>
                   </Button>
-                  <Button size="sm" className="p-1 min-w-[22px] bg-white" onClick={() => handleDeleteClick(category)}>
+                  <Button
+                    isDisabled={userRole !== 'SUPER_ADMIN'}
+                    size="sm"
+                    className="p-1 min-w-[22px] bg-white"
+                    onClick={() => handleDeleteClick(category)}
+                  >
                     <div className="flex items-center gap-1 border rounded-md border-danger p-1">
                       <FaTrash size={14} className="text-danger bg-white text-lg" />
                     </div>
@@ -84,50 +186,30 @@ const CategoriesPage = () => {
           ))}
         </TableBody>
       </Table>
+
       <Pagination
+        className="flex flex-col gap-5 my-2"
         showControls
-        className="my-2 shadow-sm"
-        total={Math.ceil(dummyCategories.length / categoriesPerPage)}
-        initialPage={1}
-        onChange={(page) => paginate(page)}
+        total={Math.ceil(totalCategories ? totalCategories / pageSize : 1)}
+        color="primary"
+        page={currentPage}
+        onChange={setCurrentPage}
       />
 
-      <Modal size="xl" isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} closeButton>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Edit Category</ModalHeader>
-              <ModalBody>
-                <Input
-                  fullWidth
-                  label="Category Name"
-                  value={editedCategoryName}
-                  onChange={(e) => setEditedCategoryName(e.target.value)}
-                />
-              </ModalBody>
-              <ModalFooter>
-                <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-                <Button onClick={handleSaveEdit}>Save</Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <AddEditCategory
+        isOpen={isAddEditModalOpen}
+        onClose={() => setIsAddEditModalOpen(false)}
+        addEditMode={addEditMode}
+        name={selectedCategory?.name}
+        handleSave={handleSave}
+      />
 
-      <Modal size="xl" isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} closeButton>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Confirm Delete</ModalHeader>
-              <ModalBody>Are you sure you want to delete {selectedCategory?.name}?</ModalBody>
-              <ModalFooter>
-                <Button onClick={() => setIsDeleteModalOpen(false)}>No</Button>
-                <Button onClick={handleConfirmDelete}>Yes</Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <DeleteConfirmationModal
+        selected={selectedCategory}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        handleConfirmDelete={handleConfirmDelete}
+      />
     </div>
   );
 };

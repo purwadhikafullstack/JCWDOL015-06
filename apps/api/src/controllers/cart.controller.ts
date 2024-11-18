@@ -2,20 +2,81 @@ import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
 export class CartController {
-  async getCartsByUserId(req: Request, res: Response) {
+  async createCart(req: Request, res: Response) {
     try {
-      const { userId } = req.body;
-      const cart = await prisma.cart.findMany({
-        where: { userId: userId },
+      const {
+        discountId,
+        totalPrice,
+        totalDiscount,
+        storeId,
+        cartItemIds,
+        userId,
+      } = req.body;
+
+      const cart = await prisma.cart.create({
+        data: {
+          discountId,
+          totalPrice,
+          totalDiscount,
+          storeId,
+          userId,
+          cartItems: {
+            connect: cartItemIds.map((id: number) => ({ id })),
+          },
+        },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        cart,
-      });
+      res.status(201).json(cart);
     } catch (err) {
-      res.status(500).send({
-        status: 'error fething carts',
+      res.status(400).send({
+        status: 'error',
+        msg: err,
+      });
+    }
+  }
+
+  async getCarts(req: Request, res: Response) {
+    try {
+      const { userName, userId, page = 1, pageSize = 10 } = req.query;
+      const skip = (Number(page) - 1) * Number(pageSize);
+      const take = Number(pageSize);
+
+      const [carts, total] = await prisma.$transaction([
+        prisma.cart.findMany({
+          where: {
+            OR: [
+              { user: { username: { contains: userName as string } } },
+              { userId: Number(userId) },
+            ],
+          },
+          include: {
+            cartItems: {
+              include: {
+                product: true,
+                discount: true,
+              },
+            },
+            discount: true,
+            store: true,
+            user: true,
+          },
+          skip,
+          take,
+        }),
+        prisma.cart.count({
+          where: {
+            OR: [
+              { user: { username: { contains: userName as string } } },
+              { userId: Number(userId) },
+            ],
+          },
+        }),
+      ]);
+
+      res.status(200).json({ carts, total });
+    } catch (err) {
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -23,72 +84,69 @@ export class CartController {
 
   async getCartById(req: Request, res: Response) {
     try {
-      const { id } = req.body;
-
+      const { id } = req.params;
       const cart = await prisma.cart.findUnique({
-        where: { id: id },
-      });
-
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Cart Fetched!',
-        cart,
-      });
-    } catch (err) {
-      res.status(500).send({
-        status: 'error fetching cart',
-        msg: err,
-      });
-    }
-  }
-
-  // Create cart
-  async createCart(req: Request, res: Response) {
-    try {
-      const { userId, cartProducts, discountCartId } = req.body;
-
-      const cart = await prisma.cart.create({
-        data: {
-          userId,
-          cartProducts,
-          discountCartId,
+        where: { id: Number(id) },
+        include: {
+          cartItems: {
+            include: {
+              product: true,
+              discount: true,
+            },
+          },
+          discount: true,
+          store: true,
+          user: true,
         },
       });
 
-      res.status(201).send({
-        status: 'ok',
-        msg: 'Cart Created!',
-        cart,
-      });
+      if (!cart) {
+        return res.status(404).json({ error: 'Cart not found' });
+      }
+
+      res.status(200).json(cart);
     } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Create Cart!',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
   }
 
-  // Update cart
   async updateCart(req: Request, res: Response) {
     try {
-      const { id, userId, cartProducts, discountCartId } = req.body;
+      const { id } = req.params;
+      const { discountId, totalPrice, totalDiscount, storeId, cartItemIds } =
+        req.body;
 
       const cart = await prisma.cart.update({
-        where: { id: id, userId: userId },
+        where: { id: Number(id) },
         data: {
-          cartProducts,
-          discountCartId,
+          discountId,
+          totalPrice,
+          totalDiscount,
+          storeId,
+          cartItems: {
+            set: cartItemIds.map((id: number) => ({ id })),
+          },
+        },
+        include: {
+          cartItems: {
+            include: {
+              product: true,
+              discount: true,
+            },
+          },
+          discount: true,
+          store: true,
+          user: true,
         },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Cart Updated!',
-        cart,
-      });
+      res.status(200).json(cart);
     } catch (err) {
-      res.status(500).send({
-        status: 'Failed to Update Cart!',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }
@@ -96,20 +154,16 @@ export class CartController {
 
   async deleteCart(req: Request, res: Response) {
     try {
-      const { id } = req.body;
+      const { id } = req.params;
 
-      const cart = await prisma.cart.delete({
-        where: { id: id },
+      await prisma.cart.delete({
+        where: { id: Number(id) },
       });
 
-      res.status(200).send({
-        status: 'ok',
-        msg: 'Cart Deleted!',
-        cart,
-      });
+      res.status(204).send();
     } catch (err) {
-      res.status(500).send({
-        status: 'error deleting cart',
+      res.status(400).send({
+        status: 'error',
         msg: err,
       });
     }

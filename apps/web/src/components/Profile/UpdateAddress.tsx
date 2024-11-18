@@ -1,13 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
-import { ErrorMessage, Field, Form, Formik, FormikHelpers, useFormik } from 'formik';
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import * as yup from 'yup';
 import { Wrapper } from '@/components/Wrapper';
 import { Button } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
-// import { IAddressCreate } from '@/types/address';
 import {
   createAddress,
   deleteAddress,
@@ -16,7 +15,7 @@ import {
   getProvinces,
   updateAddress
 } from '@/lib/address';
-import { toast } from 'react-toastify';
+import { toastFailed } from '@/utils/toastHelper';
 
 interface IAddressCreate {
   provinceId: String;
@@ -32,6 +31,15 @@ const schema = yup.object().shape({
 
 export default function UpdateAddress() {
   const router = useRouter();
+
+  const swalSuccess = (message: string) =>
+    Swal.fire({
+      titleText: message,
+      icon: 'success',
+      confirmButtonText: 'Cool',
+      timer: 5000
+    });
+  const toastSeeFailed = (message: string) => toastFailed(message);
 
   // setting for cities input select
 
@@ -52,8 +60,8 @@ export default function UpdateAddress() {
         if (result.status !== 'ok') throw result.msg;
 
         setAccountAddress(result.account);
-      } catch (error) {
-        toast.error(`${error}`);
+      } catch (error: any) {
+        toastSeeFailed(error);
       }
     };
 
@@ -69,17 +77,11 @@ export default function UpdateAddress() {
   useEffect(() => {
     const gettingCitiesAndProvinces = async () => {
       try {
-        // const { result1, result2 } = await getProvincesAndCities();
-        // if (result1.status !== 'ok') throw result1.msg;
-        // if (result2.status !== 'ok') throw result2.msg;
-        // setListProvince(result1.provinces);
-        // setListCity(result2.cities);
-
         const { result } = await getProvinces();
         if (result.status !== 'ok') throw result.msg;
         setListProvince(result.provinces);
-      } catch (error) {
-        toast.error(`${error}`);
+      } catch (error: any) {
+        toastSeeFailed(error);
       }
     };
 
@@ -96,8 +98,8 @@ export default function UpdateAddress() {
       setListCity(result.cities);
 
       setShowCities(true);
-    } catch (error) {
-      toast.error(`${error}`);
+    } catch (error: any) {
+      toastSeeFailed(error);
     }
   };
 
@@ -108,38 +110,23 @@ export default function UpdateAddress() {
     action: FormikHelpers<{ provinceId: String; cityId: String; desc: String }>
   ) => {
     try {
-      console.log('\n\n\nCREATE ADDRESS\n\n');
-
-      console.log(data);
 
       const { result } = await createAddress(data);
 
       if (result.status != 'ok') throw `${result.msg}`;
 
-      Swal.fire({
-        titleText: `${result.msg}`,
-        icon: 'success',
-        confirmButtonText: 'Cool',
-        timer: 7000
-      });
+      swalSuccess(result.msg)
 
       action.resetForm();
 
-      return router.push('http://localhost:3000/customer/profile/');
+      return router.push('/user/profile');
     } catch (error: any) {
-      console.log('\n\n\n UPDATE ADDRESS ERROR\n\n');
-      console.log(error.msg);
 
-      Swal.fire({
-        title: error,
-        icon: 'error',
-        confirmButtonText: 'Ok',
-        timer: 4000
-      });
+      toastSeeFailed(error)
 
       action.resetForm();
 
-      return router.push('http://localhost:3000/customer/profile/');
+      return router.push('/user/profile');
     }
   };
 
@@ -151,23 +138,13 @@ export default function UpdateAddress() {
 
       if (result.status !== 'ok') throw result.msg;
 
-      Swal.fire({
-        titleText: `${result.msg}`,
-        icon: 'success',
-        confirmButtonText: 'Cool',
-        timer: 7000
-      });
+      swalSuccess(result.msg)
 
-      return router.push('/customer/profile');
+      return router.push('/user/profile');
     } catch (error: any) {
-      Swal.fire({
-        title: error,
-        icon: 'error',
-        confirmButtonText: 'Ok',
-        timer: 4000
-      });
+      toastSeeFailed(error)
 
-      return router.push('/customer/profile');
+      return router.push('/user/profile');
     }
   };
 
@@ -179,21 +156,11 @@ export default function UpdateAddress() {
 
       if (result.status !== 'ok') throw result.msg;
 
-      Swal.fire({
-        titleText: `${result.msg}`,
-        icon: 'success',
-        confirmButtonText: 'Cool',
-        timer: 7000
-      });
+      swalSuccess(result.msg)
 
       router.push('/');
     } catch (error: any) {
-      Swal.fire({
-        title: error,
-        icon: 'error',
-        confirmButtonText: 'Ok',
-        timer: 4000
-      });
+      toastSeeFailed(error)
 
       router.push(`/`);
     }

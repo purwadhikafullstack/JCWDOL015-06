@@ -11,10 +11,17 @@ export class AddressController {
         results,
       });
     } catch (error: any) {
-      res.status(400).send({
-        status: 'error fething address helper data',
-        msg: error.message,
-      });
+      if (error.message) {
+        res.status(400).send({
+          status: 'error address helper',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error address helper',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -47,10 +54,17 @@ export class AddressController {
         provinces,
       });
     } catch (error: any) {
-      res.status(400).send({
-        status: 'error fetching provinces data',
-        msg: error.message,
-      });
+      if (error.message) {
+        res.status(400).send({
+          status: 'error provinces',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error provinces',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -70,10 +84,17 @@ export class AddressController {
         cities,
       });
     } catch (error: any) {
-      res.status(400).send({
-        status: 'error fetching cities data',
-        msg: error.message,
-      });
+      if (error.message) {
+        res.status(400).send({
+          status: 'error cities',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error cities',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -98,10 +119,17 @@ export class AddressController {
         cities,
       });
     } catch (error: any) {
-      res.status(400).send({
-        status: 'error fetching cities data',
-        msg: error.message,
-      });
+      if (error.message) {
+        res.status(400).send({
+          status: 'error cities by province',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error cities by province',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -156,10 +184,17 @@ export class AddressController {
         account: existingUser,
       });
     } catch (error: any) {
-      res.status(400).send({
-        status: 'error fetching cities data',
-        msg: error.message,
-      });
+      if (error.message) {
+        res.status(400).send({
+          status: 'error user address',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error user address',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -187,10 +222,17 @@ export class AddressController {
         msg: 'Address Created Successfully',
       });
     } catch (error: any) {
-      res.status(400).send({
-        status: 'error account update',
-        msg: error.message,
-      });
+      if (error.message) {
+        res.status(400).send({
+          status: 'error update user address',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error update user address',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -209,57 +251,71 @@ export class AddressController {
         },
       });
 
-      if (!findAddress || findAddress.length === 0) throw 'Error Find Address';
+      if (!findAddress || findAddress.length === 0) {
 
-      // await prisma.address.update({
-      //   where: {
-      //     id: findAddress.id,
-      //   },
-      //   data: {
-      //     isMain: 0,
-      //   },
-      // });
-
-      // await prisma.address.update({
-      //   where: {
-      //     id: id,
-      //   },
-      //   data: {
-      //     isMain: 1,
-      //   },
-      // });
-
-      const mainAddressId = findAddress[0].id;
-
-      // Use transaction to ensure atomicity
-      await prisma.$transaction([
-        prisma.address.update({
+        const findOne: any = await prisma.address.findFirst({
           where: {
-            id: mainAddressId,
+            type: 'USER',
+            typeId: req.user.id,
+            isMain: 0,
           },
-          data: {
-            isMain: 0, // Unset the current main address
+          select: {
+            id: true,
           },
-        }),
-        prisma.address.update({
+        });
+
+        await prisma.address.update({
           where: {
-            id: id,
+            id: findOne.id,
           },
           data: {
             isMain: 1, // Set the new main address
           },
         }),
-      ]);
+          res.status(201).send({
+            status: 'ok',
+            msg: 'Main Address Changed!',
+          });
+      } else {
+        const mainAddressId = findAddress[0].id;
 
-      res.status(201).send({
-        status: 'ok',
-        msg: 'Main Address Changed!',
-      });
+        // Use transaction to ensure atomicity
+        await prisma.$transaction([
+          prisma.address.update({
+            where: {
+              id: mainAddressId,
+            },
+            data: {
+              isMain: 0, // Unset the current main address
+            },
+          }),
+          prisma.address.update({
+            where: {
+              id: id,
+            },
+            data: {
+              isMain: 1, // Set the new main address
+            },
+          }),
+        ]);
+
+        res.status(201).send({
+          status: 'ok',
+          msg: 'Main Address Changed!',
+        });
+      }
     } catch (error: any) {
-      res.status(400).send({
-        status: 'error account update',
-        msg: error.message,
-      });
+      if (error.message) {
+        res.status(400).send({
+          status: 'error main address',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error main address',
+          msg: error,
+        });
+      }
     }
   }
 
@@ -276,10 +332,17 @@ export class AddressController {
         msg: 'Address Deleted!',
       });
     } catch (error: any) {
-      res.status(400).send({
-        status: 'error account update',
-        msg: error.message,
-      });
+      if (error.message) {
+        res.status(400).send({
+          status: 'error delete address',
+          msg: error.message,
+        });
+      } else {
+        res.status(400).send({
+          status: 'error delete address',
+          msg: error,
+        });
+      }
     }
   }
 }

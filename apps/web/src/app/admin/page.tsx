@@ -1,89 +1,81 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { useRouter } from 'next/navigation';
 import { FaBox, FaClipboardList, FaShoppingCart, FaChartBar, FaUser } from 'react-icons/fa';
 import { Select, SelectItem } from '@nextui-org/react';
 import { RiDiscountPercentLine } from 'react-icons/ri';
-import { dummyData, dummyProducts, dummyStocks, dummyStores, Role } from '@/types/types';
+import { Role, Stock, Store, User } from '@/types/types';
+import { fetchStocks } from '@/api/stock.api';
+import { fetchStores } from '@/api/store.api';
+import { toastFailed } from '@/utils/toastHelper';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-interface ProductQuantity {
-  productId: number;
-  totalQuantity: number;
-}
-
 const AdminDashboardPage = () => {
   const router = useRouter();
-  const [selectedStoreId, setSelectedStoreId] = useState(dummyStores[0].id);
-  const [selectedStore, setSelectedStore] = useState(dummyStores[0]);
+  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [stocks, setStocks] = useState<Stock[]>([]);
 
-  const sortProductsByTotalQuantity = (storeId?: number) => {
-    const productQuantities: ProductQuantity[] = [];
-
-    let stocks = [...dummyStocks];
-
-    stocks.forEach((stock) => {
-      //cek apakah stock.storeId == storeId || !storeId
-      //jika ya, cek apakah di array productQuantities sudah ada productId ini
-      //jika ya, cari di index ke berapa, totalQuantity = totalQuantity + stock.quantity
-      //jika tidak, productQuantities.push({productId: stock.productId, totalQuantity: stock.quantity})
-      //jika tidak, skip
-      if (stock.storeId == storeId || !storeId) {
-        const findIndex = productQuantities.findIndex((val) => val.productId == stock.productId);
-        if (findIndex < 0) {
-          productQuantities.push({ productId: Number(stock.productId), totalQuantity: Number(stock.quantity) });
-        } else {
-          productQuantities[findIndex].totalQuantity =
-            productQuantities[findIndex].totalQuantity + Number(stock.quantity);
-        }
-      }
+  const getStores = async () => {
+    const response = await fetchStores();
+    const stores = response.stores.map((store: any) => {
+      return {
+        ...store,
+        id: String(store.id)
+      };
     });
-
-    productQuantities.sort((a, b) => b.totalQuantity - a.totalQuantity);
-
-    return productQuantities.slice(0, 5);
+    setStores(stores);
   };
 
-  const [stockForChart, setStockForChart] = useState<ProductQuantity[]>(sortProductsByTotalQuantity(dummyStores[0].id));
+  const loadStocks = useCallback(async (storeId?: string) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') ?? '{}') as unknown as User;
+      const queryParams = { page: 1, pageSize: 5 } as { [key: string]: any };
 
-  const handleStoreChange = (event: any) => {
-    setSelectedStoreId(event.target.value);
-    const selectedValue = dummyStores.find((val) => val.id == event.target.value);
-
-    setStockForChart(sortProductsByTotalQuantity(event.target.value));
-
-    if (selectedValue) {
-      setSelectedStore(selectedValue);
-    }
-  };
-
-  const salesData = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-    datasets: [
-      {
-        label: 'Sales',
-        data: dummyData.sales[selectedStore.name],
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
+      if (user.role === 'STORE_ADMIN') {
+        storeId = String(user.store?.id);
       }
-    ]
-  };
+      if (storeId) {
+        queryParams.storeId = Number(storeId);
+      }
+      const response = await fetchStocks(queryParams);
+      setStocks(response.stocks);
+    } catch (err) {
+      toastFailed('Failed to fetch stock');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedStoreId) {
+      loadStocks(String(selectedStoreId));
+    }
+  }, [selectedStoreId]);
+
+  useEffect(() => {
+    getStores();
+    loadStocks();
+  }, []);
+
+  const [stockForChart, setStockForChart] = useState<Stock[]>(stocks.slice(0, 5));
+
+  useEffect(() => {
+    setStockForChart(stocks.slice(0, 5));
+  }, [stocks]);
 
   const stockData = {
     labels: stockForChart.map((val) => {
-      const name = dummyProducts.find((product) => product.id == val.productId)?.productName;
+      const name = val?.product?.productName;
       return name ?? '';
     }),
     datasets: [
       {
         label: 'Stock',
         data: stockForChart.map((val) => {
-          return val.totalQuantity;
+          return val.quantity;
         }),
         backgroundColor: 'rgba(153, 102, 255, 0.2)',
         borderColor: 'rgba(153, 102, 255, 1)',
@@ -198,18 +190,15 @@ const AdminDashboardPage = () => {
       {role === 'SUPER_ADMIN' && (
         <div className="p-4 w-1/2">
           <Select
-            label="Store"
-            labelPlacement="outside"
-            placeholder="Select store"
-            value={selectedStoreId}
-            defaultSelectedKeys={selectedStoreId.toString()}
-            renderValue={() => {
-              return <span>{selectedStore.name}</span>;
+            fullWidth
+            label="Select Store"
+            placeholder="All store"
+            onSelectionChange={(e) => {
+              setSelectedStoreId(String(e.currentKey));
             }}
-            onChange={handleStoreChange}
           >
-            {dummyStores.map((store) => (
-              <SelectItem key={store.id} value={store.name}>
+            {stores.map((store) => (
+              <SelectItem key={store.id} textValue={store?.name} value={store.name}>
                 {store.name}
               </SelectItem>
             ))}
@@ -217,10 +206,10 @@ const AdminDashboardPage = () => {
         </div>
       )}
 
-      <div className="flex flex-row gap-10 w-full p-4">
-        <div className="w-full">
+      <div className="flex flex-row w-full p-4 justify-center items-center">
+        <div className="h-[300px]">
           <div className="text-base font-semibold">Stock Report</div>
-          <Bar data={stockData} />
+          <Bar className="h-full" data={stockData} />
         </div>
       </div>
 

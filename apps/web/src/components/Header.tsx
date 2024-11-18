@@ -2,11 +2,12 @@
 
 import { Button } from '@nextui-org/react';
 import { FaShoppingCart } from 'react-icons/fa';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export const Header = () => {
   const role = localStorage.getItem('userRole') as 'SUPER_ADMIN' | 'STORE_ADMIN' | 'USER';
   const currentRoute = usePathname();
+  const router = useRouter();
 
   return (
     <header className="bg-white shadow-md p-4">
@@ -37,11 +38,13 @@ export const Header = () => {
             Contact
           </a>
           {role == 'USER' && (
-            <Button className="relative">
+            <Button
+              onClick={() => {
+                router.push('/user/carts');
+              }}
+              className="relative"
+            >
               <FaShoppingCart />
-              <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
-                3
-              </span>
             </Button>
           )}
         </nav>

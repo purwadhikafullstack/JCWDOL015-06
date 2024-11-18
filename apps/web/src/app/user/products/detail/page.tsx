@@ -79,6 +79,16 @@ export default function ProductDetail() {
     }
   }, [selectedDiscountId, product, quantity]);
 
+  const createNewCart = async (userId: number) => {
+    try {
+      const response = await createCart({ userId: Number(userId), storeId: Number(selectedStoreId) });
+      let cart = response as Cart;
+      return cart;
+    } catch (err) {
+      toastFailed('Failed to add item to cart');
+    }
+  };
+
   const handleAddToCart = async () => {
     if (!selectedStoreId) {
       toastFailed('Please select a store first!');
@@ -101,58 +111,53 @@ export default function ProductDetail() {
 
       //if no cart id, create one first
       if (!cartId) {
-        try {
-          const response = await createCart({ userId: Number(userId), storeId: Number(selectedStoreId) });
-          let cart = response as Cart;
-          cartId = cart.id;
+        const cart = await createNewCart(userId);
+        cartId = cart?.id;
+      }
 
-          //create new cartItems
-          const newCartItem = {
-            productId: Number(id),
-            quantity: quantity,
-            discountId: selectedDiscountId ?? undefined,
-            totalPrice: Number(discountedPrice) * quantity,
-            totalDiscount: (Number(product?.price) - Number(discountedPrice)) * quantity
-          };
-          let cartItems = [] as {
-            productId?: number;
-            quantity?: number;
-            discountId?: number;
-            totalPrice?: number;
-            totalDiscount?: number;
-          }[];
-          if (cart.cartItems && cart.cartItems?.length > 0) {
-            cart.cartItems?.forEach((cartItem) => {
-              cartItems.push({
-                productId: cartItem.productId,
-                quantity: cartItem.quantity,
-                discountId: cartItem.discountId ?? undefined,
-                totalPrice: cartItem.totalPrice,
-                totalDiscount: cartItem.totalDiscount
-              });
-            });
-          }
-          //join with old cartItems
-          cartItems.push(newCartItem);
+      //create new cartItems
+      const newCartItem = {
+        productId: Number(id),
+        quantity: quantity,
+        discountId: selectedDiscountId ?? undefined,
+        totalPrice: Number(discountedPrice) * quantity,
+        totalDiscount: (Number(product?.price) - Number(discountedPrice)) * quantity
+      };
+      let cartItems = [] as {
+        productId?: number;
+        quantity?: number;
+        discountId?: number;
+        totalPrice?: number;
+        totalDiscount?: number;
+      }[];
+      if (cart.cartItems && cart.cartItems?.length > 0) {
+        cart.cartItems?.forEach((cartItem) => {
+          cartItems.push({
+            productId: cartItem.productId,
+            quantity: cartItem.quantity,
+            discountId: cartItem.discountId ?? undefined,
+            totalPrice: cartItem.totalPrice,
+            totalDiscount: cartItem.totalDiscount
+          });
+        });
+      }
+      //join with old cartItems
+      cartItems.push(newCartItem);
 
-          // call updateCart api
-          try {
-            const cartTotalPrice = cartItems.reduce((total, item) => total + Number(item.totalPrice), 0);
-            const cartTotalDiscount = cartItems.reduce((total, item) => total + Number(item.totalDiscount), 0);
+      // call updateCart api
+      try {
+        const cartTotalPrice = cartItems.reduce((total, item) => total + Number(item.totalPrice), 0);
+        const cartTotalDiscount = cartItems.reduce((total, item) => total + Number(item.totalDiscount), 0);
 
-            await updateCart(Number(cartId), {
-              discountId: selectedDiscountId ?? undefined,
-              totalPrice: Number(cartTotalPrice),
-              totalDiscount: Number(cartTotalDiscount),
-              cartItems: cartItems
-            });
-            toastSuccess('Product added to cart successfully!');
-          } catch (err) {
-            toastFailed('Failed to add item to cart');
-          }
-        } catch (err) {
-          toastFailed('Failed to add item to cart');
-        }
+        await updateCart(Number(cartId), {
+          discountId: selectedDiscountId ?? undefined,
+          totalPrice: Number(cartTotalPrice),
+          totalDiscount: Number(cartTotalDiscount),
+          cartItems: cartItems
+        });
+        toastSuccess('Product added to cart successfully!');
+      } catch (err) {
+        toastFailed('Failed to add item to cart');
       }
     } else {
       toastFailed('You are not logged in!');

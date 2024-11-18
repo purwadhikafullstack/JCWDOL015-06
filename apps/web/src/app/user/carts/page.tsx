@@ -94,18 +94,24 @@ const CartPage = () => {
   };
 
   const handleDiscountSelection = async (cartId: number, discountId: number) => {
-    const discount = discounts.find((d) => d.id === discountId);
+    const discount = discounts.find((d) => d.id == discountId);
     if (!discount) return;
 
     const updatedCarts = carts.map((cart) => {
-      if (cart.id === cartId && Number(cart.totalPrice) >= Number(discount.minimumPurchaseAmount)) {
+      if (cart.id == cartId) {
         const discountAmount = discount.discountAmount || 0;
+
+        const cartTotalPrice = cart?.cartItems?.reduce((sum, item) => sum + Number(item.totalPrice), 0);
+        const cartTotalDiscount = cart?.cartItems?.reduce((sum, item) => sum + Number(item.totalDiscount), 0);
+
+        const updatedCartTotalPrice = Number(cartTotalPrice) - discountAmount;
+        const updatedCartTotalDiscount = Number(cartTotalDiscount) + discountAmount;
 
         return {
           ...cart,
           discountId: discountId,
-          totalDiscount: Number(cart.totalDiscount) + discountAmount,
-          totalPrice: Number(cart.totalPrice) - discountAmount
+          totalDiscount: updatedCartTotalDiscount > Number(cartTotalPrice) ? cartTotalPrice : updatedCartTotalDiscount,
+          totalPrice: updatedCartTotalPrice > 0 ? updatedCartTotalPrice : 0
         };
       }
       return cart;

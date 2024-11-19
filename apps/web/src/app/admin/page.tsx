@@ -11,6 +11,7 @@ import { Role, Stock, Store, User } from '@/types/types';
 import { fetchStocks } from '@/api/stock.api';
 import { fetchStores } from '@/api/store.api';
 import { toastFailed } from '@/utils/toastHelper';
+import { useAppSelector } from '@/store';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -31,14 +32,21 @@ const AdminDashboardPage = () => {
     setStores(stores);
   };
 
+  const roleUser = useAppSelector((state) => state.auth.userRole);
+  const idStore= useAppSelector((state) => state.auth.storeId);
+
   const loadStocks = useCallback(async (storeId?: string) => {
     try {
-      const user = JSON.parse(localStorage.getItem('user') ?? '{}') as unknown as User;
+      // const user = JSON.parse(localStorage.getItem('user') ?? '{}') as unknown as User;
       const queryParams = { page: 1, pageSize: 5 } as { [key: string]: any };
 
-      if (user.role === 'STORE_ADMIN') {
-        storeId = String(user.store?.id);
+      // if (user.role === 'STORE_ADMIN') {
+      //   storeId = String(user.store?.id);
+      // }
+      if (roleUser === 'STORE_ADMIN') {
+        storeId = String(idStore);
       }
+
       if (storeId) {
         queryParams.storeId = Number(storeId);
       }
@@ -95,7 +103,8 @@ const AdminDashboardPage = () => {
     icon: any;
   }
 
-  const userRole = localStorage.getItem('userRole') as Role;
+  // const userRole = localStorage.getItem('userRole') as Role;
+  const userRole = useAppSelector((state) => state.auth.userRole) as Role;
 
   const adminMenus: AdminMenu[] = [
     {
@@ -182,7 +191,8 @@ const AdminDashboardPage = () => {
     );
   };
 
-  const role = localStorage.getItem('userRole');
+  // const role = localStorage.getItem('userRole');
+  const role = useAppSelector((state) => state.auth.userRole);
 
   return (
     <div className="p-4">

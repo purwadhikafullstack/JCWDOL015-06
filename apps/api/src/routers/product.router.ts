@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ProductController } from '@/controllers/product.controller';
 import upload from '@/middlewares/upload';
+import { verifyToken } from '@/middlewares/token';
 export class ProductRouter {
   private router: Router;
   private productController: ProductController;
@@ -12,6 +13,15 @@ export class ProductRouter {
   }
 
   private initializeRoutes(): void {
+    this.router.get(
+      '/special-list',
+      this.productController.getProductsWithStoreAddress,
+    );
+    this.router.get(
+      '/special-list-v2',
+      verifyToken,
+      this.productController.getProductsWithStoreAddressV2,
+    );
     this.router.post('/', this.productController.createProduct);
     this.router.get('/', this.productController.getProducts);
     this.router.get('/:id', this.productController.getProductById);

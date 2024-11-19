@@ -20,6 +20,7 @@ import { fetchDiscounts, getDiscountById, createDiscount, updateDiscount, delete
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import AddEditDiscount from '@/components/admin/AddEditDiscount';
+import { useAppSelector } from '@/store';
 
 const DiscountsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -150,7 +151,8 @@ const DiscountsPage = () => {
     console.log(e);
   };
 
-  const userRole = localStorage.getItem('userRole') as Role;
+  // const userRole = localStorage.getItem('userRole') as Role;
+  const userRole = useAppSelector((state) => state.auth.userRole) as Role;
 
   return (
     <div className="p-4">

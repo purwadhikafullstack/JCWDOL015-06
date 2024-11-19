@@ -18,6 +18,7 @@ import { fetchCategories, getCategoryById, createCategory, updateCategory, delet
 import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import AddEditCategory from '@/components/Admin/AddEditCategory';
+import { useAppSelector } from '@/store';
 
 const CategoriesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -121,7 +122,8 @@ const CategoriesPage = () => {
     console.log(e);
   };
 
-  const userRole = localStorage.getItem('userRole') as Role;
+  // const userRole = localStorage.getItem('userRole') as Role;
+  const userRole = useAppSelector((state) => state.auth.userRole) as Role;
 
   return (
     <div className="p-4">

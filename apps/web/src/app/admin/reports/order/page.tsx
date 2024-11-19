@@ -17,8 +17,12 @@ import {
 import { parseDate, getLocalTimeZone } from '@internationalized/date';
 import { fetchOrders } from '@/api/order.api';
 import { toastFailed } from '@/utils/toastHelper';
+import { useAppSelector } from '@/store';
 
 const OrderReport = () => {
+  const storeId = useAppSelector((state) => state.auth.storeId);
+  const userRole = useAppSelector((state) => state.auth.userRole) as Role;
+
   const filter = useRef({
     userName: '',
     // productName: '',
@@ -98,7 +102,7 @@ const OrderReport = () => {
   const [totalOrders, setTotalOrders] = useState<number>(0);
 
   const pageSize = 10;
-  const userRole = localStorage.getItem('userRole') as Role;
+  // const userRole = localStorage.getItem('userRole') as Role;
 
   const loadOrders = useCallback(async () => {
     try {
@@ -119,7 +123,8 @@ const OrderReport = () => {
         queryParams.end_date = filter.current.end_date;
       }
 
-      const storeId = JSON.parse(localStorage.getItem('user') as string)?.store?.id;
+      // const storeId = JSON.parse(localStorage.getItem('user') as string)?.store?.id;
+
       if (storeId && userRole === 'STORE_ADMIN') {
         queryParams.storeId = storeId;
       }

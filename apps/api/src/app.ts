@@ -78,7 +78,7 @@ export default class App {
     // default path
     this.app.get('/api', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student API!`);
-    });
+    }); 
 
     this.app.use('/api/account', accountRouter.getRouter());
     this.app.use('/api/cart', cartRouter.getRouter());

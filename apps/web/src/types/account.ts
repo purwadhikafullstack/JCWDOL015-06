@@ -19,6 +19,7 @@ export interface DecodedToken {
   email: string;
   userRole: 'SUPER_ADMIN' | 'STORE_ADMIN' | 'USER' | null;
   isVerify: number;
+  storeId: number | null;
 }
 
 export interface IRegister {

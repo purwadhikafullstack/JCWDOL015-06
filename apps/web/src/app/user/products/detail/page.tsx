@@ -7,6 +7,7 @@ import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import { getProductById } from '@/api/product.api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createCart, fetchCarts, updateCart } from '@/api/cart.api';
+import { useAppSelector } from '@/store';
 
 export default function ProductDetail() {
   const searchParams = useSearchParams();
@@ -19,6 +20,9 @@ export default function ProductDetail() {
   const [availableStock, setAvailableStock] = useState<number>(0);
   const [selectedDiscountId, setSelectedDiscountId] = useState<number | null>(null);
   const [discountedPrice, setDiscountedPrice] = useState<number | null>(null);
+
+  const userId = useAppSelector((state) => state.auth.id);
+  const userVerify = useAppSelector((state) => state.auth.isVerify);
 
   useEffect(() => {
     const getDetails = async () => {
@@ -100,64 +104,70 @@ export default function ProductDetail() {
     }
 
     //find user cart
-    const user = JSON.parse(localStorage.getItem('user') as string);
-    const userId = user?.id;
+    // const user = JSON.parse(localStorage.getItem('user') as string);
+    // const userId = user?.id;
+
     let cartId = undefined as undefined | number;
     if (userId) {
-      const response = await fetchCarts({ userId: Number(userId), storeId: Number(selectedStoreId) });
-      let carts = response?.carts as unknown as Cart[];
-      let cart = carts?.[0];
-      cartId = cart?.id;
-
-      //if no cart id, create one first
-      if (!cartId) {
-        const cart = await createNewCart(userId);
+      if (userVerify == 1) {
+        const response = await fetchCarts({ userId: Number(userId), storeId: Number(selectedStoreId) });
+        let carts = response?.carts as unknown as Cart[];
+        let cart = carts?.[0];
         cartId = cart?.id;
-      }
 
-      //create new cartItems
-      const newCartItem = {
-        productId: Number(id),
-        quantity: quantity,
-        discountId: selectedDiscountId ?? undefined,
-        totalPrice: Number(discountedPrice) * quantity,
-        totalDiscount: (Number(product?.price) - Number(discountedPrice)) * quantity
-      };
-      let cartItems = [] as {
-        productId?: number;
-        quantity?: number;
-        discountId?: number;
-        totalPrice?: number;
-        totalDiscount?: number;
-      }[];
-      if (cart.cartItems && cart.cartItems?.length > 0) {
-        cart.cartItems?.forEach((cartItem) => {
-          cartItems.push({
-            productId: cartItem.productId,
-            quantity: cartItem.quantity,
-            discountId: cartItem.discountId ?? undefined,
-            totalPrice: cartItem.totalPrice,
-            totalDiscount: cartItem.totalDiscount
-          });
-        });
-      }
-      //join with old cartItems
-      cartItems.push(newCartItem);
+        //if no cart id, create one first
+        if (!cartId) {
+          const cart = await createNewCart(userId);
+          cartId = cart?.id;
+        }
 
-      // call updateCart api
-      try {
-        const cartTotalPrice = cartItems.reduce((total, item) => total + Number(item.totalPrice), 0);
-        const cartTotalDiscount = cartItems.reduce((total, item) => total + Number(item.totalDiscount), 0);
-
-        await updateCart(Number(cartId), {
+        //create new cartItems
+        const newCartItem = {
+          productId: Number(id),
+          quantity: quantity,
           discountId: selectedDiscountId ?? undefined,
-          totalPrice: Number(cartTotalPrice),
-          totalDiscount: Number(cartTotalDiscount),
-          cartItems: cartItems
-        });
-        toastSuccess('Product added to cart successfully!');
-      } catch (err) {
-        toastFailed('Failed to add item to cart');
+          totalPrice: Number(discountedPrice) * quantity,
+          totalDiscount: (Number(product?.price) - Number(discountedPrice)) * quantity
+        };
+        let cartItems = [] as {
+          productId?: number;
+          quantity?: number;
+          discountId?: number;
+          totalPrice?: number;
+          totalDiscount?: number;
+        }[];
+        if (cart.cartItems && cart.cartItems?.length > 0) {
+          cart.cartItems?.forEach((cartItem) => {
+            cartItems.push({
+              productId: cartItem.productId,
+              quantity: cartItem.quantity,
+              discountId: cartItem.discountId ?? undefined,
+              totalPrice: cartItem.totalPrice,
+              totalDiscount: cartItem.totalDiscount
+            });
+          });
+        }
+        //join with old cartItems
+        cartItems.push(newCartItem);
+
+        // call updateCart api
+        try {
+          const cartTotalPrice = cartItems.reduce((total, item) => total + Number(item.totalPrice), 0);
+          const cartTotalDiscount = cartItems.reduce((total, item) => total + Number(item.totalDiscount), 0);
+
+          await updateCart(Number(cartId), {
+            discountId: selectedDiscountId ?? undefined,
+            totalPrice: Number(cartTotalPrice),
+            totalDiscount: Number(cartTotalDiscount),
+            cartItems: cartItems
+          });
+          toastSuccess('Product added to cart successfully!');
+        } catch (err) {
+          toastFailed('Failed to add item to cart');
+        }
+      } else {
+        toastFailed('You account has not been verified!');
+        router.push('/user');
       }
     } else {
       toastFailed('You are not logged in!');

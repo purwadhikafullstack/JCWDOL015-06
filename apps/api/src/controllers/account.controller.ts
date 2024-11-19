@@ -217,6 +217,7 @@ export class AccountController {
         lastName: existingUser.lastName,
         userRole: existingUser.role,
         isVerify: existingUser.isVerify,
+        storeId: existingUser.storeId,
       };
       const token = sign(payload, process.env.SECRET_JWT!, { expiresIn: '1d' });
 
@@ -308,6 +309,7 @@ export class AccountController {
           lastName: existingUser.lastName,
           userRole: existingUser.role,
           isVerify: existingUser.isVerify,
+          storeId: existingUser.storeId,
         };
 
         const token = sign(payload, process.env.SECRET_JWT!, {
@@ -341,6 +343,7 @@ export class AccountController {
           lastName: account.lastName,
           userRole: 'USER',
           isVerify: 1,
+          storeId: account.storeId,
         };
 
         const token = sign(payload, process.env.SECRET_JWT!, {

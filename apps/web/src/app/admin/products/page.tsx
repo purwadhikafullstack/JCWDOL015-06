@@ -9,6 +9,7 @@ import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal
 import { useRouter } from 'next/navigation';
 import ProductsTable from '@/components/common/ProductTable';
 import { fetchCategories } from '@/api/category.api';
+import { useAppSelector } from '@/store';
 
 const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,7 +98,8 @@ const ProductsPage = () => {
     }
   };
 
-  const userRole = localStorage.getItem('userRole') as Role;
+  // const userRole = localStorage.getItem('userRole') as Role;
+  const userRole = useAppSelector((state) => state.auth.userRole) as Role;
 
   return (
     <div className="p-4">

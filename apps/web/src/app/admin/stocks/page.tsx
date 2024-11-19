@@ -19,6 +19,7 @@ import { toastFailed, toastSuccess } from '@/utils/toastHelper';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import AddEditStock from '@/components/admin/AddEditStock';
 import { createStockHistory } from '@/api/stockHistory.api';
+import { useAppSelector } from '@/store';
 
 const StocksPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,7 +33,9 @@ const StocksPage = () => {
   const [storeNameFilter, setStoreNameFilter] = useState<string | undefined>();
 
   const pageSize = 10;
-  const userRole = localStorage.getItem('userRole') as Role;
+  // const userRole = localStorage.getItem('userRole') as Role;
+  const userRole = useAppSelector((state) => state.auth.userRole) as Role;
+  const storeId = useAppSelector((state) => state.auth.storeId);
 
   const loadStocks = useCallback(async () => {
     try {
@@ -44,7 +47,7 @@ const StocksPage = () => {
         queryParams.storeName = storeNameFilter;
       }
 
-      const storeId = JSON.parse(localStorage.getItem('user') as string)?.store?.id;
+      // const storeId = JSON.parse(localStorage.getItem('user') as string)?.store?.id;
       if (storeId && userRole === 'STORE_ADMIN') {
         queryParams.storeId = storeId;
       }
@@ -94,12 +97,14 @@ const StocksPage = () => {
     setIsDeleteModalOpen(true);
   };
 
+  const userId = useAppSelector((state) => state.auth.id);
+
   const handleSave = async (stock: Stock) => {
     if (selectedStock?.id) {
       try {
         //create stock history first
         try {
-          const userId = JSON.parse(localStorage.getItem('user') as string).id;
+          // const userId = JSON.parse(localStorage.getItem('user') as string).id;
           const stockBefore = selectedStock;
           const quantityChanged = Number(stock.quantity) - Number(stockBefore?.quantity);
 
@@ -141,7 +146,7 @@ const StocksPage = () => {
         } else {
           //create stock history first
           try {
-            const userId = JSON.parse(localStorage.getItem('user') as string).id;
+            // const userId = JSON.parse(localStorage.getItem('user') as string).id;
             await createStockHistory({
               storeId: Number(stock.storeId),
               productId: Number(stock.productId),

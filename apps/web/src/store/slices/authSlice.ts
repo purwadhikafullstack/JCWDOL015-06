@@ -6,6 +6,7 @@ interface AuthState {
   id: number;
   email: string;
   isVerify: number;
+  storeId: number | null;
 }
 
 const initialState: AuthState = {
@@ -13,7 +14,8 @@ const initialState: AuthState = {
   userRole: null,
   id: 0,
   email: '',
-  isVerify: 0
+  isVerify: 0,
+  storeId: null
 };
 
 const authSlice = createSlice({
@@ -21,12 +23,13 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     login: (state, action: PayloadAction<AuthState>) => {
-      const { userRole, id, email, isVerify } = action.payload;
+      const { userRole, id, email, isVerify, storeId } = action.payload;
       state.isAuthenticated = true;
       state.userRole = userRole;
       state.id = id;
       state.email = email;
       state.isVerify = isVerify;
+      state.storeId = storeId;
     },
     logout: (state) => {
       state.isAuthenticated = false;
@@ -34,6 +37,7 @@ const authSlice = createSlice({
       state.id = 0;
       state.email = '';
       state.isVerify = 0;
+      state.storeId = null;
     }
   }
 });

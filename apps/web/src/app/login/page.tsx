@@ -45,46 +45,6 @@ const ForgotSchema = yup.object().shape({
 });
 
 export default function LoginPage() {
-  // const [username, setUsername] = useState('');
-  // const [password, setPassword] = useState('');
-  // const userOptions = useRef<User[]>([]);
-
-  // const loadCategories = useCallback(async () => {
-  //   try {
-  //     const response = await fetchAllUsers();
-  //     userOptions.current = response.storeAdmins;
-  //   } catch (err) {
-  //     toastFailed('Failed to fetch users');
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   loadCategories();
-  // }, [loadCategories]);
-
-  // const router = useRouter();
-
-  // const toastLoginSuccess = (message: string) => toastSuccess(message);
-  // const toastLoginFailed = (message: string) => toastFailed(message);
-
-  // const handleLogin = (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   const user = userOptions.current?.find((user) => user.username == username);
-
-  //   if (user) {
-  //     const userRole = user.role;
-  //     localStorage.setItem('user', JSON.stringify(user));
-  //     localStorage.setItem('userRole', userRole as unknown as string);
-  //     toastLoginSuccess(`Successfully logged in as ${user.firstName} ${user.lastName}`);
-  //     router.push(user.role == Role.USER ? '/user' : '/admin');
-  //   } else {
-  //     localStorage.removeItem('user');
-  //     localStorage.removeItem('userRole');
-  //     toastLoginFailed('Invalid username');
-  //     return;
-  //   }
-  // };
 
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -131,7 +91,8 @@ export default function LoginPage() {
           userRole: decodedToken.userRole,
           id: decodedToken.id,
           email: decodedToken.email,
-          isVerify: decodedToken.isVerify
+          isVerify: decodedToken.isVerify,
+          storeId: decodedToken.storeId
         };
 
         // setting persist state
@@ -187,7 +148,8 @@ export default function LoginPage() {
           userRole: decodedToken.userRole,
           id: decodedToken.id,
           email: decodedToken.email,
-          isVerify: decodedToken.isVerify
+          isVerify: decodedToken.isVerify,
+          storeId: decodedToken.storeId
         };
 
         // Handle the token as needed (e.g., save it in Redux state)

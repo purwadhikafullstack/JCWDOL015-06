@@ -17,6 +17,7 @@ import {
 import { parseDate, getLocalTimeZone } from '@internationalized/date';
 import { fetchStockHistories } from '@/api/stockHistory.api';
 import { toastFailed } from '@/utils/toastHelper';
+import { useAppSelector } from '@/store';
 
 const StockHistoryReport = () => {
   const filter = useRef({
@@ -64,6 +65,9 @@ const StockHistoryReport = () => {
     onFilter();
   };
 
+  const userRole = useAppSelector((state) => state.auth.userRole) as Role;
+  const storeId = useAppSelector((state) => state.auth.storeId);
+
   const dateRender = (date: string, type: 'start_date' | 'end_date') => {
     const splitDate = date?.toLocaleString().split('-');
     const yearb = splitDate?.[0];
@@ -98,7 +102,7 @@ const StockHistoryReport = () => {
   const [totalStockHistories, setTotalStockHistories] = useState<number>(0);
 
   const pageSize = 10;
-  const userRole = localStorage.getItem('userRole') as Role;
+  // const userRole = localStorage.getItem('userRole') as Role;
 
   const loadStockHistories = useCallback(async () => {
     try {
@@ -119,7 +123,7 @@ const StockHistoryReport = () => {
         queryParams.end_date = filter.current.end_date;
       }
 
-      const storeId = JSON.parse(localStorage.getItem('user') as string)?.store?.id;
+      // const storeId = JSON.parse(localStorage.getItem('user') as string)?.store?.id;
       if (storeId && userRole === 'STORE_ADMIN') {
         queryParams.storeId = storeId;
       }

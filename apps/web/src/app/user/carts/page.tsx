@@ -3,6 +3,7 @@
 
 import { fetchCarts, updateCart } from '@/api/cart.api';
 import { fetchDiscounts } from '@/api/discount.api';
+import { useAppSelector } from '@/store';
 import { Cart, Discount } from '@/types/types';
 import { toastSuccess, toastFailed } from '@/utils/toastHelper';
 import { Select, SelectSection, SelectItem, Input } from '@nextui-org/react';
@@ -12,11 +13,14 @@ const CartPage = () => {
   const [carts, setCarts] = useState<Cart[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
 
+  const userId = useAppSelector((state) => state.auth.id);
+  const userVerify = useAppSelector((state) => state.auth.isVerify);
+
   useEffect(() => {
     // Fetch cart data
     const fetchCartData = async () => {
-      const user = JSON.parse(localStorage.getItem('user') as string);
-      const userId = user?.id;
+      // const user = JSON.parse(localStorage.getItem('user') as string);
+      // const userId = user?.id;
 
       const response = await fetchCarts({ userId: Number(userId) });
       let carts = response?.carts as unknown as Cart[];

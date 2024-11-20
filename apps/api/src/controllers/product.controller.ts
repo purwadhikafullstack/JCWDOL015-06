@@ -145,8 +145,8 @@ export class ProductController {
 
   async uploadImage(req: Request, res: Response) {
     try {
-      console.log(req.files);
-      console.log('something something');
+      // console.log(req.files);
+      // console.log('something something');
       const filePaths = Array.isArray(req.files)
         ? req.files.map((file: Express.Multer.File) => {
             const fileSplit = file.path?.split('/');
@@ -244,18 +244,111 @@ export class ProductController {
     console.log('\n\nGETTING SPECIALS\n\n');
 
     try {
-      const query = `
-      select 
-        st.id AS storeId,
-        st.name AS storeName,
-        a.id AS addressId,
-        a.provinceId,
-        a.cityId,
-        a.desc AS addressDesc
-      FROM store st JOIN Address a ON a.type = 'STORE' AND a.typeId = st.id;
-      `;
+      // const query = `
+      // select
+      //   st.id AS storeId,
+      //   st.name AS storeName,
+      //   a.id AS addressId,
+      //   a.provinceId,
+      //   a.cityId,
+      //   a.desc AS addressDesc
+      // FROM store st JOIN Address a ON a.type = 'STORE' AND a.typeId = st.id;
+      // `;
 
-      const storeAddress: any[] = await prisma.$queryRawUnsafe(query);
+      // const storeAddress: any[] = await prisma.$queryRawUnsafe(query);
+
+      const stores: { id: number }[] = await prisma.store.findMany({
+        select: {
+          id: true,
+        },
+      });
+
+      if (!stores) throw 'Store Not Found!';
+      console.log('\n\n');
+      console.log(stores);
+      console.log('\n\n');
+
+      const storeAddress = await Promise.all(
+        stores.map(async (store) => {
+          // Fetch main address
+          const mainAddress = await prisma.address.findFirst({
+            where: {
+              type: 'STORE',
+              typeId: store.id,
+              isMain: 1,
+            },
+            select: {
+              id: true,
+              cityId: true,
+              provinceId: true,
+            },
+          });
+
+          // If no main address, fetch fallback address
+          const fallbackAddress = !mainAddress
+            ? await prisma.address.findFirst({
+                where: {
+                  type: 'STORE',
+                  typeId: store.id,
+                },
+                select: {
+                  id: true,
+                  cityId: true,
+                  provinceId: true,
+                },
+                orderBy: {
+                  createdAt: 'asc', // Modify ordering if needed
+                },
+              })
+            : null;
+
+          const selectedAddress = mainAddress || fallbackAddress;
+
+          return {
+            ...store,
+            address: selectedAddress,
+          };
+        }),
+      );
+
+      // let storeAddress: any[] = stores.map(async (s) => {
+      //   let address: any[];
+
+      //   address = await prisma.address.findMany({
+      //     where: {
+      //       type: 'STORE',
+      //       typeId: s.id,
+      //       isMain: 1,
+      //     },
+      //     select: {
+      //       id: true,
+      //       desc: true,
+      //       provinceId: true,
+      //       cityId: true,
+      //     },
+      //   });
+
+      //   if (!address) {
+      //     return await prisma.address.findFirst({
+      //       where: {
+      //         type: 'STORE',
+      //         typeId: s.id,
+      //       },
+      //       select: {
+      //         id: true,
+      //         desc: true,
+      //         provinceId: true,
+      //         cityId: true,
+      //       },
+      //     });
+      //   } else {
+      //     return address;
+      //   }
+      // });
+
+      console.log('\n\n');
+      console.log(storeAddress);
+      console.log('\n\n');
 
       let userAddress: any;
 
@@ -290,11 +383,22 @@ export class ProductController {
 
       console.log(userAddress);
 
-      const cost = await rajaongkirShippingCost(197, 114);
+      console.log('\n\n');
+
+      console.log(storeAddress[0].address?.cityId);
+
+      const storeCity = storeAddress[0].address ? storeAddress[0].address.cityId : 114;
+
+      // const cost = await rajaongkirShippingCost(197, 114);
+      const cost = await rajaongkirShippingCost(
+        userAddress.cityId,
+        storeCity
+      );
 
       console.log(cost);
 
-      if (cost.status.code == 400) throw cost.status.description;
+      if (cost.status.code == 400)
+        throw `RajaOongkir, ${cost.status.description}`;
 
       res.status(200).send({
         status: 'ok',

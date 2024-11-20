@@ -112,12 +112,12 @@ export default function ProductDetail() {
       if (userVerify == 1) {
         const response = await fetchCarts({ userId: Number(userId), storeId: Number(selectedStoreId) });
         let carts = response?.carts as unknown as Cart[];
-        let cart = carts?.[0];
+        let cart: any = carts?.[0];
         cartId = cart?.id;
 
         //if no cart id, create one first
         if (!cartId) {
-          const cart = await createNewCart(userId);
+          cart = await createNewCart(userId);
           cartId = cart?.id;
         }
 
@@ -136,8 +136,9 @@ export default function ProductDetail() {
           totalPrice?: number;
           totalDiscount?: number;
         }[];
+
         if (cart.cartItems && cart.cartItems?.length > 0) {
-          cart.cartItems?.forEach((cartItem) => {
+          cart.cartItems?.forEach((cartItem: { productId: any; quantity: any; discountId: any; totalPrice: any; totalDiscount: any; }) => {
             cartItems.push({
               productId: cartItem.productId,
               quantity: cartItem.quantity,
@@ -147,6 +148,7 @@ export default function ProductDetail() {
             });
           });
         }
+
         //join with old cartItems
         cartItems.push(newCartItem);
 

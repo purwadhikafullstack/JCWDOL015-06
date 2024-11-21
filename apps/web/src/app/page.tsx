@@ -6,7 +6,7 @@ import { Spinner } from '@nextui-org/react';
 import { DecodedToken } from '@/types/account';
 import { jwtDecode } from 'jwt-decode';
 import { login, logout } from '@/store/slices/authSlice';
-import { getToken } from '@/lib/cookie';
+import { getToken } from '@/api/cookie';
 import { useAppDispatch, useAppSelector } from '@/store';
 
 export default function Home() {
@@ -20,7 +20,7 @@ export default function Home() {
 
       if (!token) {
         dispatch(logout());
-      } 
+      }
       // else {
       //   const decodedToken: DecodedToken = jwtDecode<DecodedToken>(token);
 

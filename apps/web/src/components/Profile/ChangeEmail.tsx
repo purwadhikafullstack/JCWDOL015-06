@@ -3,11 +3,11 @@
 import * as yup from 'yup';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import { IForgot, IUpdateEmail } from '@/types/account';
-import { updateAccountEmail } from '@/lib/account';
+import { updateAccountEmail } from '@/api/account';
 import Swal from 'sweetalert2';
 import { Wrapper } from '../Wrapper';
 import { Button } from '@nextui-org/react';
-import { deleteToken } from '@/lib/cookie';
+import { deleteToken } from '@/api/cookie';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { logout } from '@/store/slices/authSlice';
@@ -55,7 +55,7 @@ const ChangeEmail: React.FC = () => {
 
       action.resetForm();
 
-      router.push('/');
+      router.push('/user');
     } catch (error: any) {
       toastSeeFailed(error);
     }

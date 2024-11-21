@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '../store';
-import { getToken } from '@/lib/cookie';
+import { getToken } from '@/api/cookie';
 
 const useRoleBasedRedirect = () => {
   console.log('REDIRECT MIAN');

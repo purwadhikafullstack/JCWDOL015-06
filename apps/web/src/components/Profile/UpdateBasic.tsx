@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import * as yup from 'yup';
 import { IUpdateBasic } from '@/types/account';
-import { updateAccountBasic } from '@/lib/account';
+import { updateAccountBasic } from '@/api/account';
 import { Wrapper } from '@/components/Wrapper';
 import { Button } from '@nextui-org/react';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -51,7 +51,8 @@ export default function UpdateBasic() {
 
       action.resetForm();
 
-      return router.push('/user/profile');
+      // return router.push('/user/profile');
+      return router.refresh();
     } catch (error: any) {
       toastSeeFailed(error);
 

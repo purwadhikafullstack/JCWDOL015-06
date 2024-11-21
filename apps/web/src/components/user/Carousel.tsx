@@ -8,6 +8,8 @@ import { fetchProducts } from '@/api/product.api';
 import { toastFailed } from '@/utils/toastHelper';
 import { FaCircle } from 'react-icons/fa';
 
+const imageurl = `${process.env.NEXT_PUBLIC_IMAGE_API_URL}`;
+
 const Carousel: React.FC = () => {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
@@ -31,7 +33,7 @@ const Carousel: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleClick = (id: number) => {
-    router.push(`/product/${id}`);
+    router.push(`/user/products/detail?id=${id}`);
   };
 
   const nextSlide = () => {
@@ -56,7 +58,7 @@ const Carousel: React.FC = () => {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`http://localhost:8000/uploads/${product.imageUrls?.split(',')?.[0]}`}
+              src={`${imageurl}/${product.imageUrls?.split(',')?.[0]}`}
               alt={product.productName}
               className="w-full h-[60vh] object-cover"
             />

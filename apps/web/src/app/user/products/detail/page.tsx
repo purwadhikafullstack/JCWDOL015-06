@@ -9,6 +9,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createCart, fetchCarts, updateCart } from '@/api/cart.api';
 import { useAppSelector } from '@/store';
 
+const imageurl = `${process.env.NEXT_PUBLIC_IMAGE_API_URL}`;
+
 export default function ProductDetail() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
@@ -121,12 +123,21 @@ export default function ProductDetail() {
           cartId = cart?.id;
         }
 
+        console.log(Number(product?.price));
+
+        console.log(Number(discountedPrice) > 0 ? 'YES DISCOUNT' : 'NO DISCOUNT')
+
+        const ttotalP =
+          Number(discountedPrice) > 0 ? Number(discountedPrice) * quantity : Number(product?.price) * quantity;
+
+          console.log(ttotalP)
+
         //create new cartItems
         const newCartItem = {
           productId: Number(id),
           quantity: quantity,
           discountId: selectedDiscountId ?? undefined,
-          totalPrice: Number(discountedPrice) * quantity,
+          totalPrice: ttotalP,
           totalDiscount: (Number(product?.price) - Number(discountedPrice)) * quantity
         };
         let cartItems = [] as {
@@ -137,16 +148,20 @@ export default function ProductDetail() {
           totalDiscount?: number;
         }[];
 
+        console.log(newCartItem);
+
         if (cart.cartItems && cart.cartItems?.length > 0) {
-          cart.cartItems?.forEach((cartItem: { productId: any; quantity: any; discountId: any; totalPrice: any; totalDiscount: any; }) => {
-            cartItems.push({
-              productId: cartItem.productId,
-              quantity: cartItem.quantity,
-              discountId: cartItem.discountId ?? undefined,
-              totalPrice: cartItem.totalPrice,
-              totalDiscount: cartItem.totalDiscount
-            });
-          });
+          cart.cartItems?.forEach(
+            (cartItem: { productId: any; quantity: any; discountId: any; totalPrice: any; totalDiscount: any }) => {
+              cartItems.push({
+                productId: cartItem.productId,
+                quantity: cartItem.quantity,
+                discountId: cartItem.discountId ?? undefined,
+                totalPrice: cartItem.totalPrice,
+                totalDiscount: cartItem.totalDiscount
+              });
+            }
+          );
         }
 
         //join with old cartItems
@@ -156,6 +171,9 @@ export default function ProductDetail() {
         try {
           const cartTotalPrice = cartItems.reduce((total, item) => total + Number(item.totalPrice), 0);
           const cartTotalDiscount = cartItems.reduce((total, item) => total + Number(item.totalDiscount), 0);
+
+          console.log('\n\n\nPRODUCT DETAIL COMPONENT\n');
+          console.log(cartTotalPrice, ' ~~ ', cartTotalDiscount);
 
           await updateCart(Number(cartId), {
             discountId: selectedDiscountId ?? undefined,
@@ -220,7 +238,7 @@ export default function ProductDetail() {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={index}
-              src={`http://localhost:8000/uploads/${url}`}
+              src={`${imageurl}/${url}`}
               alt={`Product ${index + 1}`}
               className="w-full h-auto mb-4 cursor-pointer"
               onClick={() => handleImageClick()}
@@ -358,7 +376,7 @@ export default function ProductDetail() {
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`http://localhost:8000/uploads/${product?.imageUrls ? product?.imageUrls?.split(',')[currentImageIndex] : ''}`}
+            src={`${imageurl}/${product?.imageUrls ? product?.imageUrls?.split(',')[currentImageIndex] : ''}`}
             alt={`Product Preview ${currentImageIndex + 1}`}
             width={800}
             height={600}

@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import store, { useAppSelector } from '@/store';
-import { getToken } from '@/lib/cookie';
+import { getToken } from '@/api/cookie';
 import { DecodedToken } from '@/types/account';
 import { jwtDecode } from 'jwt-decode';
 import { persistStore } from 'redux-persist';

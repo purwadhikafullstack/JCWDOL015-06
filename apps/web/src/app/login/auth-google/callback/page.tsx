@@ -2,8 +2,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
-import { createToken } from '@/lib/cookie';
-import { googleLogin } from '@/lib/account';
+import { createToken } from '@/api/cookie';
+import { googleLogin } from '@/api/account';
 import { useSearchParams } from 'next/navigation';
 
 const AuthCallback = () => {

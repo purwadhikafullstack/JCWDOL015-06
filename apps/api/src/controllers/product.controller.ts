@@ -2,6 +2,26 @@ import { Request, Response } from 'express';
 import prisma from '@/prisma';
 import { rajaongkirShippingCost } from '@/helpers/rajaOngkirCost';
 
+type Cost = {
+  value: number;
+  etd: string;
+  note: string;
+};
+
+type Store = {
+  id: number;
+  address: {
+    id: number;
+    cityId: number;
+    provinceId: number;
+  } | null; // Allow null to handle cases where address is missing
+  cost: {
+    service: string;
+    description: string;
+    cost: Cost[];
+  };
+};
+
 export class ProductController {
   async createProduct(req: Request, res: Response) {
     try {
@@ -166,96 +186,44 @@ export class ProductController {
     }
   }
 
-  async getProductsWithStoreAddress(req: Request, res: Response) {
-    console.log('NNGETTING SPECIALSNN');
-
+  async getProductsWithStoreAddressV22(req: Request, res: Response) {
+    console.log('\n\nGETTING SPECIALS\n\n');
     try {
-      // Step 1: Fetch products with their related stock and store details
-      const products = await prisma.product.findMany({
-        include: {
-          Stock: {
-            include: {
-              store: true, // Include store for each stock entry
-            },
-          },
-          productDiscounts: {
-            include: {
-              discount: true,
-            },
-          },
-        },
-      });
+      const { userId } = req.body;
 
-      // Step 2: Fetch all addresses for stores in the query
-      const storeIds = products
-        .flatMap((product) => product.Stock.map((stock) => stock.storeId))
-        .filter((value, index, self) => self.indexOf(value) === index); // Deduplicate storeIds
+      console.log('\n\n\nSPECIALS V2\n\n');
 
-      const addresses = await prisma.address.findMany({
+      let userAddress: any;
+
+      userAddress = await prisma.address.findMany({
         where: {
-          type: 'STORE',
-          typeId: {
-            in: storeIds, // Fetch addresses for all stores
-          },
+          type: 'USER',
+          typeId: userId,
+          isMain: 1,
+        },
+        select: {
+          id: true,
+          cityId: true,
+          provinceId: true,
         },
       });
 
-      // Step 3: Map each product to its store and address
-      const result = products.map((product) => {
-        return {
-          ...product,
-          Stock: product.Stock.map((stock) => {
-            const storeAddress = addresses.find(
-              (address) =>
-                address.typeId === stock.storeId && address.type === 'STORE',
-            );
-            return {
-              ...stock,
-              store: {
-                ...stock.store,
-                address: storeAddress, // Attach the address to the store
-              },
-            };
-          }),
-        };
-      });
-
-      // return result;
-      res.status(200).send({
-        status: 'ok',
-        products: result,
-      });
-    } catch (error: any) {
-      if (error.message) {
-        res.status(400).send({
-          status: 'error products',
-          msg: error.message,
-        });
-      } else {
-        res.status(400).send({
-          status: 'error products',
-          msg: error,
+      if (!userAddress) {
+        userAddress = await prisma.address.findFirst({
+          where: {
+            type: 'USER',
+            typeId: userId,
+          },
+          select: {
+            id: true,
+            cityId: true,
+            provinceId: true,
+          },
         });
       }
-    }
-  }
-
-  async getProductsWithStoreAddressV2(req: Request, res: Response) {
-    console.log('\n\nGETTING SPECIALS\n\n');
-
-    try {
-      // const query = `
-      // select
-      //   st.id AS storeId,
-      //   st.name AS storeName,
-      //   a.id AS addressId,
-      //   a.provinceId,
-      //   a.cityId,
-      //   a.desc AS addressDesc
-      // FROM store st JOIN Address a ON a.type = 'STORE' AND a.typeId = st.id;
-      // `;
-
-      // const storeAddress: any[] = await prisma.$queryRawUnsafe(query);
+      // console.log('\n USER ADDRESS');
+      // console.log(userAddress);
+      // console.log('\n\n');
 
       const stores: { id: number }[] = await prisma.store.findMany({
         select: {
@@ -264,9 +232,6 @@ export class ProductController {
       });
 
       if (!stores) throw 'Store Not Found!';
-      console.log('\n\n');
-      console.log(stores);
-      console.log('\n\n');
 
       const storeAddress = await Promise.all(
         stores.map(async (store) => {
@@ -301,109 +266,93 @@ export class ProductController {
                 },
               })
             : null;
-
+   
           const selectedAddress = mainAddress || fallbackAddress;
+
+          const cost = await rajaongkirShippingCost(
+            userAddress.length >= 1 ? Number(userAddress[0].cityId) : 114,
+            Number(selectedAddress?.cityId),
+          );
 
           return {
             ...store,
             address: selectedAddress,
+            cost: cost.results[0].costs[1],
           };
         }),
       );
 
-      // let storeAddress: any[] = stores.map(async (s) => {
-      //   let address: any[];
+      const storeWithLowestCost = storeAddress.reduce<Store | null>(
+        (lowest, store) => {
+          // Handle case where the store doesn't have a cost or address
+          if (!store.cost || !store.address) {
+            return lowest;
+          }
 
-      //   address = await prisma.address.findMany({
-      //     where: {
-      //       type: 'STORE',
-      //       typeId: s.id,
-      //       isMain: 1,
-      //     },
-      //     select: {
-      //       id: true,
-      //       desc: true,
-      //       provinceId: true,
-      //       cityId: true,
-      //     },
-      //   });
+          // Find the lowest cost within the current store's costs
+          const currentStoreLowestCost = store.cost.cost.reduce(
+            (minCost: { value: number }, currentCost: { value: number }) => {
+              return currentCost.value < minCost.value ? currentCost : minCost;
+            },
+            store.cost.cost[0], // Initial value is the first cost
+          );
 
-      //   if (!address) {
-      //     return await prisma.address.findFirst({
-      //       where: {
-      //         type: 'STORE',
-      //         typeId: s.id,
-      //       },
-      //       select: {
-      //         id: true,
-      //         desc: true,
-      //         provinceId: true,
-      //         cityId: true,
-      //       },
-      //     });
-      //   } else {
-      //     return address;
-      //   }
-      // });
+          // Compare the current store's lowest cost with the overall lowest cost
+          if (
+            !lowest ||
+            !lowest.cost.cost[0] ||
+            currentStoreLowestCost.value < lowest.cost.cost[0].value
+          ) {
+            return {
+              ...store,
+              cost: {
+                ...store.cost,
+                cost: [currentStoreLowestCost], // Only keep the lowest cost for this store
+              },
+            };
+          }
 
-      console.log('\n\n');
-      console.log(storeAddress);
-      console.log('\n\n');
-
-      let userAddress: any;
-
-      userAddress = await prisma.address.findMany({
-        where: {
-          type: 'USER',
-          typeId: req.user.id,
-          isMain: 1,
+          return lowest;
         },
-        select: {
-          id: true,
-          cityId: true,
-          provinceId: true,
-        },
-      });
-
-      if (!userAddress) {
-        userAddress = await prisma.address.findFirst({
-          where: {
-            type: 'USER',
-            typeId: req.user.id,
-          },
-          select: {
-            id: true,
-            cityId: true,
-            provinceId: true,
-          },
-        });
-      }
-
-      console.log('\n\n\nSPECIALS V2\n\n');
-
-      console.log(userAddress);
-
-      console.log('\n\n');
-
-      console.log(storeAddress[0].address?.cityId);
-
-      const storeCity = storeAddress[0].address ? storeAddress[0].address.cityId : 114;
-
-      // const cost = await rajaongkirShippingCost(197, 114);
-      const cost = await rajaongkirShippingCost(
-        userAddress.cityId,
-        storeCity
+        null, // Initial value
       );
 
-      console.log(cost);
+      // console.log('\n\n LOWEST COST');
+      // console.log(storeWithLowestCost);
 
-      if (cost.status.code == 400)
-        throw `RajaOongkir, ${cost.status.description}`;
+      const products = await prisma.product.findMany({
+        where: {
+          // id: Number(storeWithLowestCost.id),
+          Stock: {
+            some: {
+              // This filters stocks to include only the specified store
+              storeId: Number(storeWithLowestCost ? storeWithLowestCost.id : 1), // Replace storeId with the specific store's ID
+            },
+          },
+        },
+        include: {
+          category: true,
+          productDiscounts: {
+            include: {
+              discount: true,
+            },
+          },
+          Stock: {
+            where: {
+              storeId: Number(storeWithLowestCost ? storeWithLowestCost.id : 1),
+            }, // Include only the Stock for the specified store
+            include: {
+              store: true,
+            },
+          },
+        },
+        take: 6,
+      });
 
       res.status(200).send({
         status: 'ok',
-        store: storeAddress,
-        costs: cost.results[0].costs[1],
+        storeLowestCost: storeWithLowestCost,
+        products,
       });
     } catch (error: any) {
       if (error.message) {

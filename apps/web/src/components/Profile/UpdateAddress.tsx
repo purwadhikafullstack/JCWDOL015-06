@@ -14,7 +14,7 @@ import {
   getCitiesByProvince,
   getProvinces,
   setMainAddress
-} from '@/lib/address';
+} from '@/api/address';
 import { toastFailed } from '@/utils/toastHelper';
 
 interface IAddressCreate {
@@ -110,19 +110,17 @@ export default function UpdateAddress() {
     action: FormikHelpers<{ provinceId: String; cityId: String; desc: String }>
   ) => {
     try {
-
       const { result } = await createAddress(data);
 
       if (result.status != 'ok') throw `${result.msg}`;
 
-      swalSuccess(result.msg)
+      swalSuccess(result.msg);
 
       action.resetForm();
 
       return router.push('/user/profile');
     } catch (error: any) {
-
-      toastSeeFailed(error)
+      toastSeeFailed(error);
 
       action.resetForm();
 
@@ -138,11 +136,11 @@ export default function UpdateAddress() {
 
       if (result.status !== 'ok') throw result.msg;
 
-      swalSuccess(result.msg)
+      swalSuccess(result.msg);
 
       return router.push('/user/profile');
     } catch (error: any) {
-      toastSeeFailed(error)
+      toastSeeFailed(error);
 
       return router.push('/user/profile');
     }
@@ -156,11 +154,11 @@ export default function UpdateAddress() {
 
       if (result.status !== 'ok') throw result.msg;
 
-      swalSuccess(result.msg)
+      swalSuccess(result.msg);
 
       router.push('/');
     } catch (error: any) {
-      toastSeeFailed(error)
+      toastSeeFailed(error);
 
       router.push(`/`);
     }

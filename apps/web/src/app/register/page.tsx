@@ -8,7 +8,7 @@ import { toastFailed } from '@/utils/toastHelper';
 // import { fetchAllUsers } from '@/api/storeAdmin.api';
 import * as yup from 'yup';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
-import { registerAccount } from '@/lib/account';
+import { registerAccount } from '@/api/account';
 import Swal from 'sweetalert2';
 import { IRegister } from '@/types/account';
 
@@ -47,15 +47,15 @@ export default function RegisterPage() {
       confirmButtonText: 'Cool',
       timer: 5000
     });
-    
-    const swalError = (message: string) =>
-      Swal.fire({
-        titleText: message,
-        icon: 'error',
-        confirmButtonText: 'Cool',
-        timer: 5000
-      });
-      
+
+  const swalError = (message: string) =>
+    Swal.fire({
+      titleText: message,
+      icon: 'error',
+      confirmButtonText: 'Cool',
+      timer: 5000
+    });
+
   const toastRegisterFailed = (message: string) => toastFailed(message);
 
   //// setting form handling

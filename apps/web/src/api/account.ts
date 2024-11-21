@@ -124,7 +124,6 @@ export const forgotPassword = async (data: IForgot) => {
 };
 
 export const getAccountDetail = async (token: string) => {
-  
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}account/account-detail`, {
     method: 'GET',
     headers: {

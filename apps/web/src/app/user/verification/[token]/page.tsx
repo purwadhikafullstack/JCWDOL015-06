@@ -70,7 +70,7 @@
 
 'use client';
 
-import { verifyAccount } from '@/lib/account';
+import { verifyAccount } from '@/api/account';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
@@ -99,28 +99,26 @@ export default function VerifyAccount() {
         text: `Please proceed to login to access all features`,
         icon: 'success',
         confirmButtonText: 'Cool',
-        timer: 7000,
-      })
+        timer: 7000
+      });
       // .then(() => {
       //   window.close();
       // });
 
-      return router.push('/')
-
+      return router.push('/');
     } catch (error: any) {
       Swal.fire({
         titleText: 'Verification Failed',
         text: `${error.message}`,
         icon: 'error',
         confirmButtonText: 'Okay',
-        timer: 7000,
-      })
+        timer: 7000
+      });
       // .then(() => {
       //   window.close();
       // });
 
-      return router.push('/')
-      
+      return router.push('/');
     }
   }
 
@@ -128,9 +126,5 @@ export default function VerifyAccount() {
     navigateAfterVerify();
   }, []); // Re-run if searchParams changes
 
-  return (
-    <div className=" fixed inset-0 w-screen h-screen flex items-center justify-center z-50 bg-white">
-      s
-    </div>
-  );
+  return <div className=" fixed inset-0 w-screen h-screen flex items-center justify-center z-50 bg-white">s</div>;
 }

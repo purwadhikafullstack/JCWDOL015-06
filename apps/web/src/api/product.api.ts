@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
-const PRODUCT_BASE_URL = `${API_BASE_URL}/product`;
+// const API_BASE_URL = 'http://localhost:8000/api';
+const PRODUCT_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_API_URL}product`;
 
 export const fetchProducts = async (queryParams: { [key: string]: any } = {}) => {
   try {
@@ -73,4 +73,20 @@ export const deleteProduct = async (id: number) => {
   } catch (error) {
     throw new Error('Failed to delete product');
   }
+};
+
+export const getSpecials = async (userId: number) => {
+  const res = await fetch(`${PRODUCT_BASE_URL}/specials/v2`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      userId
+    })
+  });
+
+  const result = await res.json();
+
+  return { result };
 };

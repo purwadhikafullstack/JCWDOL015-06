@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
-const STORE_BASE_URL = `${API_BASE_URL}/store`;
+// const API_BASE_URL = 'http://localhost:8000/api';
+const STORE_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_API_URL}store`;
 
 export const fetchStores = async (queryParams: { [key: string]: any } = {}) => {
   try {

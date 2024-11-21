@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers, useFormik } from 'formik';
 import * as yup from 'yup';
 import { IChangePassword } from '@/types/account';
-import { changePassword } from '@/lib/account';
+import { changePassword } from '@/api/account';
 import { Wrapper } from '@/components/Wrapper';
 import { Button } from '@nextui-org/react';
 
@@ -30,11 +30,10 @@ export default function ChangePassword() {
 
   const handleSubmit = async (data: IChangePassword, action: FormikHelpers<IChangePassword>) => {
     try {
-        console.log('\n\n\n CHANGING PASSWORD \n');
+      console.log('\n\n\n CHANGING PASSWORD \n');
 
-        console.log(params);
-        
-        
+      console.log(params);
+
       const { result } = await changePassword(data.password, params.token, null);
 
       if (result.status != 'ok') throw result.msg;

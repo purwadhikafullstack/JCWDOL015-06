@@ -14,7 +14,7 @@ import {
   getCitiesByProvince,
   getProvinces,
   setMainAddressAdmin
-} from '@/lib/address';
+} from '@/api/address';
 import { toastFailed } from '@/utils/toastHelper';
 
 interface IAddressCreate {
@@ -110,19 +110,17 @@ export default function AdminAddress() {
     action: FormikHelpers<{ provinceId: String; cityId: String; desc: String }>
   ) => {
     try {
-
       const { result } = await createAddressAdmin(data);
 
       if (result.status != 'ok') throw `${result.msg}`;
 
-      swalSuccess(result.msg)
+      swalSuccess(result.msg);
 
       action.resetForm();
 
       return router.push('/user/profile');
     } catch (error: any) {
-
-      toastSeeFailed(error)
+      toastSeeFailed(error);
 
       action.resetForm();
 
@@ -138,11 +136,11 @@ export default function AdminAddress() {
 
       if (result.status !== 'ok') throw result.msg;
 
-      swalSuccess(result.msg)
+      swalSuccess(result.msg);
 
       return router.push('/user/profile');
     } catch (error: any) {
-      toastSeeFailed(error)
+      toastSeeFailed(error);
 
       return router.push('/user/profile');
     }
@@ -156,11 +154,11 @@ export default function AdminAddress() {
 
       if (result.status !== 'ok') throw result.msg;
 
-      swalSuccess(result.msg)
+      swalSuccess(result.msg);
 
       router.push('/');
     } catch (error: any) {
-      toastSeeFailed(error)
+      toastSeeFailed(error);
 
       router.push(`/`);
     }
@@ -219,11 +217,11 @@ export default function AdminAddress() {
       ) : (
         <div className="flex flex-col w-full h-fit p-5 border-4 gap-6">
           <div className="flex">
-          <Skeleton className="flex rounded-lg w-full max-w-24" />
-          <Skeleton className="flex rounded-lg w-full max-w-24" />
+            <Skeleton className="flex rounded-lg w-full max-w-24" />
+            <Skeleton className="flex rounded-lg w-full max-w-24" />
           </div>
           <div className="flex">
-          <Skeleton className="flex rounded-lg w-full max-w-32" />
+            <Skeleton className="flex rounded-lg w-full max-w-32" />
           </div>
         </div>
       )}

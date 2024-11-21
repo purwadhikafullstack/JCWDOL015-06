@@ -5,7 +5,7 @@ import { FaShoppingCart } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { logout } from '@/store/slices/authSlice';
-import { deleteToken } from '@/lib/cookie';
+import { deleteToken } from '@/api/cookie';
 import Swal from 'sweetalert2';
 import { PiListMagnifyingGlassLight } from 'react-icons/pi';
 import { useRouter } from 'next/navigation';
@@ -135,7 +135,7 @@ export const Header = () => {
                   <Avatar isBordered color="success" src="https://i.pravatar.cc/150?u=a042581f4e29026704d" size="md" />
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Static Actions">
-                <DropdownItem key="new" onPress={() => router.push('/admin/profile/address')}>
+                  <DropdownItem key="new" onPress={() => router.push('/admin/profile/address')}>
                     Address
                   </DropdownItem>
                   <DropdownItem key="delete" onPress={logoutAction} className="text-danger" color="danger">

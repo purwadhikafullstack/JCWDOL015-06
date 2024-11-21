@@ -1,8 +1,8 @@
 import { Role } from '@/types/types';
 import axios, { AxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
-const STORE_ADMIN_BASE_URL = `${API_BASE_URL}/storeAdmin`;
+// const API_BASE_URL = 'http://localhost:8000/api';
+const STORE_ADMIN_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_API_URL}storeAdmin`;
 
 export const fetchStoreAdmins = async (queryParams: { [key: string]: any } = {}) => {
   let newQueryParams = { ...queryParams };

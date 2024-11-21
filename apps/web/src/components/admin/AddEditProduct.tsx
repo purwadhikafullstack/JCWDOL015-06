@@ -59,7 +59,7 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
       setPrice(data.price ?? 0);
       setSelectedCategory(data?.category?.id ? new Set([String(data?.category?.id)]) : new Set());
       if (data.imageUrls) {
-        let baseImagePath = 'http://localhost:8000/uploads';
+        let baseImagePath = `${process.env.NEXT_PUBLIC_IMAGE_API_URL}`;
 
         const imageUrlsAsArray = data.imageUrls.split(',');
         const imageUrlsAsArrayRender = imageUrlsAsArray.map((val) => {
@@ -117,7 +117,7 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
           const formData = new FormData();
           images.forEach((file) => formData.append('images', file));
 
-          const response = await fetch('http://localhost:8000/api/product/upload-images', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}product/upload-images`, {
             method: 'POST',
             body: formData
           });
@@ -276,7 +276,7 @@ const AddEditProductForm: React.FC<AddEditProductFormProps> = ({ mode, data }) =
                 <span className="text-lg">Image Previews:</span>
                 <div className="flex flex-wrap gap-2">
                   {imagePreviews.map((preview, index) => {
-                    let baseImagePath = 'http://localhost:8000/uploads/';
+                    let baseImagePath = `${process.env.NEXT_PUBLIC_IMAGE_API_URL}/`;
                     let imagePath = preview;
                     if (preview.startsWith('/')) {
                       imagePath = baseImagePath + preview;

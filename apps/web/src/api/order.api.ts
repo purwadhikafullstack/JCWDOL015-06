@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
-const ORDER_BASE_URL = `${API_BASE_URL}/order`;
+// const API_BASE_URL = 'http://localhost:8000/api';
+const ORDER_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_API_URL}order`;
 
 export const fetchOrders = async (queryParams: { [key: string]: any } = {}) => {
   try {

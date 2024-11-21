@@ -5,11 +5,11 @@ import Swal from 'sweetalert2';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import * as yup from 'yup';
 import { IChangePassword } from '@/types/account';
-import { changePassword } from '@/lib/account';
+import { changePassword } from '@/api/account';
 import { Wrapper } from '@/components/Wrapper';
 import { Button } from '@nextui-org/react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { deleteToken } from '@/lib/cookie';
+import { deleteToken } from '@/api/cookie';
 import { logout } from '@/store/slices/authSlice';
 import { toastFailed } from '@/utils/toastHelper';
 
@@ -54,13 +54,13 @@ export default function UpdatePassword() {
 
       action.resetForm();
 
-      return router.push('/');
+      return router.push('/user/profile');
     } catch (error: any) {
       toastSeeFailed(error);
 
       action.resetForm();
 
-      return router.push('/');
+      return router.push('/user/profile');
     }
   };
 

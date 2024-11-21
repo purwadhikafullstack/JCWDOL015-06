@@ -259,7 +259,7 @@ export class AccountController {
         code,
         client_id: googleId,
         client_secret: googleSecret,
-        redirect_uri: `http://localhost:${process.env.PORT}/api/account/google`,
+        redirect_uri: `${process.env.BASE_URL}account/google`,
         grant_type: 'authorization_code',
       };
 
@@ -374,7 +374,7 @@ export class AccountController {
     try {
       console.log('\n\n OAUTH CONSENT API \n\n\n');
 
-      const GOOGLE_CALLBACK_URL = `http%3A//localhost:${process.env.PORT}/api/account/google`;
+      const GOOGLE_CALLBACK_URL = `${process.env.GOOGLE_BASE_URL}account/google`;
 
       const GOOGLE_OAUTH_SCOPES = [
         'https%3A//www.googleapis.com/auth/userinfo.email',

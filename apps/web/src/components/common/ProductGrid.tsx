@@ -17,7 +17,7 @@ interface ProductsGridProps {
 }
 
 export default function ProductsGrid({ products, pagination, onChangePage }: Readonly<ProductsGridProps>) {
-  let baseImagePath = 'http://localhost:8000/uploads/';
+  let baseImagePath = `${process.env.NEXT_PUBLIC_IMAGE_API_URL}/`;
   const router = useRouter();
 
   return (

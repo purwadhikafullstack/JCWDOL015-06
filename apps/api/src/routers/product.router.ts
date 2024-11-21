@@ -13,14 +13,10 @@ export class ProductRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get(
-      '/special-list',
-      this.productController.getProductsWithStoreAddress,
-    );
-    this.router.get(
-      '/special-list-v2',
-      verifyToken,
-      this.productController.getProductsWithStoreAddressV2,
+    this.router.post(
+      '/specials/v2',
+      // verifyToken,
+      this.productController.getProductsWithStoreAddressV22,
     );
     this.router.post('/', this.productController.createProduct);
     this.router.get('/', this.productController.getProducts);

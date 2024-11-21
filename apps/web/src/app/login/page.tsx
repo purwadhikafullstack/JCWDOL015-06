@@ -8,9 +8,9 @@ import { toastFailed } from '@/utils/toastHelper';
 // import { fetchAllUsers } from '@/api/storeAdmin.api';
 import * as yup from 'yup';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
-import { forgotPassword, regulerLogin } from '@/lib/account';
+import { forgotPassword, regulerLogin } from '@/api/account';
 import Swal from 'sweetalert2';
-import { createToken } from '@/lib/cookie';
+import { createToken } from '@/api/cookie';
 import { jwtDecode } from 'jwt-decode';
 import { useAppDispatch } from '@/store';
 import { DecodedToken, IForgot, IRegLogin } from '@/types/account';
@@ -45,7 +45,6 @@ const ForgotSchema = yup.object().shape({
 });
 
 export default function LoginPage() {
-
   const router = useRouter();
   const dispatch = useAppDispatch();
 

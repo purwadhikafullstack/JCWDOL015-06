@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
-const CATEGORY_BASE_URL = `${API_BASE_URL}/category`;
+// const API_BASE_URL = 'http://localhost:8000/api';
+const CATEGORY_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_API_URL}category`;
 
 export const fetchCategories = async (queryParams: { [key: string]: any } = {}) => {
   try {

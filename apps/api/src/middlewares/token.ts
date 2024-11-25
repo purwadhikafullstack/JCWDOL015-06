@@ -3,6 +3,7 @@ import { verify } from 'jsonwebtoken';
 
 type IUser = {
   id: number;
+  email: string;
   role: string;
 };
 
@@ -12,6 +13,8 @@ export const verifyToken = async (
   next: NextFunction,
 ) => {
   try {
+    console.log('\n\n API TOKEN VERIFICATION');
+    
     const token =
       req.cookies?.token || req.header('Authorization')?.replace('Bearer ', '');
     console.log('Token:', token); // Log the token
@@ -26,7 +29,7 @@ export const verifyToken = async (
     next();
   } catch (err) {
     console.error('Error:', err); // Log the error
-    res.status(400).send({
+    res.status(401).send({
       status: 'error',
       msg: 'Invalid or expired token',
     });

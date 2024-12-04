@@ -2,6 +2,22 @@
 
 This project uses React.js with NextJS for the frontend, Express.js for the backend, and TurboRepo for monorepo management, facilitating rapid development of a scalable web application with streamlined collaboration and efficient server-client interactions.
 
+&nbsp;
+
+## Current Progression Status
+
+Vito: 
+-   [ ]     Change Yup Schema <---
+-   [ ]     Change Popup Control From Using *useState*
+-   [ ]     Add Role Authentication For Backend Controllers
+-   [ ]     Geolocation With Map & Change Nearest Store Controller
+-   [ ]     Checkout Order
+
+Aldi:
+
+
+&nbsp;
+
 ## Available Scripts
 
 ### `npm run dev`
@@ -27,6 +43,8 @@ Run command on specific app (install package, run test, etc).
 Run command on specific app with options.
 
 Example : `npm run seqeulize --workspace=api -- --db:migrate`
+
+&nbsp;
 
 # Rules
 
